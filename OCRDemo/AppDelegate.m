@@ -2,11 +2,12 @@
 //  AppDelegate.m
 //  OCRDemo
 //
-//  Created by ltp on 5/14/16.
-//  Copyright © 2016 ltp. All rights reserved.
+//  Created by alex on 5/14/16.
+//  Copyright © 2016 alex. All rights reserved.
 //
 
 #import "AppDelegate.h"
+#import "ViewController.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +18,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    UIViewController *vc = [[ViewController alloc] init];
+    self.window = [[UIWindow alloc] init];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+    [self.window setRootViewController:nav];
     return YES;
 }
 

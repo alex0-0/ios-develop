@@ -2,14 +2,13 @@
 //  ViewController.h
 //  OCRDemo
 //
-//  Created by ltp on 5/14/16.
-//  Copyright © 2016 ltp. All rights reserved.
+//  Created by alex on 5/14/16.
+//  Copyright © 2016 alex. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
-
+@interface ViewController : UIViewController <UINavigationControllerDelegate,UIImagePickerControllerDelegate>//, G8TesseractDelegate>
 
 @end
 

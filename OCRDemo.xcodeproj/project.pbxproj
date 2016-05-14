@@ -10,9 +10,7 @@
 		55417A9C1CE749C600860E4F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417A9B1CE749C600860E4F /* main.m */; };
 		55417A9F1CE749C600860E4F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417A9E1CE749C600860E4F /* AppDelegate.m */; };
 		55417AA21CE749C600860E4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417AA11CE749C600860E4F /* ViewController.m */; };
-		55417AA51CE749C600860E4F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 55417AA31CE749C600860E4F /* Main.storyboard */; };
 		55417AA71CE749C600860E4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55417AA61CE749C600860E4F /* Assets.xcassets */; };
-		55417AAA1CE749C600860E4F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 55417AA81CE749C600860E4F /* LaunchScreen.storyboard */; };
 		55417AB51CE749C600860E4F /* OCRDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417AB41CE749C600860E4F /* OCRDemoTests.m */; };
 		55417AC01CE749C600860E4F /* OCRDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417ABF1CE749C600860E4F /* OCRDemoUITests.m */; };
 /* End PBXBuildFile section */
@@ -41,9 +39,7 @@
 		55417A9E1CE749C600860E4F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		55417AA01CE749C600860E4F /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		55417AA11CE749C600860E4F /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		55417AA41CE749C600860E4F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		55417AA61CE749C600860E4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		55417AA91CE749C600860E4F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		55417AAB1CE749C600860E4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		55417AB01CE749C600860E4F /* OCRDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OCRDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		55417AB41CE749C600860E4F /* OCRDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OCRDemoTests.m; sourceTree = "<group>"; };
@@ -105,9 +101,7 @@
 				55417A9E1CE749C600860E4F /* AppDelegate.m */,
 				55417AA01CE749C600860E4F /* ViewController.h */,
 				55417AA11CE749C600860E4F /* ViewController.m */,
-				55417AA31CE749C600860E4F /* Main.storyboard */,
 				55417AA61CE749C600860E4F /* Assets.xcassets */,
-				55417AA81CE749C600860E4F /* LaunchScreen.storyboard */,
 				55417AAB1CE749C600860E4F /* Info.plist */,
 				55417A9A1CE749C600860E4F /* Supporting Files */,
 			);
@@ -243,9 +237,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				55417AAA1CE749C600860E4F /* LaunchScreen.storyboard in Resources */,
 				55417AA71CE749C600860E4F /* Assets.xcassets in Resources */,
-				55417AA51CE749C600860E4F /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,25 +298,6 @@
 			targetProxy = 55417ABC1CE749C600860E4F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		55417AA31CE749C600860E4F /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				55417AA41CE749C600860E4F /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		55417AA81CE749C600860E4F /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				55417AA91CE749C600860E4F /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		55417AC21CE749C600860E4F /* Debug */ = {
