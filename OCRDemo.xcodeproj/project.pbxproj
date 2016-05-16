@@ -13,6 +13,7 @@
 		55417AA71CE749C600860E4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55417AA61CE749C600860E4F /* Assets.xcassets */; };
 		55417AB51CE749C600860E4F /* OCRDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417AB41CE749C600860E4F /* OCRDemoTests.m */; };
 		55417AC01CE749C600860E4F /* OCRDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417ABF1CE749C600860E4F /* OCRDemoUITests.m */; };
+		C28B029B83B6F40CB22D5739 /* libPods-OCRDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2E096EEB2BD6E9C66D46EBC6 /* Pods-OCRDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo.release.xcconfig"; sourceTree = "<group>"; };
 		55417A971CE749C600860E4F /* OCRDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCRDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		55417A9B1CE749C600860E4F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		55417A9D1CE749C600860E4F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -47,6 +49,10 @@
 		55417ABB1CE749C600860E4F /* OCRDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OCRDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		55417ABF1CE749C600860E4F /* OCRDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OCRDemoUITests.m; sourceTree = "<group>"; };
 		55417AC11CE749C600860E4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		66077DA0C2A9E15361CCD0F0 /* libPods-OCRDemoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		743AF19623A65314777F5C72 /* libPods-OCRDemoUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemoUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8322C2F2A56F1D6FC6F23936 /* Pods-OCRDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C28B029B83B6F40CB22D5739 /* libPods-OCRDemo.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +88,8 @@
 				55417AB31CE749C600860E4F /* OCRDemoTests */,
 				55417ABE1CE749C600860E4F /* OCRDemoUITests */,
 				55417A981CE749C600860E4F /* Products */,
+				E0CE7D9CA6869C5A17EF1192 /* Pods */,
+				7A53DEF20B22AAD69947B502 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -134,6 +143,25 @@
 			path = OCRDemoUITests;
 			sourceTree = "<group>";
 		};
+		7A53DEF20B22AAD69947B502 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */,
+				66077DA0C2A9E15361CCD0F0 /* libPods-OCRDemoTests.a */,
+				743AF19623A65314777F5C72 /* libPods-OCRDemoUITests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E0CE7D9CA6869C5A17EF1192 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				8322C2F2A56F1D6FC6F23936 /* Pods-OCRDemo.debug.xcconfig */,
+				2E096EEB2BD6E9C66D46EBC6 /* Pods-OCRDemo.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -141,9 +169,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 55417AC41CE749C600860E4F /* Build configuration list for PBXNativeTarget "OCRDemo" */;
 			buildPhases = (
+				191208CF195437D319F984FB /* 📦 Check Pods Manifest.lock */,
 				55417A931CE749C600860E4F /* Sources */,
 				55417A941CE749C600860E4F /* Frameworks */,
 				55417A951CE749C600860E4F /* Resources */,
+				C408911987FD6586F76C880E /* 📦 Embed Pods Frameworks */,
+				D47A2313E63E37CBE275507E /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -256,6 +287,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		191208CF195437D319F984FB /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		C408911987FD6586F76C880E /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D47A2313E63E37CBE275507E /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		55417A931CE749C600860E4F /* Sources */ = {
@@ -386,6 +465,7 @@
 		};
 		55417AC51CE749C600860E4F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8322C2F2A56F1D6FC6F23936 /* Pods-OCRDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = OCRDemo/Info.plist;
@@ -397,6 +477,7 @@
 		};
 		55417AC61CE749C600860E4F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2E096EEB2BD6E9C66D46EBC6 /* Pods-OCRDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = OCRDemo/Info.plist;
@@ -471,6 +552,7 @@
 				55417AC61CE749C600860E4F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		55417AC71CE749C600860E4F /* Build configuration list for PBXNativeTarget "OCRDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -479,6 +561,7 @@
 				55417AC91CE749C600860E4F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		55417ACA1CE749C600860E4F /* Build configuration list for PBXNativeTarget "OCRDemoUITests" */ = {
 			isa = XCConfigurationList;
@@ -487,6 +570,7 @@
 				55417ACC1CE749C600860E4F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
