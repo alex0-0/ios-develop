@@ -7,6 +7,6 @@ target 'OCRDemo' do
 
 #xcodeproj 'OCRDemo'
 pod 'TesseractOCRiOS', '4.0.0'
-
+pod 'CardIO'
 end
 
