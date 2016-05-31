@@ -7,8 +7,12 @@
 //
 
 #import "ViewController.h"
+#import <TesseractOCR/TesseractOCR.h>
+#import "CardIO.h"
+#import "CardIOUtilities.h"
 
-@interface ViewController ()
+@interface ViewController () <UINavigationControllerDelegate,UIImagePickerControllerDelegate, G8TesseractDelegate>
+
 @property (strong, nonatomic) UIImagePickerController *imagePicker;
 @property (strong, nonatomic) UIImage *image;
 @property (strong, nonatomic) UIImageView *picView;
@@ -21,7 +25,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    
+    if ([CardIOUtilities canReadCardWithCamera]) {
+        
+    }
     
     [self initView];
     [self setupImagePicker];
