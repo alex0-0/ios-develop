@@ -10,4 +10,6 @@
 
 @interface OCRManager : NSObject
 
+-(NSString *)scanPic;
+
 @end
