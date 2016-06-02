@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5538EF331D0012BA004C2BFC /* tessdata in Resources */ = {isa = PBXBuildFile; fileRef = 5538EF321D0012BA004C2BFC /* tessdata */; };
+		5538EF351D0013F7004C2BFC /* flowers.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 5538EF341D0013F7004C2BFC /* flowers.jpg */; };
 		55417A9C1CE749C600860E4F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417A9B1CE749C600860E4F /* main.m */; };
 		55417A9F1CE749C600860E4F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417A9E1CE749C600860E4F /* AppDelegate.m */; };
 		55417AA21CE749C600860E4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417AA11CE749C600860E4F /* ViewController.m */; };
@@ -36,6 +38,8 @@
 
 /* Begin PBXFileReference section */
 		2E096EEB2BD6E9C66D46EBC6 /* Pods-OCRDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo.release.xcconfig"; sourceTree = "<group>"; };
+		5538EF321D0012BA004C2BFC /* tessdata */ = {isa = PBXFileReference; lastKnownFileType = folder; path = tessdata; sourceTree = "<group>"; };
+		5538EF341D0013F7004C2BFC /* flowers.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = flowers.jpg; sourceTree = "<group>"; };
 		55417A971CE749C600860E4F /* OCRDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCRDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		55417A9B1CE749C600860E4F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		55417A9D1CE749C600860E4F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -125,6 +129,8 @@
 		55417A9A1CE749C600860E4F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				5538EF341D0013F7004C2BFC /* flowers.jpg */,
+				5538EF321D0012BA004C2BFC /* tessdata */,
 				55417A9B1CE749C600860E4F /* main.m */,
 			);
 			name = "Supporting Files";
@@ -273,6 +279,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5538EF351D0013F7004C2BFC /* flowers.jpg in Resources */,
+				5538EF331D0012BA004C2BFC /* tessdata in Resources */,
 				55417AA71CE749C600860E4F /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

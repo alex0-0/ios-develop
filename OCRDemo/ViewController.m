@@ -10,12 +10,28 @@
 #import <TesseractOCR/TesseractOCR.h>
 #import "CardIO.h"
 #import "CardIOUtilities.h"
+#import "OCRManager.h"
+
+#define kScreenWidth [[UIScreen mainScreen] bounds].size.width
+#define kScreenHeight [[UIScreen mainScreen] bounds].size.height
+#define kButtonRadius 50
+#define kPicSideLength [[UIScreen mainScreen] bounds].size.width/2
+
+static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
+    UIImageView *ret = [[UIImageView alloc] initWithImage:pic];
+    int y = index / 2 * kPicSideLength;
+    int x = index % 2 * kPicSideLength;
+    ret.frame = CGRectMake(x , y, kPicSideLength, kPicSideLength);
+    return ret;
+}
 
 @interface ViewController () <UINavigationControllerDelegate,UIImagePickerControllerDelegate, G8TesseractDelegate>
 
 @property (strong, nonatomic) UIImagePickerController *imagePicker;
 @property (strong, nonatomic) UIImage *image;
 @property (strong, nonatomic) UIImageView *picView;
+@property (strong, nonatomic) UIImageView *greyView;
+@property (strong, nonatomic) UIImageView *blackView;
 @end
 
 @implementation ViewController {
@@ -52,8 +68,9 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(nullable NSDictionary<NSString *,id> *)editingInfo {
-    self.image = image;
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
+    self.image = [info objectForKey:UIImagePickerControllerLivePhoto];
     _tesseract.image = [self.image g8_blackAndWhite];
     [self.picView setImage:_tesseract.image];
     _tesseract.rect = CGRectMake(0, 0, _tesseract.image.size.width, _tesseract.image.size.height);
@@ -67,13 +84,22 @@
 -(void)initView {
     self.navigationController.navigationBarHidden = YES;
     [self.view setBackgroundColor:[UIColor purpleColor]];
-    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(100, 400, 100, 100)];
+    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(kScreenWidth/2 - kButtonRadius, kScreenHeight - kButtonRadius * 2, kButtonRadius * 2, kButtonRadius * 2)];
     btn.backgroundColor = [UIColor blackColor];
     [btn addTarget:self action:@selector(pickImage) forControlEvents:UIControlEventTouchUpInside];
-    btn.layer.cornerRadius = 50;
-    self.picView = [[UIImageView alloc] initWithFrame:CGRectMake(100, 150, 200, 200)];
+    btn.layer.cornerRadius = kButtonRadius;
     [self.view addSubview:btn];
+    
+    _image = [UIImage imageNamed:@"flowers.jpg"];
+    self.picView = demoImageView(_image, 0);
     [self.view addSubview:self.picView];
+    
+    OCRManager *ocrManager = [[OCRManager alloc] init];
+    UIImage *greyImg = [ocrManager getGreyScaleImage:_image];
+    self.greyView = demoImageView(greyImg, 1);
+    [self.view addSubview:_greyView];
+    
+    
 }
 
 -(void)setupImagePicker {

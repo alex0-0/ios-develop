@@ -7,9 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface OCRManager : NSObject
 
 -(NSString *)scanPic;
+
+- (UIImage *)getGreyScaleImage:(UIImage *)image;
 
 @end
