@@ -15,4 +15,6 @@
 
 - (UIImage *)getGreyScaleImage:(UIImage *)image;
 
+- (UIImage *)getBlackImage:(UIImage *)image;
+
 @end

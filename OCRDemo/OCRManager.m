@@ -36,6 +36,17 @@
     NSInteger width = size.width;
     NSInteger height = size.height;
     
+    CGImageRef imageRef = [image CGImage];
+    CIContext *context = [CIContext contextWithOptions:nil];
+    CIImage *ciImage = [CIImage imageWithCGImage:imageRef];
+    CIFilter *filter = [CIFilter filterWithName:@"CIColorMonochrome" keysAndValues:
+                        @"inputImage", ciImage,
+                        @"inputColor", [CIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f],
+                        @"inputIntensity", [NSNumber numberWithFloat:1.0f],
+                        nil];
+    CIImage *filtedImage = [filter valueForKey:kCIOutputImageKey];
+    CGImageRef cgImage = [context createCGImage:filtedImage fromRect:[filtedImage extent]];
+    retImg = [UIImage imageWithCGImage:cgImage];
     return retImg;
 }
 

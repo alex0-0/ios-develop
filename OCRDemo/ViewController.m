@@ -90,14 +90,17 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     btn.layer.cornerRadius = kButtonRadius;
     [self.view addSubview:btn];
     
-    _image = [UIImage imageNamed:@"flowers.jpg"];
+    _image = [UIImage imageNamed:@"passport_0.jpg"];
     self.picView = demoImageView(_image, 0);
     [self.view addSubview:self.picView];
     
     OCRManager *ocrManager = [[OCRManager alloc] init];
     UIImage *greyImg = [ocrManager getGreyScaleImage:_image];
-    self.greyView = demoImageView(greyImg, 1);
+    _greyView = demoImageView(greyImg, 1);
     [self.view addSubview:_greyView];
+    UIImage *blackImg = [ocrManager getBlackImage:greyImg];
+    _blackView = demoImageView(blackImg, 2);
+    [self.view addSubview:_blackView];
     
     
 }
