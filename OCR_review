@@ -1,0 +1,70 @@
+Character Recognition
+
+************************************************
+ios convert image to grey scale image
+http://stackoverflow.com/questions/1298867/convert-image-to-grayscale
+************************************************************
+
+Algorithm for Identifying Barely Legible or Embossed Text in an Image
+http://rnd.azoft.com/optical-recognition-ios-application/
+keyword:
+Sobel operator  (edge detection)
+Hough transform
+Gradient descent
+
+Step 1. Convert the source image I to grayscale.
+
+Step 2. Detect edges in the grayscale image using the Sobel or similar operator. The resulting image we denote by Ie.
+
+Step 3. Perform binarization of Ie using Otsu's method. The resulting image we denote by Ib.
+
+Both Ie and Ib are used as input for the stroke width algorithm. Next, we need to perform the local binarization and voting steps:
+
+Step 4. Create a 2-dimensional array S with the same dimensions as I and fill it with zeroes.
+
+Step 5. Create a binary mask Win and binary mask Wout. Their dimensions should be Nin×Nin and Nout×Nout respectively. Nin and Nout values depend on the stroke width in the image and Nin is always less than or equal to Nout.
+
+Step 6. For every pixel Ie[i, j] that satisfies the condition Ib[i, b] = 1 we apply the Win mask centered on this pixel to the image and look for minimum and maximum values (Pmin, Pmax) among the pixels found within this mask.
+
+Step 7. The same pixel Ie[i, j] is then used to center the Wout mask and for every pixel falling into Wout we perform the transform: S[i+k, j+l] = S[i+k, j+l] + 1, if Ie[i+k, j+l] ≥ t(i,j), where k,l ≤ Nout / 2 and t(i, j) = (Pmax + Pmin) / 2.
+
+The resulting grayscale image stored in 2-dimensional array S will have suppressed background and intensified strokes that compose text. The image is suitable for additional binarization or further processing (segmentation of digits, etc.). Like Ie, S is a grayscale image but with decreased range of pixel brightness. The brightness range depends on the size of Win and Wout (smaller masks result in a smaller range).
+
+After some experiments, we discovered that the results can be improved if the binarization level used to produce Ib (step 3) is calculated as follows:
+
+Apply Gaussian blur to Ie after detecting edges with the Sobel operator. The resulting image we denote by Ig, and we'll continue to use Ie in step 6.
+Calculate the binarization level by processing the difference matrix abs(Ig-Ie) using Otsu's method.
+
+
+****************************************************************
+
+Optical Recognition of Credit Card Numbers in an iOS Application
+http://rnd.azoft.com/optical-recognition-ios-application/
+
+capturing a card image
+localizing — the search of a supposed area with text on the captured image
+segmentation — slitting the localized text to areas with a separate digit on each
+digits recognition
+
+
+
+
+
+*****************************************************************
+1.Feature Extraction
+
+The classi er could store a single prototype per character, The inevitably remaining variations are left for learning by statistical adaptation of the classfier.
+
+2. Character Learning
+
+The keys of printed character learning are essentially training set and classication adaptation to new characters and new fonts. The training set can be given either by user or extracted directly from document samples. 
+In the first case, the user selects the fonts and the samples to represent each character in each font and then guides the system to create models as in Anigbogu. Here  the user must use sucient number of samples in each font according to the dificulty of its recognition. However  it is dificult in an omnifont context to collect a training set of characters having the expected distribution of noise and pitch size. suggested parameterized models for imaging defects  based on a variety of theoretical arguments and empirical evidence. 
+In the second case  the idea is to generate the training set directly from document images chosen from a wide variety of fonts and image quality and to reflect the variability expected by the system. The problem here is that one is not sure that all valid characters are present.
+
+3. Contextual Processing
+
+Contextual processing attempts to overcome the short coming of decisions made on the basis of local properties and to extend the perception on relationships between characters into word.
+
+
+****************************************************************
+

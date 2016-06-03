@@ -23,14 +23,19 @@
 -(NSString *)scanPic{
     NSString *res = @"";
     
-    unsigned char *uc[88][25] = {0};
-    unsigned char *grayImage[135][700] = {0};
-    unsigned char *blackImage[135][88] = {0};
+//    uint8_t *uc[88][25] = {0};
+//    uint8_t *grayImage[135][700] = {0};
+//    uint8_t *blackImage[135][88] = {0};
     return res;
 }
 
 - (UIImage *)getBlackImage:(UIImage *)image{
     UIImage *retImg = nil;
+    
+    CGSize size = image.size;
+    NSInteger width = size.width;
+    NSInteger height = size.height;
+    
     return retImg;
 }
 
