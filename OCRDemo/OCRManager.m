@@ -7,7 +7,8 @@
 //
 
 #import "OCRManager.h"
-	
+#import "template.h"
+
 @implementation OCRManager {
     NSInteger _width;
     NSInteger _height;
@@ -29,6 +30,12 @@
     return res;
 }
 
+//edge detection
+- (void)detectEdge{
+    
+}
+
+//image binarization
 - (UIImage *)getBlackImage:(UIImage *)image{
     UIImage *retImg = nil;
     

@@ -4,6 +4,9 @@ Character Recognition
 ios convert image to grey scale image
 http://stackoverflow.com/questions/1298867/convert-image-to-grayscale
 ************************************************************
+ios convert image to binary image
+http://stackoverflow.com/questions/13247914/ocr-image-to-text
+************************************************************
 
 Algorithm for Identifying Barely Legible or Embossed Text in an Image
 http://rnd.azoft.com/optical-recognition-ios-application/
@@ -11,6 +14,21 @@ keyword:
 Sobel operator  (edge detection)
 Hough transform
 Gradient descent
+
+************************************************************
+Canny Edge Detector
+
+The Process of Canny edge detection algorithm can be broken down to 5 different steps:
+
+    Apply Gaussian filter to smooth the image in order to remove the noise
+    Find the intensity gradients of the image
+    Apply non-maximum suppression to get rid of spurious response to edge detection
+    Apply double threshold to determine potential edges
+    Track edge by hysteresis: Finalize the detection of edges by suppressing all the other edges that are weak and not connected to strong edges.
+    
+
+************************************************************
+
 
 Step 1. Convert the source image I to grayscale.
 
