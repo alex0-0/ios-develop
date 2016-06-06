@@ -9,13 +9,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "OCRDemo/ViewController.m"
-            timestampString = "486896815.111988"
+            filePath = "OCRDemo/OCRManager.m"
+            timestampString = "486910106.88474"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "108"
-            endingLineNumber = "108"
-            landmarkName = "-initView"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
+            landmarkName = "-cannyEdgeExtractWithTLow:THigh:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,12 +26,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/OCRManager.m"
-            timestampString = "486896885.157587"
+            timestampString = "486910241.707955"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "59"
-            endingLineNumber = "59"
-            landmarkName = "-getEdge:"
+            startingLineNumber = "105"
+            endingLineNumber = "105"
+            landmarkName = "-cannyEdgeExtractWithTLow:THigh:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -42,12 +42,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/OCRManager.m"
-            timestampString = "486896980.271011"
+            timestampString = "486910306.037517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "156"
-            endingLineNumber = "156"
-            landmarkName = "-imageFromBitMap"
+            startingLineNumber = "99"
+            endingLineNumber = "99"
+            landmarkName = "-cannyEdgeExtractWithTLow:THigh:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

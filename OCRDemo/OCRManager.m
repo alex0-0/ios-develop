@@ -9,6 +9,10 @@
 #import "OCRManager.h"
 #import "template.h"
 
+#define NOEDGE 0
+#define POSSIBLE_EDGE 128
+#define EDGE 255
+
 static const int kRed = 1;
 static const int kGreen = 2;
 static const int kBlue = 3;
@@ -17,6 +21,9 @@ static const int kBlue = 3;
     NSInteger _width;
     NSInteger _height;
     uint8_t *_imageData;
+    int *_gradx;
+    int *_grady;
+    int *_mag;
 }
 
 - (instancetype)init{
@@ -55,6 +62,8 @@ static const int kBlue = 3;
     
     [self gaussianBlur];
     
+    [self cannyEdgeExtractWithTLow:0.3 THigh:0.7];
+    
     retImage = [self imageFromBitMap];
     return retImage;
 }
@@ -67,13 +76,256 @@ static const int kBlue = 3;
         { -1,  0,  1}
     };
     int gy[3][3] = {
-        { -1,  0,  1},
-        { -2,  0,  2},
-        { -1,  0,  1}
+        {  1,  2,  1},
+        {  0,  0,  0},
+        { -1, -2,  1}
     };
+    NSInteger retHeight = _height - 3;
+    NSInteger retWidth = _width - 3;
+    int *diffx = malloc(sizeof(int) * retWidth * retHeight);    //horizonal derivative
+    int *diffy = malloc(sizeof(int) * retWidth * retHeight);    //vertical derivative
+    int *mag = malloc(sizeof(int) * retWidth * retHeight);      //gradient magnitude
+    memset(diffx, 0, sizeof(int) * retWidth * retHeight);
+    memset(diffy, 0, sizeof(int) * retWidth * retHeight);
+    memset(mag, 0, sizeof(int) * retWidth * retHeight);
+    //compute magnitude
+    for (int y = 0; y < retHeight; y++) {
+        for (int x = 0; x < retWidth; x++) {
+            int derX = 0;
+            int derY = 0;
+            for (int dy = 0; dy < 3; dy++) {
+                for (int dx = 0; dx < 3; dx++) {
+                    int pixel = _imageData[y * _width + x];
+                    derX += pixel * gx[dy][dx];
+                    derY += pixel * gy[dy][dx];
+                }
+            }
+            mag[y * retWidth + x] = abs(derX) + abs(derY);
+            diffx[y * retWidth + x] = derX;
+            diffy[y * retWidth + x] = derY;
+        }
+    }
+    _mag = mag;
+    _gradx = diffx;
+    _grady = diffy;
+    _width = retWidth;
+    _height = retHeight;
+    //non max suppression
+    uint8_t *filteredImage = malloc(sizeof(uint8_t) * retWidth * retHeight);
+    memset(filteredImage, 0, sizeof(uint8_t) * retWidth * retHeight);
+    [self suppressNonMaxium:filteredImage];
+    
+    free(diffx);
+    free(diffy);
+    
+    uint8_t *edge=(uint8_t *) malloc(sizeof(uint8_t)*retHeight*retWidth);
+    memset(edge, 0, sizeof(uint8_t) * retWidth * retHeight);
+    
+    
+    _imageData = edge ;
 }
 
--(void)gaussianBlur{
+- (void)applyHystesis:(int *)possibleEdges highThreshold:(float)highT lowThreshold:(float)lowT{
+    
+}
+
+- (void)suppressNonMaxium:(uint8_t*)result{
+    int rowCount, colCount, count;
+    int *magRowPtr, *magPtr;
+    int *gxRowPtr, *gxPtr;
+    int *gyRowPtr, *gyPtr;
+    int m00, gx = 0, gy = 0, z1 = 0, z2 = 0;
+    float mag1, mag2, xperp = 0.0f, yperp = 0.0f; //magnitude of beside points, x perpendicular, y perpendicular
+    uint8_t *resultRowPtr, *resultPtr;
+
+    /****************************************************************************
+     * Zero the edges of the result image.
+     ****************************************************************************/
+    for (count = 0, resultPtr = result, resultRowPtr = result + _width * (_height - 1) + 1;
+         count < _width;
+         count++, resultPtr++, resultRowPtr++) {
+         *resultRowPtr = *resultPtr = (uint8_t)0;
+    }
+    for (count = 0, resultPtr = result, resultRowPtr = result + _width - 1;
+         count < _height;
+         count++, resultRowPtr++, resultPtr++) {
+         *resultRowPtr = *resultPtr = (uint8_t)0;
+    }
+    /****************************************************************************
+     * Suppress non-maximum points.
+     ****************************************************************************/
+    for(rowCount = 1, magRowPtr = _mag + _width + 1, gxRowPtr = _gradx + _width + 1,
+        gyRowPtr = _grady + _width + 1, resultRowPtr = result + _width + 1;
+        rowCount < _width - 2;
+        rowCount++, magRowPtr += _width, gyRowPtr += _width, gxRowPtr += _width,
+        resultRowPtr += _width){
+        for(colCount = 1, magPtr = magRowPtr, gxPtr = gxRowPtr, gyPtr = gyRowPtr, resultPtr = resultRowPtr;
+            colCount < _width-2;
+            colCount++,magPtr++,gxPtr++,gyPtr++,resultPtr++){
+            m00 = *magPtr;
+            if(m00 == 0){
+                *resultPtr = (unsigned char) NOEDGE;
+            }
+            else{
+                xperp = -(gx = *gxPtr)/((float)m00);
+                yperp = (gy = *gyPtr)/((float)m00);
+            }
+            //linear interpolation?
+            if(gx >= 0){
+                if(gy >= 0){
+                    if (gx >= gy)
+                    {
+                        /* 111 */
+                        /* Left point */
+                        z1 = *(magPtr - 1);
+                        z2 = *(magPtr - _width - 1);
+                        
+                        mag1 = (m00 - z1)*xperp + (z2 - z1)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr + 1);
+                        z2 = *(magPtr + _width + 1);
+                        
+                        mag2 = (m00 - z1)*xperp + (z2 - z1)*yperp;
+                    }
+                    else
+                    {
+                        /* 110 */
+                        /* Left point */
+                        z1 = *(magPtr - _width);
+                        z2 = *(magPtr - _width - 1);
+                        
+                        mag1 = (z1 - z2)*xperp + (z1 - m00)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr + _width);
+                        z2 = *(magPtr + _width + 1);
+                        
+                        mag2 = (z1 - z2)*xperp + (z1 - m00)*yperp;
+                    }
+                }
+                else
+                {
+                    if (gx >= -gy)
+                    {
+                        /* 101 */
+                        /* Left point */
+                        z1 = *(magPtr - 1);
+                        z2 = *(magPtr + _width - 1);
+                        
+                        mag1 = (m00 - z1)*xperp + (z1 - z2)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr + 1);
+                        z2 = *(magPtr - _width + 1);
+                        
+                        mag2 = (m00 - z1)*xperp + (z1 - z2)*yperp;
+                    }
+                    else
+                    {
+                        /* 100 */
+                        /* Left point */
+                        z1 = *(magPtr + _width);
+                        z2 = *(magPtr + _width - 1);
+                        
+                        mag1 = (z1 - z2)*xperp + (m00 - z1)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr - _width);
+                        z2 = *(magPtr - _width + 1);
+                        
+                        mag2 = (z1 - z2)*xperp  + (m00 - z1)*yperp;
+                    }
+                }
+            }
+            else
+            {
+                if ((gy = *gyPtr) >= 0)
+                {
+                    if (-gx >= gy)
+                    {
+                        /* 011 */
+                        /* Left point */
+                        z1 = *(magPtr + 1);
+                        z2 = *(magPtr - _width + 1);
+                        
+                        mag1 = (z1 - m00)*xperp + (z2 - z1)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr - 1);
+                        z2 = *(magPtr + _width - 1);
+                        
+                        mag2 = (z1 - m00)*xperp + (z2 - z1)*yperp;
+                    }
+                    else
+                    {
+                        /* 010 */
+                        /* Left point */
+                        z1 = *(magPtr - _width);
+                        z2 = *(magPtr - _width + 1);
+                        
+                        mag1 = (z2 - z1)*xperp + (z1 - m00)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr + _width);
+                        z2 = *(magPtr + _width - 1);
+                        
+                        mag2 = (z2 - z1)*xperp + (z1 - m00)*yperp;
+                    }
+                }
+                else
+                {
+                    if (-gx > -gy)
+                    {
+                        /* 001 */
+                        /* Left point */
+                        z1 = *(magPtr + 1);
+                        z2 = *(magPtr + _width + 1);
+                        
+                        mag1 = (z1 - m00)*xperp + (z1 - z2)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr - 1);
+                        z2 = *(magPtr - _width - 1);
+                        
+                        mag2 = (z1 - m00)*xperp + (z1 - z2)*yperp;
+                    }
+                    else
+                    {
+                        /* 000 */
+                        /* Left point */
+                        z1 = *(magPtr + _width);
+                        z2 = *(magPtr + _width + 1);
+                        
+                        mag1 = (z2 - z1)*xperp + (m00 - z1)*yperp;
+                        
+                        /* Right point */
+                        z1 = *(magPtr - _width);
+                        z2 = *(magPtr - _width - 1);
+                        
+                        mag2 = (z2 - z1)*xperp + (m00 - z1)*yperp;
+                    }
+                }
+            } 
+            
+            /* Now determine if the current point is a maximum point */
+            
+            if ((mag1 > 0.0) || (mag2 > 0.0))
+            {
+                *resultPtr = (unsigned char) NOEDGE;
+            }
+            else
+            {    
+                if (mag2 == 0.0)
+                    *resultPtr = (unsigned char) NOEDGE;
+                else
+                    *resultPtr = (unsigned char) POSSIBLE_EDGE;
+            }
+        } 
+    }
+}
+
+- (void)gaussianBlur{
     int blurMatrix[5][5] = {
         { 1,  4,  7,  4,  1},
         { 4, 16, 26, 16,  4},
