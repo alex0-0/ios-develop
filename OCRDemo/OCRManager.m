@@ -9,9 +9,14 @@
 #import "OCRManager.h"
 #import "template.h"
 
+static const int kRed = 1;
+static const int kGreen = 2;
+static const int kBlue = 3;
+
 @implementation OCRManager {
     NSInteger _width;
     NSInteger _height;
+    uint8_t *_imageData;
 }
 
 - (instancetype)init{
@@ -31,17 +36,77 @@
 }
 
 //edge detection
-- (void)detectEdge{
+- (UIImage *)getEdge:(UIImage *)image{
+    UIImage *retImage = nil;
     
+    CGSize size = image.size;
+    NSInteger width = size.width / 4;
+    NSInteger height = size.height / 4;
+    _width = width;
+    _height = height;
+    _imageData = malloc(sizeof(uint8_t) * width * height);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
+    CGContextRef context = CGBitmapContextCreate(_imageData, width, height, 8, width, colorSpace, kCGImageAlphaNone);
+    CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
+    CGContextSetShouldAntialias(context, NO);
+    CGContextDrawImage(context, CGRectMake(0, 0, width, height), [image CGImage]);
+    CGContextRelease(context);
+    CGColorSpaceRelease(colorSpace);
+    
+    [self gaussianBlur];
+    
+    retImage = [self imageFromBitMap];
+    return retImage;
 }
+
+-(void)cannyEdgeExtractWithTLow:(float)lowThreshhold THigh:(float)highThreshhold{
+    //sobel operator
+    int gx[3][3] = {
+        { -1,  0,  1},
+        { -2,  0,  2},
+        { -1,  0,  1}
+    };
+    int gy[3][3] = {
+        { -1,  0,  1},
+        { -2,  0,  2},
+        { -1,  0,  1}
+    };
+}
+
+-(void)gaussianBlur{
+    int blurMatrix[5][5] = {
+        { 1,  4,  7,  4,  1},
+        { 4, 16, 26, 16,  4},
+        { 7, 26, 41, 26,  7},
+        { 4, 16, 26, 16,  4},
+        { 1,  4,  7,  4,  1},
+    };
+    uint8_t *blurImage = malloc(sizeof(uint8_t) * (_width - 5) * (_height - 5));
+    for (int y = 0; y < _height - 5; y++) {
+        for (int x = 0; x < _width - 5; x++) {
+            int val = 0;
+            for (int dy = 0; dy < 5; dy++) {
+                for (int dx = 0; dx < 5; dx++) {
+                    int pixel = _imageData[(y+dy) * _width + x + dx];
+                    val += pixel * blurMatrix[dy][dx];
+                }
+            }
+            blurImage[y*(_width-5)+x] = val/273;
+        }
+    }
+    _width -= 5;
+    _height -= 5;
+    _imageData = blurImage;
+}
+
 
 //image binarization
 - (UIImage *)getBlackImage:(UIImage *)image{
     UIImage *retImg = nil;
     
-    CGSize size = image.size;
-    NSInteger width = size.width;
-    NSInteger height = size.height;
+//    CGSize size = image.size;
+//    NSInteger width = size.width;
+//    NSInteger height = size.height;
     
     CGImageRef imageRef = [image CGImage];
     CIContext *context = [CIContext contextWithOptions:nil];
@@ -58,10 +123,6 @@
 }
 
 - (UIImage *)getGreyScaleImage:(UIImage *)image{
-
-    const int kRed = 1;
-    const int kGreen = 2;
-    const int kBlue = 3;
     
 //    int colors = kRed | kGreen | kBlue;
     CGSize size = image.size;
@@ -96,6 +157,31 @@
     UIImage *returnImage = [UIImage imageWithCGImage:imageRef];
     
     return returnImage;
+}
+
+#pragma mark ---------utilities-----------
+
+- (UIImage *)imageFromBitMap{
+    UIImage *retImage = nil;
+    uint8_t *retImageData = calloc(sizeof(uint32_t) * _width * _height, 1);
+    for (int i = 0; i < _height * _width; i++) {
+        uint8_t *rgbPixel = (uint8_t *)&retImageData[4*i];
+        int pixel = _imageData[i];
+        rgbPixel[kRed] = pixel;
+        rgbPixel[kGreen] = pixel;
+        rgbPixel[kBlue] = pixel;
+    }
+    
+    CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+    CGContextRef context=CGBitmapContextCreate(retImageData, _width, _height, 8, _width*sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little|kCGImageAlphaNoneSkipLast);
+    CGImageRef image=CGBitmapContextCreateImage(context);
+    CGContextRelease(context);
+    CGColorSpaceRelease(colorSpace);
+    retImage=[UIImage imageWithCGImage:image];
+    CGImageRelease(image);
+    // make sure the data will be released by giving it to an autoreleased NSData
+    [NSData dataWithBytesNoCopy:retImageData length:_width*_height];
+    return retImage;
 }
 
 @end

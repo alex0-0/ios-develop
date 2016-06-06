@@ -1,5 +1,17 @@
 Character Recognition
 
+****************************
+//tmp possible useful sites
+http://stackoverflow.com/questions/1579631/converting-rgb-data-into-a-bitmap-in-objective-c-cocoa/1581805#1581805
+http://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html
+http://homepages.inf.ed.ac.uk/rbf/HIPR2/sobel.htm
+https://en.wikipedia.org/wiki/Artificial_neural_network
+http://felixniklas.com/imageprocessing/binarization
+https://en.wikipedia.org/wiki/Sobel_operator#Technical_details
+https://www.quora.com/What-is-Card-io-and-how-will-it-impact-the-mobile-payment-space
+http://rnd.azoft.com/optical-recognition-ios-application/
+http://stackoverflow.com/questions/10030631/what-is-the-best-core-image-filter-to-produce-black-and-white-effects
+
 ************************************************
 ios convert image to grey scale image
 http://stackoverflow.com/questions/1298867/convert-image-to-grayscale

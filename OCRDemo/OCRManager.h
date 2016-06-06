@@ -17,4 +17,6 @@
 
 - (UIImage *)getBlackImage:(UIImage *)image;
 
+- (UIImage *)getEdge:(UIImage *)image;
+
 @end

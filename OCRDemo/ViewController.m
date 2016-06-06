@@ -32,6 +32,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 @property (strong, nonatomic) UIImageView *picView;
 @property (strong, nonatomic) UIImageView *greyView;
 @property (strong, nonatomic) UIImageView *blackView;
+@property (strong, nonatomic) UIImageView *gaussianView;
 @end
 
 @implementation ViewController {
@@ -90,7 +91,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     btn.layer.cornerRadius = kButtonRadius;
     [self.view addSubview:btn];
     
-    _image = [UIImage imageNamed:@"passport.jpg"];
+    _image = [UIImage imageNamed:@"chinese_id_card.jpg"];
     self.picView = demoImageView(_image, 0);
     [self.view addSubview:self.picView];
     
@@ -98,9 +99,14 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     UIImage *greyImg = [ocrManager getGreyScaleImage:_image];
     _greyView = demoImageView(greyImg, 1);
     [self.view addSubview:_greyView];
+    
     UIImage *blackImg = [ocrManager getBlackImage:greyImg];
     _blackView = demoImageView(blackImg, 2);
     [self.view addSubview:_blackView];
+    
+    UIImage *gaussianImg = [ocrManager getEdge:_image];
+    _gaussianView = demoImageView(gaussianImg, 3);
+    [self.view addSubview:_gaussianView];
     
     
 }
