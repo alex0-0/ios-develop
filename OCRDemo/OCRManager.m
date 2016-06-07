@@ -118,18 +118,128 @@ static const int kBlue = 3;
     free(diffx);
     free(diffy);
     
-//    uint8_t *edge = malloc(sizeof(uint8_t)*retHeight*retWidth);
-//    memset(edge, 0, sizeof(uint8_t) * retWidth * retHeight);
-//    
-//    free(filteredImage);
+    uint8_t *edge = malloc(sizeof(uint8_t)*retHeight*retWidth);
+    memset(edge, 0, sizeof(uint8_t) * retWidth * retHeight);
+    [self applyHystesis:filteredImage highThreshold:highThreshhold lowThreshold:lowThreshhold edge:edge];
+    free(filteredImage);
     
-    _imageData = filteredImage ;
+    _imageData = edge ;
 }
 
-- (void)applyHystesis:(int *)possibleEdges highThreshold:(float)highT lowThreshold:(float)lowT{
-    int edgesCount = 0, pos = 0, numEdges = 0, maxMag = 0;
-    int hist[32768] = {0};  //256*8*16
+- (void)applyHystesis:(uint8_t *)possibleEdges highThreshold:(float)highT lowThreshold:(float)lowT edge:(uint8_t *)edge{
+    int edgesCount = 0, numHighEdges = 0, maxMag = 0, lowThreshold = 0, highThreshold = 0;
+    int hist[32768] = {0};  //256*16*8
+    NSInteger pos;
+    /****************************************************************************
+     * Initialize the edge map to possible edges everywhere the non-maximal
+     * suppression suggested there could be an edge except for the border. At
+     * the border we say there can not be an edge because it makes the
+     * follow_edges algorithm more efficient to not worry about tracking an
+     * edge off the side of the image.
+     ****************************************************************************/
+    for(int r=0,pos=0;r<_height;r++){
+        for(int c=0;c<_width;c++,pos++){
+            if(possibleEdges[pos] == POSSIBLE_EDGE) edge[pos] = POSSIBLE_EDGE;
+            else edge[pos] = NOEDGE;
+        }
+    }
+    
+    for(int r=0,pos=0;r<_height;r++,pos+=_width){
+        edge[pos] = NOEDGE;
+        edge[pos+_width-1] = NOEDGE;
+    }
+    pos = (_height-1) * _width;
+    for(int c=0;c<_height;c++,pos++){
+        edge[c] = NOEDGE;
+        edge[pos] = NOEDGE;
+    }
+    /****************************************************************************
+     * Compute the histogram of the magnitude image. Then use the histogram to
+     * compute hysteresis thresholds.
+     ****************************************************************************/
+    for(int r=0;r<32768;r++) hist[r] = 0;
+    for(int r=0,pos=0;r<_height;r++){
+        for(int c=0;c<_width;c++,pos++){
+            if(edge[pos] == POSSIBLE_EDGE) hist[_mag[pos]]++;
+        }
+    }
+    
+    /****************************************************************************
+     * Compute the number of pixels that passed the nonmaximal suppression.
+     ****************************************************************************/
+    for(int r=1,edgesCount=0;r<32768;r++){
+        if(hist[r] != 0) maxMag = r;
+        edgesCount += hist[r];
+    }
+    //edges that gratidude larger than high threshold
+    numHighEdges = (int)(edgesCount * highT + 0.5);
+    
+    /****************************************************************************
+     * Compute the high threshold value as the (100 * thigh) percentage point
+     * in the magnitude of the gradient histogram of all the pixels that passes
+     * non-maximal suppression. Then calculate the low threshold as a fraction
+     * of the computed high threshold value. John Canny said in his paper
+     * "A Computational Approach to Edge Detection" that "The ratio of the
+     * high to low threshold in the implementation is in the range two or three
+     * to one." That means that in terms of this implementation, we should
+     * choose tlow ~= 0.5 or 0.33333.
+     ****************************************************************************/
+    int r = 1;
+    edgesCount = hist[1];
+    while((r<(maxMag-1)) && (edgesCount < numHighEdges)){
+        r++;
+        edgesCount += hist[r];
+    }
+    highThreshold = r;
+    lowThreshold = (int)(numHighEdges * lowT + 0.5);
+    
+    /****************************************************************************
+     * This loop looks for pixels above the highthreshold to locate edges and
+     * then calls follow_edges to continue the edge.
+     ****************************************************************************/
+    for(int r=0,pos=0;r<_height;r++){
+        for(int c=0;c<_width;c++,pos++){
+            if((edge[pos] == POSSIBLE_EDGE) && (_mag[pos] >= highThreshold)){
+                edge[pos] = EDGE;
+                [self followEdges:(edge+pos) mag:(_mag+pos) lowThreshold:lowThreshold width:(int)_width];
+            }
+        }
+    }
+    
+    /****************************************************************************
+     * Set all the remaining possible edges to non-edges.
+     ****************************************************************************/
+    for(int r=0,pos=0;r<_height;r++){
+        for(int c=0;c<_width;c++,pos++) if(edge[pos] != EDGE) edge[pos] = NOEDGE;
+    }
+
 }
+
+- (void)followEdges:(uint8_t *)edgeMapPtr mag:(int *)edgeMagPtr lowThreshold:(short)lowval width:(int)cols{
+    int *tempMagPtr;
+    uint8_t *tempMapPtr;
+    int i;
+    
+    /****************************************************************************
+     * The x pixel is which should get checked:
+     *  x x x
+     *  x o x
+     *  x x x
+     ****************************************************************************/
+    int x[8] = {1,1,0,-1,-1,-1,0,1},
+    y[8] = {0,1,1,1,0,-1,-1,-1};
+    
+    for(i=0;i<8;i++){
+        tempMapPtr = edgeMapPtr - y[i]*cols + x[i];
+        tempMagPtr = edgeMagPtr - y[i]*cols + x[i];
+        
+        if((*tempMapPtr == POSSIBLE_EDGE) && (*tempMagPtr > lowval)){
+            *tempMapPtr = (unsigned char) EDGE;
+            [self followEdges:tempMapPtr mag:tempMagPtr lowThreshold:lowval width:cols];
+        }
+    }
+}
+
 
 - (void)suppressNonMaxium:(uint8_t*)result{
     int rowCount, colCount, count;
