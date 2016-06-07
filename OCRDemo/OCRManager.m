@@ -118,15 +118,17 @@ static const int kBlue = 3;
     free(diffx);
     free(diffy);
     
-    uint8_t *edge=(uint8_t *) malloc(sizeof(uint8_t)*retHeight*retWidth);
-    memset(edge, 0, sizeof(uint8_t) * retWidth * retHeight);
+//    uint8_t *edge = malloc(sizeof(uint8_t)*retHeight*retWidth);
+//    memset(edge, 0, sizeof(uint8_t) * retWidth * retHeight);
+//    
+//    free(filteredImage);
     
-    
-    _imageData = edge ;
+    _imageData = filteredImage ;
 }
 
 - (void)applyHystesis:(int *)possibleEdges highThreshold:(float)highT lowThreshold:(float)lowT{
-    
+    int edgesCount = 0, pos = 0, numEdges = 0, maxMag = 0;
+    int hist[32768] = {0};  //256*8*16
 }
 
 - (void)suppressNonMaxium:(uint8_t*)result{
@@ -156,7 +158,7 @@ static const int kBlue = 3;
      ****************************************************************************/
     for(rowCount = 1, magRowPtr = _mag + _width + 1, gxRowPtr = _gradx + _width + 1,
         gyRowPtr = _grady + _width + 1, resultRowPtr = result + _width + 1;
-        rowCount < _width - 2;
+        rowCount < _height - 2;
         rowCount++, magRowPtr += _width, gyRowPtr += _width, gxRowPtr += _width,
         resultRowPtr += _width){
         for(colCount = 1, magPtr = magRowPtr, gxPtr = gxRowPtr, gyPtr = gyRowPtr, resultPtr = resultRowPtr;
@@ -401,7 +403,6 @@ static const int kBlue = 3;
     }
     
     CGImageRef imageRef = CGBitmapContextCreateImage(context);
-    CGContextRelease(context);
     CGContextRelease(context);
     CGColorSpaceRelease(colorSpace);
     free(bitMap);
