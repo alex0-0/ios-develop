@@ -100,7 +100,7 @@ static const int kBlue = 3;
                     derY += pixel * gy[dy][dx];
                 }
             }
-            mag[y * retWidth + x] = abs(derX) + abs(derY);
+            mag[y * retWidth + x] = sqrt(derX^2 + derY^2);
             diffx[y * retWidth + x] = derX;
             diffy[y * retWidth + x] = derY;
         }
@@ -263,6 +263,7 @@ static const int kBlue = 3;
          count++, resultRowPtr++, resultPtr++) {
          *resultRowPtr = *resultPtr = (uint8_t)0;
     }
+    
     /****************************************************************************
      * Suppress non-maximum points.
      ****************************************************************************/
@@ -282,7 +283,7 @@ static const int kBlue = 3;
                 xperp = -(gx = *gxPtr)/((float)m00);
                 yperp = (gy = *gyPtr)/((float)m00);
             }
-            //linear interpolation?
+            //linear interpolation
             if(gx >= 0){
                 if(gy >= 0){
                     if (gx >= gy)

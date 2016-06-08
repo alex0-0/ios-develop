@@ -32,7 +32,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 @property (strong, nonatomic) UIImageView *picView;
 @property (strong, nonatomic) UIImageView *greyView;
 @property (strong, nonatomic) UIImageView *blackView;
-@property (strong, nonatomic) UIImageView *gaussianView;
+@property (strong, nonatomic) UIImageView *edgeView;
 @end
 
 @implementation ViewController {
@@ -104,9 +104,9 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     _blackView = demoImageView(blackImg, 2);
     [self.view addSubview:_blackView];
     
-    UIImage *gaussianImg = [ocrManager getEdge:_image];
-    _gaussianView = demoImageView(gaussianImg, 3);
-    [self.view addSubview:_gaussianView];
+    UIImage *edgeImg = [ocrManager getEdge:_image];
+    _edgeView = demoImageView(edgeImg, 3);
+    [self.view addSubview:_edgeView];
     
     
 }
