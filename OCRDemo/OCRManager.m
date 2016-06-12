@@ -95,12 +95,12 @@ static const int kBlue = 3;
             int derY = 0;
             for (int dy = 0; dy < 3; dy++) {
                 for (int dx = 0; dx < 3; dx++) {
-                    int pixel = _imageData[y * _width + x];
+                    int pixel = _imageData[(y+dy) * _width + (x + dx)];
                     derX += pixel * gx[dy][dx];
                     derY += pixel * gy[dy][dx];
                 }
             }
-            mag[y * retWidth + x] = sqrt(derX^2 + derY^2);
+            mag[y * retWidth + x] = abs(derX) + abs(derY);
             diffx[y * retWidth + x] = derX;
             diffy[y * retWidth + x] = derY;
         }
@@ -114,7 +114,7 @@ static const int kBlue = 3;
     uint8_t *filteredImage = malloc(sizeof(uint8_t) * retWidth * retHeight);
     memset(filteredImage, 0, sizeof(uint8_t) * retWidth * retHeight);
     [self suppressNonMaxium:filteredImage];
-    
+
     free(diffx);
     free(diffy);
     
