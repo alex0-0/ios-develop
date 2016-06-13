@@ -11,7 +11,7 @@
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-@property (assign, nonatomic) BOOL allowRotation;
+//@property (assign, nonatomic) BOOL rotateLeft;
 
 @end
 

@@ -18,6 +18,7 @@
 		55417AA71CE749C600860E4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55417AA61CE749C600860E4F /* Assets.xcassets */; };
 		554D759F1CF6E0A7004BA1BA /* OCRManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 554D759E1CF6E0A7004BA1BA /* OCRManager.m */; };
 		559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 559891181D0D5CDA0079A250 /* CameraOverlay.m */; };
+		55FD06391D0F16C600F2C5B7 /* OverlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55FD06381D0F16C600F2C5B7 /* OverlayViewController.m */; };
 		C28B029B83B6F40CB22D5739 /* libPods-OCRDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,8 @@
 		559891171D0D5CDA0079A250 /* CameraOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraOverlay.h; sourceTree = "<group>"; };
 		559891181D0D5CDA0079A250 /* CameraOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlay.m; sourceTree = "<group>"; };
 		55F719A81D018B1200CF7551 /* template.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = template.h; sourceTree = "<group>"; };
+		55FD06371D0F16C600F2C5B7 /* OverlayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayViewController.h; sourceTree = "<group>"; };
+		55FD06381D0F16C600F2C5B7 /* OverlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OverlayViewController.m; sourceTree = "<group>"; };
 		66077DA0C2A9E15361CCD0F0 /* libPods-OCRDemoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		743AF19623A65314777F5C72 /* libPods-OCRDemoUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemoUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8322C2F2A56F1D6FC6F23936 /* Pods-OCRDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo.debug.xcconfig"; sourceTree = "<group>"; };
@@ -85,6 +88,8 @@
 				55417A9E1CE749C600860E4F /* AppDelegate.m */,
 				55417AA01CE749C600860E4F /* ViewController.h */,
 				55417AA11CE749C600860E4F /* ViewController.m */,
+				55FD06371D0F16C600F2C5B7 /* OverlayViewController.h */,
+				55FD06381D0F16C600F2C5B7 /* OverlayViewController.m */,
 				559891171D0D5CDA0079A250 /* CameraOverlay.h */,
 				559891181D0D5CDA0079A250 /* CameraOverlay.m */,
 				554D759D1CF6E0A7004BA1BA /* OCRManager.h */,
@@ -254,6 +259,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				55417AA21CE749C600860E4F /* ViewController.m in Sources */,
+				55FD06391D0F16C600F2C5B7 /* OverlayViewController.m in Sources */,
 				559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */,
 				55417A9F1CE749C600860E4F /* AppDelegate.m in Sources */,
 				554D759F1CF6E0A7004BA1BA /* OCRManager.m in Sources */,

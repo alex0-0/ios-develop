@@ -11,8 +11,9 @@
 #import "CardIO.h"
 #import "CardIOUtilities.h"
 #import "OCRManager.h"
-#import "CameraOverlay.h"
+//#import "CameraOverlay.h"
 #import "AppDelegate.h"
+#import "OverlayViewController.h"
 
 #define kScreenWidth [[UIScreen mainScreen] bounds].size.width
 #define kScreenHeight [[UIScreen mainScreen] bounds].size.height
@@ -55,15 +56,15 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 -(void) pickImage{
-    [((AppDelegate *)[UIApplication sharedApplication].delegate) setAllowRotation:TRUE];
-    NSNumber *value = [NSNumber numberWithInt:UIDeviceOrientationLandscapeLeft];
-    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+//    [((AppDelegate *)[UIApplication sharedApplication].delegate) setRotateLeft:TRUE];
+//    NSNumber *value = [NSNumber numberWithInt:UIDeviceOrientationLandscapeLeft];
+//    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
     [self presentViewController:self.imagePicker animated:YES completion:nil];
-    [((AppDelegate *)[UIApplication sharedApplication].delegate) setAllowRotation:NO];
+//    [((AppDelegate *)[UIApplication sharedApplication].delegate) setRotateLeft:NO];
 }
 
 -(void)viewDidAppear:(BOOL)animated {
-    
+    [super viewDidAppear:animated];
 //    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"ID Number" message:_recognizedText preferredStyle:UIAlertControllerStyleAlert];
 //    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
 //    [alertController addAction:okAction];
@@ -71,7 +72,8 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 -(void)viewWillAppear:(BOOL)animated{
-    [((AppDelegate *)[UIApplication sharedApplication].delegate) setAllowRotation:NO];
+    [super viewWillAppear:animated];
+//    [((AppDelegate *)[UIApplication sharedApplication].delegate) setRotateLeft:NO];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -128,11 +130,15 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 //        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
         self.imagePicker.allowsEditing = NO;
         self.imagePicker.delegate = self;
-//        _imagePicker.showsCameraControls = NO;
+        _imagePicker.showsCameraControls = NO;
+        _imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
+        _imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
         
-        CameraOverlay *overlay = [[CameraOverlay alloc] init];
-        overlay.frame = [UIScreen mainScreen].bounds;
-        _imagePicker.cameraOverlayView = overlay;
+        OverlayViewController *overlayController = [[OverlayViewController alloc] init];
+        overlayController.dismissImagePicker = ^{
+            [[_imagePicker parentViewController] dismissViewControllerAnimated:YES completion:nil];
+        };
+        _imagePicker.cameraOverlayView = overlayController.view;
     }
 }
 
@@ -162,6 +168,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     
     // and so on for other orientations
     
-    return YES;//((interfaceOrientation == UIInterfaceOrientationLandscapeRight));
+    return NO;//((interfaceOrientation == UIInterfaceOrientationLandscapeRight));
 }
+
 @end

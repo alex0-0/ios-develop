@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+typedef void(^doBlock) (void);
+
 @interface CameraOverlay : UIView
+
+@property (assign, nonatomic) doBlock dismissImagePicker;
 
 @end
