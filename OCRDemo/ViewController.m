@@ -11,6 +11,8 @@
 #import "CardIO.h"
 #import "CardIOUtilities.h"
 #import "OCRManager.h"
+#import "CameraOverlay.h"
+#import "AppDelegate.h"
 
 #define kScreenWidth [[UIScreen mainScreen] bounds].size.width
 #define kScreenHeight [[UIScreen mainScreen] bounds].size.height
@@ -53,15 +55,23 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 -(void) pickImage{
+    [((AppDelegate *)[UIApplication sharedApplication].delegate) setAllowRotation:TRUE];
+    NSNumber *value = [NSNumber numberWithInt:UIDeviceOrientationLandscapeLeft];
+    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
     [self presentViewController:self.imagePicker animated:YES completion:nil];
+    [((AppDelegate *)[UIApplication sharedApplication].delegate) setAllowRotation:NO];
 }
 
 -(void)viewDidAppear:(BOOL)animated {
     
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"ID Number" message:_recognizedText preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-    [alertController addAction:okAction];
-    [self presentViewController:alertController animated:YES completion:nil];
+//    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"ID Number" message:_recognizedText preferredStyle:UIAlertControllerStyleAlert];
+//    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+//    [alertController addAction:okAction];
+//    [self presentViewController:alertController animated:YES completion:nil];
+}
+
+-(void)viewWillAppear:(BOOL)animated{
+    [((AppDelegate *)[UIApplication sharedApplication].delegate) setAllowRotation:NO];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -91,7 +101,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     btn.layer.cornerRadius = kButtonRadius;
     [self.view addSubview:btn];
     
-    _image = [UIImage imageNamed:@"chinese_id_card.jpg"];
+    _image = [UIImage imageNamed:@"passport.jpg"];
     self.picView = demoImageView(_image, 0);
     [self.view addSubview:self.picView];
     
@@ -114,11 +124,15 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 -(void)setupImagePicker {
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         self.imagePicker = [[UIImagePickerController alloc] init];
-        //        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
-        //        self.imagePicker.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
+        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+//        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
         self.imagePicker.allowsEditing = NO;
         self.imagePicker.delegate = self;
+//        _imagePicker.showsCameraControls = NO;
+        
+        CameraOverlay *overlay = [[CameraOverlay alloc] init];
+        overlay.frame = [UIScreen mainScreen].bounds;
+        _imagePicker.cameraOverlayView = overlay;
     }
 }
 
@@ -138,4 +152,16 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     return NO;
 }
 
+- (BOOL)shouldAutorotate{
+    
+//    if(interfaceOrientation == UIInterfaceOrientationLandscapeRight)
+//    {
+////        captureVideoPreviewLayer.connection.videoOrientation = AVCaptureVideoOrientationLandscapeRight
+//        _imagePicker.interfaceOrientation = UIInterfaceOrientationLandscapeRight;
+//    }
+    
+    // and so on for other orientations
+    
+    return YES;//((interfaceOrientation == UIInterfaceOrientationLandscapeRight));
+}
 @end
