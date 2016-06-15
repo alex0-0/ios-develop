@@ -41,6 +41,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 @implementation ViewController {
     G8Tesseract *_tesseract;
     NSString *_recognizedText;
+    OverlayViewController *_overlayController;
 }
 
 - (void)viewDidLoad {
@@ -55,12 +56,14 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     [self configTesseract];
 }
 
--(void) pickImage{
+-(void) takePhoto{
 //    [((AppDelegate *)[UIApplication sharedApplication].delegate) setRotateLeft:TRUE];
 //    NSNumber *value = [NSNumber numberWithInt:UIDeviceOrientationLandscapeLeft];
 //    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
-    [self presentViewController:self.imagePicker animated:YES completion:nil];
-//    [((AppDelegate *)[UIApplication sharedApplication].delegate) setRotateLeft:NO];
+//    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+//        [self presentViewController:self.imagePicker animated:YES completion:nil];
+//    }
+    [self presentViewController:_overlayController animated:YES completion:nil];
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -81,6 +84,9 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     // Dispose of any resources that can be recreated.
 }
 
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
     self.image = [info objectForKey:UIImagePickerControllerLivePhoto];
@@ -99,11 +105,11 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     [self.view setBackgroundColor:[UIColor purpleColor]];
     UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(kScreenWidth/2 - kButtonRadius, kScreenHeight - kButtonRadius * 2, kButtonRadius * 2, kButtonRadius * 2)];
     btn.backgroundColor = [UIColor blackColor];
-    [btn addTarget:self action:@selector(pickImage) forControlEvents:UIControlEventTouchUpInside];
+    [btn addTarget:self action:@selector(takePhoto) forControlEvents:UIControlEventTouchUpInside];
     btn.layer.cornerRadius = kButtonRadius;
     [self.view addSubview:btn];
     
-    _image = [UIImage imageNamed:@"passport.jpg"];
+    _image = [UIImage imageNamed:@"chinese_id_card.jpg"];
     self.picView = demoImageView(_image, 0);
     [self.view addSubview:self.picView];
     
@@ -119,8 +125,10 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     UIImage *edgeImg = [ocrManager getEdge:_image];
     _edgeView = demoImageView(edgeImg, 3);
     [self.view addSubview:_edgeView];
-    
-    
+}
+
+- (void)back{
+    [_imagePicker dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void)setupImagePicker {
@@ -134,11 +142,25 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
         _imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
         _imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
         
-        OverlayViewController *overlayController = [[OverlayViewController alloc] init];
-        overlayController.dismissImagePicker = ^{
-            [[_imagePicker parentViewController] dismissViewControllerAnimated:YES completion:nil];
-        };
-        _imagePicker.cameraOverlayView = overlayController.view;
+        _overlayController = [[OverlayViewController alloc] init];
+        _overlayController.imagePicker = _imagePicker;
+//        _overlayController.dismissImagePicker = ^{
+//            [_imagePicker dismissViewControllerAnimated:YES completion:nil];
+//        };
+        _imagePicker.cameraOverlayView = _overlayController.view;
+//        UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(20, 20, 50, 50)];
+//        [backButton setTitle:@"Back" forState:UIControlStateNormal];
+//        [backButton setBackgroundColor:[UIColor blackColor]];
+//        [backButton addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
+//        [_imagePicker.cameraOverlayView addSubview:backButton];
+        
+        //make iamge picker full screen
+        CGSize screenSize = [UIScreen mainScreen].bounds.size;
+        float cameraAspectRatio = 4.0 / 3.0;
+        float imageHeight = floorf(screenSize.width * cameraAspectRatio);
+        float scale = ceilf((screenSize.height / imageHeight) * 10.0) / 10.0;
+        _imagePicker.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenSize.height - imageHeight) / 2);
+        _imagePicker.cameraViewTransform = CGAffineTransformScale(_imagePicker.cameraViewTransform,scale, scale);
     }
 }
 
@@ -156,19 +178,6 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 
 - (BOOL)shouldCancelImageRecognitionForTesseract:(G8Tesseract *)tesseract {
     return NO;
-}
-
-- (BOOL)shouldAutorotate{
-    
-//    if(interfaceOrientation == UIInterfaceOrientationLandscapeRight)
-//    {
-////        captureVideoPreviewLayer.connection.videoOrientation = AVCaptureVideoOrientationLandscapeRight
-//        _imagePicker.interfaceOrientation = UIInterfaceOrientationLandscapeRight;
-//    }
-    
-    // and so on for other orientations
-    
-    return NO;//((interfaceOrientation == UIInterfaceOrientationLandscapeRight));
 }
 
 @end

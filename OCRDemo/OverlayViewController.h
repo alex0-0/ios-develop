@@ -13,5 +13,6 @@
 
 @property (strong, nonatomic) CameraOverlay *overlay;
 @property (assign, nonatomic) doBlock dismissImagePicker;
+@property (strong, nonatomic) UIImagePickerController *imagePicker;
 
 @end

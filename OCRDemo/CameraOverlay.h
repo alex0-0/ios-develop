@@ -12,6 +12,8 @@ typedef void(^doBlock) (void);
 
 @interface CameraOverlay : UIView
 
-@property (assign, nonatomic) doBlock dismissImagePicker;
+@property (copy, nonatomic) doBlock dismissImagePicker;
+@property (copy, nonatomic) doBlock tapFlashLight;
+@property (copy, nonatomic) doBlock tapTip;
 
 @end
