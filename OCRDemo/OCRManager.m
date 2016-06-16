@@ -7,7 +7,6 @@
 //
 
 #import "OCRManager.h"
-#import "template.h"
 
 #define NOEDGE 0
 #define POSSIBLE_EDGE 128

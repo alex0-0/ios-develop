@@ -18,6 +18,8 @@
 		55417AA71CE749C600860E4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55417AA61CE749C600860E4F /* Assets.xcassets */; };
 		554D759F1CF6E0A7004BA1BA /* OCRManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 554D759E1CF6E0A7004BA1BA /* OCRManager.m */; };
 		559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 559891181D0D5CDA0079A250 /* CameraOverlay.m */; };
+		55F1358C1D118D40007E4F2B /* LibScanPassport.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55F135881D118D40007E4F2B /* LibScanPassport.mm */; };
+		55F1358D1D118D40007E4F2B /* template.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55F135891D118D40007E4F2B /* template.cpp */; };
 		55FD06391D0F16C600F2C5B7 /* OverlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55FD06381D0F16C600F2C5B7 /* OverlayViewController.m */; };
 		C28B029B83B6F40CB22D5739 /* libPods-OCRDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */; };
 /* End PBXBuildFile section */
@@ -41,11 +43,11 @@
 		554D759E1CF6E0A7004BA1BA /* OCRManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCRManager.m; sourceTree = "<group>"; };
 		559891171D0D5CDA0079A250 /* CameraOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraOverlay.h; sourceTree = "<group>"; };
 		559891181D0D5CDA0079A250 /* CameraOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlay.m; sourceTree = "<group>"; };
-		55F719A81D018B1200CF7551 /* template.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = template.h; sourceTree = "<group>"; };
+		55F135871D118D40007E4F2B /* LibScanPassport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibScanPassport.h; sourceTree = "<group>"; };
+		55F135881D118D40007E4F2B /* LibScanPassport.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LibScanPassport.mm; sourceTree = "<group>"; };
+		55F135891D118D40007E4F2B /* template.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = template.cpp; sourceTree = "<group>"; };
 		55FD06371D0F16C600F2C5B7 /* OverlayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayViewController.h; sourceTree = "<group>"; };
 		55FD06381D0F16C600F2C5B7 /* OverlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OverlayViewController.m; sourceTree = "<group>"; };
-		66077DA0C2A9E15361CCD0F0 /* libPods-OCRDemoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		743AF19623A65314777F5C72 /* libPods-OCRDemoUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemoUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8322C2F2A56F1D6FC6F23936 /* Pods-OCRDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -83,7 +85,6 @@
 		55417A991CE749C600860E4F /* OCRDemo */ = {
 			isa = PBXGroup;
 			children = (
-				55F719A81D018B1200CF7551 /* template.h */,
 				55417A9D1CE749C600860E4F /* AppDelegate.h */,
 				55417A9E1CE749C600860E4F /* AppDelegate.m */,
 				55417AA01CE749C600860E4F /* ViewController.h */,
@@ -104,6 +105,7 @@
 		55417A9A1CE749C600860E4F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				55F135841D118D40007E4F2B /* c++_File */,
 				55396B001D0167570039C59E /* passport.jpg */,
 				55396AFC1D0164E40039C59E /* chinese_id_card.jpg */,
 				55396AFD1D0164E40039C59E /* idCard.png */,
@@ -114,12 +116,20 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		55F135841D118D40007E4F2B /* c++_File */ = {
+			isa = PBXGroup;
+			children = (
+				55F135871D118D40007E4F2B /* LibScanPassport.h */,
+				55F135881D118D40007E4F2B /* LibScanPassport.mm */,
+				55F135891D118D40007E4F2B /* template.cpp */,
+			);
+			path = "c++_File";
+			sourceTree = "<group>";
+		};
 		7A53DEF20B22AAD69947B502 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */,
-				66077DA0C2A9E15361CCD0F0 /* libPods-OCRDemoTests.a */,
-				743AF19623A65314777F5C72 /* libPods-OCRDemoUITests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -259,9 +269,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				55417AA21CE749C600860E4F /* ViewController.m in Sources */,
+				55F1358D1D118D40007E4F2B /* template.cpp in Sources */,
 				55FD06391D0F16C600F2C5B7 /* OverlayViewController.m in Sources */,
 				559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */,
 				55417A9F1CE749C600860E4F /* AppDelegate.m in Sources */,
+				55F1358C1D118D40007E4F2B /* LibScanPassport.mm in Sources */,
 				554D759F1CF6E0A7004BA1BA /* OCRManager.m in Sources */,
 				55417A9C1CE749C600860E4F /* main.m in Sources */,
 			);
@@ -362,6 +374,12 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/CardIO\"",
+					"\"${PODS_ROOT}/Headers/Public/TesseractOCRiOS\"",
+				);
 				INFOPLIST_FILE = OCRDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -379,6 +397,12 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/CardIO\"",
+					"\"${PODS_ROOT}/Headers/Public/TesseractOCRiOS\"",
+				);
 				INFOPLIST_FILE = OCRDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

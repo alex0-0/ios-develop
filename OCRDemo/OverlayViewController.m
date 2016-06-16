@@ -8,6 +8,7 @@
 
 #import "OverlayViewController.h"
 #import <AVFoundation/AVFoundation.h>
+#import "LibScanPassport.h"
 
 @interface OverlayViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 
@@ -18,6 +19,9 @@
     CameraOverlay *_overlay;
     AVCaptureSession *_captureSession;
     AVCaptureVideoPreviewLayer *_previewLayer;
+//    AVCaptureStillImageOutput *_stillImageOutput;
+//    CIDetector *_faceDetector;
+    int8_t *_bitMap;
 }
 
 - (void)viewDidLoad {
@@ -29,7 +33,8 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [_captureSession startRunning];
+    [self ocr:[UIImage imageNamed:@"passport.jpg"]];
+//    [_captureSession startRunning];
 }
 
 -(void)viewDidDisappear:(BOOL)animated{
@@ -74,8 +79,6 @@
     _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [_previewLayer setPosition:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))];
     [self.view.layer addSublayer:_previewLayer];
-//    [self.view.layer addSublayer:_overlay.layer];
-//    [self.view.layer addSublayer:_tipView.layer];
 }
 
 - (void)initTipView{
@@ -94,7 +97,7 @@
     \u2022 证件为有效证件；\n\
     \u2022 扫描角度正对证件，无倾斜、无抖动；\n\
     \u2022 证件无反光且清晰。若灯光过暗，请打开闪光灯\n\
-    或至明亮的地方扫描。\n\
+      或至明亮的地方扫描。\n\
     \u2022 网络顺畅";
     CGSize labelSize = [tips.text sizeWithAttributes:@{NSFontAttributeName:tips.font}];
     tips.frame = CGRectMake(0, 0, labelSize.width, labelSize.height);
@@ -116,7 +119,6 @@
 - (void)initOverlayView{
     _overlay = [[CameraOverlay alloc] init];
     _overlay.frame = [UIScreen mainScreen].bounds;
-    _overlay.dismissImagePicker = _dismissImagePicker;
     __weak typeof(self) weakSelf = self;
     _overlay.tapFlashLight = ^{
         __weak typeof(weakSelf) self = weakSelf;
@@ -154,10 +156,70 @@
 }
 
 - (void)back{
-    [_imagePicker dismissViewControllerAnimated:YES completion:nil];
+    [_captureSession stopRunning];
+    if ([self presentingViewController] != nil) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+//    else {
+//        [self dismissViewControllerAnimated:YES completion:nil];
+//    }
+//    [_imagePicker dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)showTip{
     [self.view addSubview:_tipView];
 }
+
+#pragma mark -------------AVCaptureVideoDataOutputSampleBufferDelegate   -------------------
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection{
+
+    CIImage *ciimage = [CIImage imageWithCVPixelBuffer:CMSampleBufferGetImageBuffer(sampleBuffer)];
+    CIImage *croppedRecImage = nil;
+    CIDetector *faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:[CIContext contextWithOptions:nil] options:nil];
+    CIDetector *rectangleDetector = [CIDetector detectorOfType:CIDetectorTypeRectangle context:[CIContext contextWithOptions:nil] options:nil];
+    NSArray *rectangleFeatures = [rectangleDetector featuresInImage:ciimage options:nil];
+    for (CIFeature *feature in rectangleFeatures) {
+        if ( ![feature isKindOfClass:[CIRectangleFeature class]]) {
+            continue;
+        }
+
+        CIVector *cropRect = [CIVector vectorWithCGRect:feature.bounds];
+        CIFilter *cropFilter = [CIFilter filterWithName:@"CICrop"];
+        [cropFilter setValue:ciimage forKey:@"inputImage"];
+        [cropFilter setValue:cropRect forKey:@"inputRectangle"];
+        croppedRecImage = [cropFilter valueForKey:@"outputImage"];
+    }
+    if (croppedRecImage) {
+        NSArray *faceFeatures = [faceDetector featuresInImage:croppedRecImage options:nil];
+        for (CIFeature *feature in faceFeatures) {
+            if ( [feature isKindOfClass:[CIFaceFeature class]]) {
+                CIVector *cropRect = [CIVector vectorWithCGRect:feature.bounds];
+                CIFilter *cropFilter = [CIFilter filterWithName:@"CICrop"];
+                [cropFilter setValue:ciimage forKey:@"inputImage"];
+                [cropFilter setValue:cropRect forKey:@"inputRectangle"];
+                CIImage *faceImage = [cropFilter valueForKey:@"outputImage"];
+                UIImage *tmpImage = [UIImage imageWithCGImage:[[CIContext contextWithOptions:nil] createCGImage:croppedRecImage fromRect:croppedRecImage.extent]];
+                [self ocr:tmpImage];
+            }
+        }
+    }
+    
+}
+
+- (void)ocr:(UIImage *)image{
+    NSData *data = UIImageJPEGRepresentation(image, 1.0);
+    _bitMap = malloc([data length] * sizeof(char));
+    memcpy(_bitMap, [data bytes], [data length]);
+    int pixelWidth = image.size.width * [UIScreen mainScreen].scale;
+    int pixelHeight = image.size.height * [UIScreen mainScreen].scale;
+    CGRect clippedRect  = CGRectMake(0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158);
+    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], clippedRect);
+    UIImage *newImage   = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    char *result = LibScanPassport_scanByte(_bitMap, pixelWidth, pixelHeight, 0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158); //0.158 = 1/6.33
+    NSString *number = [NSString stringWithUTF8String:result];
+    NSLog(@"%@",number);
+}
+
 @end

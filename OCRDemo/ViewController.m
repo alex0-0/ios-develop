@@ -143,17 +143,8 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
         _imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
         
         _overlayController = [[OverlayViewController alloc] init];
-        _overlayController.imagePicker = _imagePicker;
-//        _overlayController.dismissImagePicker = ^{
-//            [_imagePicker dismissViewControllerAnimated:YES completion:nil];
-//        };
         _imagePicker.cameraOverlayView = _overlayController.view;
-//        UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(20, 20, 50, 50)];
-//        [backButton setTitle:@"Back" forState:UIControlStateNormal];
-//        [backButton setBackgroundColor:[UIColor blackColor]];
-//        [backButton addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
-//        [_imagePicker.cameraOverlayView addSubview:backButton];
-        
+
         //make iamge picker full screen
         CGSize screenSize = [UIScreen mainScreen].bounds.size;
         float cameraAspectRatio = 4.0 / 3.0;
