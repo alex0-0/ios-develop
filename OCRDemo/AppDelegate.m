@@ -21,6 +21,7 @@
     UIViewController *vc = [[ViewController alloc] init];
     self.window = [[UIWindow alloc] init];
     self.window.frame = [UIScreen mainScreen].bounds;
+//    self.window.frame = CGRectMake(0, 0, self.window.frame.size.width + 0.0001, self.window.frame.size.height + 0.0001);
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     [self.window setRootViewController:nav];
     [_window makeKeyAndVisible];

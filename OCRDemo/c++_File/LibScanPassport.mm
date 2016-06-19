@@ -28,7 +28,8 @@ extern "C" {
 extern int onetable[256];
 extern char templateImage[36][200][25];
 extern int charcount[36];
-
+uc grayimage[135][700]={0};
+uc blackimage[135][88]={0};//135*700/8
 int times = 0;
 
 static int cmpVariance(const void* a,const void* b){
@@ -395,8 +396,8 @@ static bool generateLetterX(int up,int down,uc blackimage[135][88],float angle,i
 //            LOGE("%d",result[i]);
         }
         if(resultcount < 88){
-//            cout<<"字符数不对 count = "<<resultcount<<endl;
-            //LOGE("白格数过少,最少88个, count = %d",resultcount);
+            printf("字符数不对 count = %d\n",resultcount);
+            printf("白格数过少,最少88个, count = %d\n",resultcount);
             return false;
         }
         *spaces = resultcount;
@@ -714,10 +715,9 @@ static void generateGrayImage(int8_t* arr,uc grayimage[135][700],int hw,int hh,i
 
 char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
     int level = 0;
-    uc letterimage[88][25]={0};//88 leeters 13width 15 height;
+    uc letterimage[88][25]={0};//88 leters 13width 15 height;
     char *resultstring;
-    uc grayimage[135][700]={0};
-    uc blackimage[135][88]={0};//135*700/8
+
     int width = 700;
     int height = 131;
     float angle = 0;
@@ -731,6 +731,7 @@ char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h
     int upwhitespaces = 0;
     int downwhitespaces = 0;
     if(!getHeightEdge(width,height,blackimage,&angle,(int*) heightEdge)){
+        printf("get no height edge!\n");
         goto A;
     }
     level++;
@@ -750,4 +751,25 @@ A:  if(result[0] == 0){
 
     resultstring = &result[0];
     return resultstring;
+}
+
+uint8_t *tmpGrayImage(){
+    uint8_t *ret;
+    ret = (uint8_t*)malloc(135 * 700);
+    for (int i = 0; i < 135; i++) {
+        for (int d = 0; d < 700; d++) {
+            ret[i*700+d] = (uint8_t)grayimage[i][d];
+        }
+    }
+    return ret;
+}
+uint8_t *tmpBlackImage(){
+    uint8_t *ret;
+    ret = (uint8_t*)malloc(135 * 88);
+    for (int i = 0; i < 135; i++) {
+        for (int d = 0; d < 88; d++) {
+            ret[i*88+d] = (uint8_t)blackimage[i][d];
+        }
+    }
+    return ret;
 }

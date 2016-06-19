@@ -109,7 +109,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     btn.layer.cornerRadius = kButtonRadius;
     [self.view addSubview:btn];
     
-    _image = [UIImage imageNamed:@"chinese_id_card.jpg"];
+    _image = [UIImage imageNamed:@"passport.jpg"];
     self.picView = demoImageView(_image, 0);
     [self.view addSubview:self.picView];
     

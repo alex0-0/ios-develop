@@ -33,8 +33,8 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [self ocr:[UIImage imageNamed:@"passport.jpg"]];
-//    [_captureSession startRunning];
+//    [self ocr:[UIImage imageNamed:@"abc.jpg"]];
+    [_captureSession startRunning];
 }
 
 -(void)viewDidDisappear:(BOOL)animated{
@@ -56,13 +56,13 @@
     dispatch_queue_t cameraQueue = dispatch_queue_create("cameraQueue", NULL);
     [captureOutput setSampleBufferDelegate:self queue:cameraQueue];
     NSString *key = (NSString *)kCVPixelBufferPixelFormatTypeKey;
-    NSNumber *value = [NSNumber numberWithUnsignedInteger:kCVPixelFormatType_32BGRA];
+    NSNumber *value = [NSNumber numberWithUnsignedInteger:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange];
     NSDictionary *videoSetting = [NSDictionary dictionaryWithObject:value forKey:key];
     [captureOutput setVideoSettings:videoSetting];
     _captureSession = [[AVCaptureSession alloc] init];
     NSString *preset = 0;
     if (!preset) {
-        preset = AVCaptureSessionPresetMedium;
+        preset = AVCaptureSessionPresetHigh;
     }
     _captureSession.sessionPreset = preset;
     if ([_captureSession canAddInput:captureInput]) {
@@ -88,12 +88,12 @@
     UIView *containerView = [[UIView alloc] init];
     
     _tipView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, width, height)];
-    _tipView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
+    _tipView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
     UILabel *tips = [[UILabel alloc] init];
     tips.numberOfLines = 0;
-    tips.font = [UIFont systemFontOfSize:12.0];
+    tips.font = [UIFont systemFontOfSize:15.0];
     tips.textColor = [UIColor whiteColor];
-    tips.text = @"请确保：\n\
+    tips.text = @"      请确保：\n\
     \u2022 证件为有效证件；\n\
     \u2022 扫描角度正对证件，无倾斜、无抖动；\n\
     \u2022 证件无反光且清晰。若灯光过暗，请打开闪光灯\n\
@@ -103,14 +103,18 @@
     tips.frame = CGRectMake(0, 0, labelSize.width, labelSize.height);
     [containerView addSubview:tips];
     
-    UIButton *okButton = [[UIButton alloc] initWithFrame:CGRectMake(tips.frame.origin.x, tips.frame.origin.y + labelSize.height, labelSize.width, 30)];
+    UIButton *okButton = [[UIButton alloc] initWithFrame:CGRectMake(tips.frame.origin.x + (labelSize.width - 254)/2, tips.frame.origin.y + labelSize.height + 60, 254, 44)];
     [okButton setTitle:@"知道了" forState:UIControlStateNormal];
-    [okButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [okButton setBackgroundColor:[UIColor whiteColor]];
+    [okButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [okButton.titleLabel setFont:[UIFont systemFontOfSize:18.0]];
+    [okButton setBackgroundColor:[UIColor clearColor]];
     [okButton addTarget:self action:@selector(dismissTipView) forControlEvents:UIControlEventTouchUpInside];
+    okButton.layer.borderWidth = 0.5f;
+    okButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    okButton.layer.cornerRadius = 4.0f;
     [containerView addSubview:okButton];
     
-    containerView.frame = CGRectMake((width - labelSize.width) / 2, (height - labelSize.height) / 2, labelSize.width, labelSize.height + okButton.frame.size.height);
+    containerView.frame = CGRectMake((width - labelSize.width) / 2, (height - labelSize.height) / 2, labelSize.width, labelSize.height + okButton.frame.size.height + 60);
     [containerView setTransform:CGAffineTransformMakeRotation(M_PI/2)];
     [_tipView addSubview:containerView];
     [self.view addSubview:_tipView];
@@ -179,6 +183,7 @@
     CIDetector *faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:[CIContext contextWithOptions:nil] options:nil];
     CIDetector *rectangleDetector = [CIDetector detectorOfType:CIDetectorTypeRectangle context:[CIContext contextWithOptions:nil] options:nil];
     NSArray *rectangleFeatures = [rectangleDetector featuresInImage:ciimage options:nil];
+    CGRect rectangleRect = CGRectZero;
     for (CIFeature *feature in rectangleFeatures) {
         if ( ![feature isKindOfClass:[CIRectangleFeature class]]) {
             continue;
@@ -189,6 +194,7 @@
         [cropFilter setValue:ciimage forKey:@"inputImage"];
         [cropFilter setValue:cropRect forKey:@"inputRectangle"];
         croppedRecImage = [cropFilter valueForKey:@"outputImage"];
+        rectangleRect = feature.bounds;
     }
     if (croppedRecImage) {
         NSArray *faceFeatures = [faceDetector featuresInImage:croppedRecImage options:nil];
@@ -200,7 +206,19 @@
                 [cropFilter setValue:cropRect forKey:@"inputRectangle"];
                 CIImage *faceImage = [cropFilter valueForKey:@"outputImage"];
                 UIImage *tmpImage = [UIImage imageWithCGImage:[[CIContext contextWithOptions:nil] createCGImage:croppedRecImage fromRect:croppedRecImage.extent]];
-                [self ocr:tmpImage];
+//                [self ocr:tmpImage];
+                
+                CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+                CVPixelBufferLockBaseAddress(imageBuffer, 0);
+                void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
+//                size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+                size_t width = CVPixelBufferGetWidth(imageBuffer);
+                size_t height = CVPixelBufferGetHeight(imageBuffer);
+                int8_t *byteMap = malloc(width * height * sizeof(int8_t));
+                memcpy(byteMap, baseAddress, width * height);
+                NSData *data = [NSData dataWithBytes:baseAddress length:width*height];
+                CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+                [self tmpOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height];
             }
         }
     }
@@ -208,18 +226,81 @@
 }
 
 - (void)ocr:(UIImage *)image{
-    NSData *data = UIImageJPEGRepresentation(image, 1.0);
-    _bitMap = malloc([data length] * sizeof(char));
-    memcpy(_bitMap, [data bytes], [data length]);
-    int pixelWidth = image.size.width * [UIScreen mainScreen].scale;
-    int pixelHeight = image.size.height * [UIScreen mainScreen].scale;
+//    NSString *path = [[NSBundle mainBundle] pathForResource:@"bbb" ofType:@""];
+//    NSData *tmpData = [NSData dataWithContentsOfFile:path];
+//    NSData *tmpData = (NSData *)CFBridgingRelease(CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage)));
+//    _bitMap = malloc([tmpData length] * sizeof(char));
+//    memcpy(_bitMap, [tmpData bytes], [tmpData length]);
+//    
+    CGImageRef inputeCGImage = [image CGImage];
+    int pixelWidth = (int)CGImageGetWidth(image.CGImage);//image.size.width * [UIScreen mainScreen].scale;
+    int pixelHeight = (int)CGImageGetHeight(image.CGImage);//image.size.height * [UIScreen mainScreen].scale;
+    UInt32 *pixels;
+    pixels = calloc(pixelWidth*pixelHeight, sizeof(UInt32));
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(pixels, pixelWidth, pixelHeight, 8, 4 * pixelWidth, colorSpace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast);
+    CGContextDrawImage(context, CGRectMake(0, 0, pixelWidth, pixelHeight), inputeCGImage);
+    CGColorSpaceRelease(colorSpace);
+    CGContextRelease(context);
+    
+//    int8_t *tmpMap = malloc(pixelWidth*pixelHeight*3);  //only RGB
+//    for (int i = 0; i < [tmpData length]; i++) {
+//        if ((i+1)%4 == 0) {
+//            continue;
+//        }
+//        int index = ((int)i / 4) * 3 + i % 4;
+//        tmpMap[index] = _bitMap[i];
+//    }
+//    CGRect clippedRect  = CGRectMake(305, 480, 669, 99);
+
     CGRect clippedRect  = CGRectMake(0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158);
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], clippedRect);
-    UIImage *newImage   = [UIImage imageWithCGImage:imageRef];
+    UIImage *newImage   = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
     CGImageRelease(imageRef);
-    char *result = LibScanPassport_scanByte(_bitMap, pixelWidth, pixelHeight, 0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158); //0.158 = 1/6.33
+        char *result = LibScanPassport_scanByte(pixels, pixelWidth, pixelHeight, 0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158); //0.158 = 1/6.33
+//    char *result = LibScanPassport_scanByte(tmpMap, 1280, 720, 305, 480, 669, 99); //0.158 = 1/6.33
     NSString *number = [NSString stringWithUTF8String:result];
+    if (![number  isEqual: @"0"]) {
+        NSLog(@"Right");
+    }
     NSLog(@"%@",number);
+//    free(tmpMap);
+    free(pixels);
+    free(_bitMap);
+//    
+//    NSString *path = [[NSBundle mainBundle] pathForResource:@"bbb" ofType:@""];
+//    NSData *tmpData = [NSData dataWithContentsOfFile:path];
+//    _bitMap = malloc([tmpData length] * sizeof(char));
+//    memcpy(_bitMap, [tmpData bytes], [tmpData length]);
+//    char *result = LibScanPassport_scanByte(_bitMap, 1280, 720, 305, 480, 669, 99); //0.158 = 1/6.33
+//    NSString *number = [NSString stringWithUTF8String:result];
+//    if (![number  isEqual: @"0"]) {
+//        NSLog(@"Right");
+//    }
+//    NSLog(@"%@",number);
+//    //    free(tmpMap);
+//    //    free(pixels);
+//    free(_bitMap);
+
+}
+
+-(void)tmpOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height{
+    CGRect clippedRect  = CGRectMake(0, bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
+    char *result = LibScanPassport_scanByte(YUVData, width, height, clippedRect.origin.x, clippedRect.origin.y, clippedRect.size.width, clippedRect.size.height); //0.158 = 1/6.33
+    //    char *result = LibScanPassport_scanByte(tmpMap, 1280, 720, 305, 480, 669, 99); //0.158 = 1/6.33
+    NSData *grayData = [NSData dataWithBytes:tmpGrayImage() length:135*700];
+    UIImage *grayImage = [UIImage imageWithData:grayData];
+    NSData *blackData = [NSData dataWithBytes:tmpBlackImage() length:135*88];
+    UIImage *blackImage = [UIImage imageWithData:blackData];
+    NSString *number = [NSString stringWithUTF8String:result];
+    if (![number  isEqual: @"0"]) {
+        NSLog(@"Right");
+    }
+    NSLog(@"%@",number);
+    //    free(tmpMap);
+    free(YUVData);
+//    free(_bitMap);
+
 }
 
 @end
