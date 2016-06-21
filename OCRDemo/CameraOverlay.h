@@ -15,5 +15,7 @@ typedef void(^doBlock) (void);
 @property (copy, nonatomic) doBlock dismissImagePicker;
 @property (copy, nonatomic) doBlock tapFlashLight;
 @property (copy, nonatomic) doBlock tapTip;
+@property (assign, nonatomic) CGRect idStringRect;
+@property (assign, nonatomic) CGRect passportRect;
 
 @end

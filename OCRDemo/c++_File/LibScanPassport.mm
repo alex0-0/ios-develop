@@ -11,6 +11,7 @@ typedef struct _Variance{
 #include <time.h>
 #include "LibScanPassport.h"
 #include <sys/time.h>
+#import "OverlayViewController.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -28,8 +29,7 @@ extern "C" {
 extern int onetable[256];
 extern char templateImage[36][200][25];
 extern int charcount[36];
-uc grayimage[135][700]={0};
-uc blackimage[135][88]={0};//135*700/8
+
 int times = 0;
 
 static int cmpVariance(const void* a,const void* b){
@@ -535,7 +535,7 @@ static char getcharbyint(int maxI){
     return (char) (55 + maxI);
 }
 
-static bool debugable = false;
+static bool debugable = true;
 
 static void ocr(uc letterimage[88][25],char* result,int* iaa){
     int min = 0xfffff;
@@ -710,14 +710,23 @@ static void generateGrayImage(int8_t* arr,uc grayimage[135][700],int hw,int hh,i
             grayimage[j][k] = roundf(color/((endy-starty)*(endx-startx)));
         }
     }
-//    free(graytmp);
+//    int32_t* tmpArray;
+//    tmpArray = (int32_t*)malloc(131 * 700 * sizeof(int32_t));
+//    for(int i = 0;i<131;i++){
+//        for (int j = 0; j < 700; j++) {
+//            tmpArray[i * 700 + j] =grayimage[i][j];
+//        }
+//    }
+//    saveBitmap(tmpArray);
+////    free(graytmp);
 }
 
 char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
     int level = 0;
     uc letterimage[88][25]={0};//88 leters 13width 15 height;
     char *resultstring;
-
+    uc grayimage[135][700]={0};
+    uc blackimage[135][88]={0};//135*700/8
     int width = 700;
     int height = 131;
     float angle = 0;
@@ -753,23 +762,65 @@ A:  if(result[0] == 0){
     return resultstring;
 }
 
-uint8_t *tmpGrayImage(){
-    uint8_t *ret;
-    ret = (uint8_t*)malloc(135 * 700);
-    for (int i = 0; i < 135; i++) {
-        for (int d = 0; d < 700; d++) {
-            ret[i*700+d] = (uint8_t)grayimage[i][d];
+char* LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
+    if(!debugable) return NULL;
+    uc letterimage[88][25]={0};//88 leeters 13width 15 height;
+    uc grayimage[135][700]={0};
+    uc blackimage[135][88]={0};//135*700/8
+    char *resultstring;
+    int width = 700;
+    int height = 131;
+    float angle = 0;
+    int heightEdge[4]={0};
+    generateGrayImage(arr,grayimage,hw,hh,x,y,w,h);
+    timeval start,end,blacktime,heightedgetime,dividetime;
+    gettimeofday(&start, NULL);
+    blackImage(width,height,grayimage,blackimage);
+    gettimeofday(&blacktime,NULL);
+    char result[89] = {0};
+    int upletterX[130] = {0};
+    int downletterX[130] = {0};
+    int lettersxy[88][4] = {0};
+    int upwhitespaces = 0;
+    int downwhitespaces = 0;
+    if(!getHeightEdge(width,height,blackimage,&angle,(int*) heightEdge)){
+        gettimeofday(&heightedgetime,NULL);
+        printf("寻找上下边框失败");
+        goto A;
+    }
+    printf("%d %d %d %d",heightEdge[0],heightEdge[1],heightEdge[2],heightEdge[3]);
+    if(generateLetterX(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)&&generateLetterX(heightEdge[2],heightEdge[3],blackimage,angle,width,height,downletterX,&downwhitespaces)){
+        if(getlettersxy(lettersxy,upletterX,downletterX,heightEdge,blackimage,angle,width,height,upwhitespaces,downwhitespaces)){
+            dividechar(blackimage,lettersxy,letterimage);
+            gettimeofday(&dividetime,NULL);
+            int iaa[88] = {0};
+            ocr(letterimage, result,iaa);
+            if(debugable){
+                int32_t* jjarray;
+                jjarray = (int32_t*)malloc(2288 * sizeof(int32_t));
+                int bbb[2288];
+                for(int i = 0;i<2200;i++){
+                    bbb[i] = (int) letterimage[i/25][i%25]&0xff;
+                }
+                for(int i = 2200;i<2288;i++) bbb[i] = iaa[i-2200];
+                memcpy(jjarray, bbb, 2288 * sizeof(int32_t));
+                saveSmallBitmap(jjarray);
+                free(jjarray);
+            }
+            printf("%s",result);
+            printf("第%d 次 识别",times);
         }
     }
-    return ret;
+A:  if(result[0] == 0){
+    strcat(result,"8");
 }
-uint8_t *tmpBlackImage(){
-    uint8_t *ret;
-    ret = (uint8_t*)malloc(135 * 88);
-    for (int i = 0; i < 135; i++) {
-        for (int d = 0; d < 88; d++) {
-            ret[i*88+d] = (uint8_t)blackimage[i][d];
-        }
-    }
-    return ret;
+    gettimeofday(&end, NULL);
+    printf("%ld",start.tv_sec);
+    printf("%ld",end.tv_sec);
+    printf("共花费%d 毫秒,二值化耗时 %d 毫秒，寻找两行字耗时%d毫秒，分割字符耗时%d毫秒，ocr耗时%d毫秒",(end.tv_usec-start.tv_usec)/1000,(blacktime.tv_usec-start.tv_usec)/1000,(heightedgetime.tv_usec-blacktime.tv_usec)/1000,(dividetime.tv_usec-heightedgetime.tv_usec)/1000,(end.tv_usec-dividetime.tv_usec)/1000);
+    times++;
+    
+    resultstring = &result[0];
+    return resultstring;
 }
+

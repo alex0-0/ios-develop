@@ -9,6 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "CameraOverlay.h"
 
+void saveSmallBitmap(int* arr);
+void saveBitmap(int* arr);
+
 @interface OverlayViewController : UIViewController
 
 @end

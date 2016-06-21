@@ -10,6 +10,76 @@
 #import <AVFoundation/AVFoundation.h>
 #import "LibScanPassport.h"
 
+int getPixelByCharImage(int *arr, int num, int x, int y){
+    int a = arr[num * 25 + (y * 13 + x)/8];
+    return  (a >> (7 - (y * 13 + x) % 8))&1;
+}
+
+char getCharByInt(int maxI){
+    if (maxI < 10) {
+        char a = (char)(48 + maxI);
+        return a;
+    }
+    else if(maxI == 31){
+        return '<';
+    }
+    return (char)(55 + maxI);
+}
+
+void saveSmallBitmap(int* arr){
+    for (int i = 0; i < 88; i++) {
+//        int value = arr[2200 + i];
+        int32_t *bitMap;
+        bitMap = malloc(13 * 15 * sizeof(int32_t));
+        for (int j = 0; j < 13; j++) {
+            for (int k = 0; k < 15; k++) {
+                if (getPixelByCharImage(arr, i, j, k)) {
+                    bitMap[j * 15 + k] = 0xff000000;
+                }
+                else
+                    bitMap[j * 15 + k] = 0xffffffff;
+            }
+        }
+        CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+        CGContextRef bitmapContext=CGBitmapContextCreate(bitMap, 13, 15, 8, 4*13, colorSpace,  kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrderDefault);
+        CFRelease(colorSpace);
+        free(bitMap);
+        CGImageRef cgImage=CGBitmapContextCreateImage(bitmapContext);
+        CGContextRelease(bitmapContext);
+        
+        UIImage * newimage = [UIImage imageWithCGImage:cgImage];
+        CGImageRelease(cgImage);
+    }
+}
+
+int getPixelByBlackImage(int32_t *arr, int x, int y){
+    uint32_t tmpInt = arr[y * 88 + x / 8];
+    return (tmpInt>>(7 - x % 8)) & 1;
+}
+
+void saveBitmap(int* arr){
+    int32_t *bitMap;
+    bitMap = malloc(131 * 700 * sizeof(int32_t));
+    for (int i = 0; i < 700; i++) {
+        for (int j = 0; j < 131; j++) {
+            if (getPixelByBlackImage(arr, i, j) != 0) {
+                bitMap[j * 700 + i] = 0xff000000;
+            }
+            else
+                bitMap[j * 700 + i] = 0xffffffff;
+        }
+    }
+    CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+    CGContextRef bitmapContext=CGBitmapContextCreate(bitMap, 700, 131, 8, 4*700, colorSpace,  kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrderDefault);
+    CFRelease(colorSpace);
+    CGImageRef cgImage=CGBitmapContextCreateImage(bitmapContext);
+    CGContextRelease(bitmapContext);
+    
+    UIImage * newimage = [UIImage imageWithCGImage:cgImage];
+    free(bitMap);
+    CGImageRelease(cgImage);
+}
+
 @interface OverlayViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 
 @end
@@ -55,8 +125,9 @@
     AVCaptureVideoDataOutput *captureOutput = [[AVCaptureVideoDataOutput alloc] init];
     dispatch_queue_t cameraQueue = dispatch_queue_create("cameraQueue", NULL);
     [captureOutput setSampleBufferDelegate:self queue:cameraQueue];
+    [captureOutput setAlwaysDiscardsLateVideoFrames:YES];
     NSString *key = (NSString *)kCVPixelBufferPixelFormatTypeKey;
-    NSNumber *value = [NSNumber numberWithUnsignedInteger:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange];
+    NSNumber *value = [NSNumber numberWithUnsignedInteger:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange];
     NSDictionary *videoSetting = [NSDictionary dictionaryWithObject:value forKey:key];
     [captureOutput setVideoSettings:videoSetting];
     _captureSession = [[AVCaptureSession alloc] init];
@@ -214,11 +285,15 @@
 //                size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
                 size_t width = CVPixelBufferGetWidth(imageBuffer);
                 size_t height = CVPixelBufferGetHeight(imageBuffer);
-                int8_t *byteMap = malloc(width * height * sizeof(int8_t));
-                memcpy(byteMap, baseAddress, width * height);
-                NSData *data = [NSData dataWithBytes:baseAddress length:width*height];
+                size_t size = CVPixelBufferGetDataSize(imageBuffer);
+                int8_t *byteMap = malloc(size * sizeof(int8_t) - 16);
+                memcpy(byteMap, baseAddress+16, size);
+                NSData *data = [NSData dataWithBytes:baseAddress length:size-16];
                 CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-                [self tmpOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height];
+                
+                UIImage *tttImage = [UIImage imageWithCGImage:[[CIContext contextWithOptions:nil] createCGImage:ciimage fromRect:ciimage.extent]];
+
+                [self tmpOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)tttImage];
             }
         }
     }
@@ -228,10 +303,10 @@
 - (void)ocr:(UIImage *)image{
 //    NSString *path = [[NSBundle mainBundle] pathForResource:@"bbb" ofType:@""];
 //    NSData *tmpData = [NSData dataWithContentsOfFile:path];
-//    NSData *tmpData = (NSData *)CFBridgingRelease(CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage)));
-//    _bitMap = malloc([tmpData length] * sizeof(char));
-//    memcpy(_bitMap, [tmpData bytes], [tmpData length]);
-//    
+    NSData *tmpData = (NSData *)CFBridgingRelease(CGDataProviderCopyData(CGImageGetDataProvider(image.CGImage)));
+    _bitMap = malloc([tmpData length] * sizeof(char));
+    memcpy(_bitMap, [tmpData bytes], [tmpData length]);
+    
     CGImageRef inputeCGImage = [image CGImage];
     int pixelWidth = (int)CGImageGetWidth(image.CGImage);//image.size.width * [UIScreen mainScreen].scale;
     int pixelHeight = (int)CGImageGetHeight(image.CGImage);//image.size.height * [UIScreen mainScreen].scale;
@@ -242,22 +317,12 @@
     CGContextDrawImage(context, CGRectMake(0, 0, pixelWidth, pixelHeight), inputeCGImage);
     CGColorSpaceRelease(colorSpace);
     CGContextRelease(context);
-    
-//    int8_t *tmpMap = malloc(pixelWidth*pixelHeight*3);  //only RGB
-//    for (int i = 0; i < [tmpData length]; i++) {
-//        if ((i+1)%4 == 0) {
-//            continue;
-//        }
-//        int index = ((int)i / 4) * 3 + i % 4;
-//        tmpMap[index] = _bitMap[i];
-//    }
-//    CGRect clippedRect  = CGRectMake(305, 480, 669, 99);
 
     CGRect clippedRect  = CGRectMake(0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158);
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], clippedRect);
     UIImage *newImage   = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
     CGImageRelease(imageRef);
-        char *result = LibScanPassport_scanByte(pixels, pixelWidth, pixelHeight, 0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158); //0.158 = 1/6.33
+        char *result = LibScanPassport_test(pixels, pixelWidth, pixelHeight, 0, image.size.height - image.size.width * 0.158, image.size.width, image.size.width * 0.158); //0.158 = 1/6.33
 //    char *result = LibScanPassport_scanByte(tmpMap, 1280, 720, 305, 480, 669, 99); //0.158 = 1/6.33
     NSString *number = [NSString stringWithUTF8String:result];
     if (![number  isEqual: @"0"]) {
@@ -267,7 +332,7 @@
 //    free(tmpMap);
     free(pixels);
     free(_bitMap);
-//    
+
 //    NSString *path = [[NSBundle mainBundle] pathForResource:@"bbb" ofType:@""];
 //    NSData *tmpData = [NSData dataWithContentsOfFile:path];
 //    _bitMap = malloc([tmpData length] * sizeof(char));
@@ -284,16 +349,16 @@
 
 }
 
--(void)tmpOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height{
-    CGRect clippedRect  = CGRectMake(0, bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
-    char *result = LibScanPassport_scanByte(YUVData, width, height, clippedRect.origin.x, clippedRect.origin.y, clippedRect.size.width, clippedRect.size.height); //0.158 = 1/6.33
-    //    char *result = LibScanPassport_scanByte(tmpMap, 1280, 720, 305, 480, 669, 99); //0.158 = 1/6.33
-    NSData *grayData = [NSData dataWithBytes:tmpGrayImage() length:135*700];
-    UIImage *grayImage = [UIImage imageWithData:grayData];
-    NSData *blackData = [NSData dataWithBytes:tmpBlackImage() length:135*88];
-    UIImage *blackImage = [UIImage imageWithData:blackData];
+-(void)tmpOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{
+    CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
+    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+    UIImage *newImage   = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+    CGImageRelease(imageRef);
+
+    char *result = LibScanPassport_test(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
+
     NSString *number = [NSString stringWithUTF8String:result];
-    if (![number  isEqual: @"0"]) {
+    if (![number  isEqual: @"8"]) {
         NSLog(@"Right");
     }
     NSLog(@"%@",number);

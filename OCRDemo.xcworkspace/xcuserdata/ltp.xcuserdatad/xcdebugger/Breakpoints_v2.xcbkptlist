@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/OverlayViewController.m"
-            timestampString = "488034356.685683"
+            timestampString = "488191353.672213"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "297"
-            endingLineNumber = "297"
-            landmarkName = "-tmpOCR:bounds:width:height:"
+            startingLineNumber = "325"
+            endingLineNumber = "325"
+            landmarkName = "-ocr:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,12 +26,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/c++_File/LibScanPassport.mm"
-            timestampString = "487995110.64646"
+            timestampString = "488188578.9346"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "739"
-            endingLineNumber = "739"
-            landmarkName = "LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h)"
+            startingLineNumber = "400"
+            endingLineNumber = "400"
+            landmarkName = "generateLetterX(int up,int down,uc blackimage[135][88],float angle,int width,int height,int result[130],int* spaces)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -42,12 +42,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/c++_File/LibScanPassport.mm"
-            timestampString = "488028743.390167"
+            timestampString = "488189158.771506"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "560"
-            endingLineNumber = "560"
-            landmarkName = "ocr(uc letterimage[88][25],char* result,int* iaa)"
+            startingLineNumber = "793"
+            endingLineNumber = "793"
+            landmarkName = "LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int h)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -58,12 +58,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/OverlayViewController.m"
-            timestampString = "488032853.703098"
+            timestampString = "488191353.672213"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "261"
-            endingLineNumber = "261"
-            landmarkName = "-ocr:"
+            startingLineNumber = "358"
+            endingLineNumber = "358"
+            landmarkName = "-tmpOCR:bounds:width:height:image:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "OCRDemo/OverlayViewController.m"
+            timestampString = "488191348.021008"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "296"
+            endingLineNumber = "296"
+            landmarkName = "-captureOutput:didOutputSampleBuffer:fromConnection:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
