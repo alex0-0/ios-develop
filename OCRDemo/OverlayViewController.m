@@ -104,7 +104,7 @@ void saveBitmap(int* arr){
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-//    PassportScanResult *aaa = [[PassportScanResult alloc] initWithScanResult:@"P0CHNCHU<<HUIQIA0<<<<<<<<<<<<<<<<<<<<<<<<<<<E448424219CHN9211214F2502276PBNCLLNLMHMFA926"];
+
     [_captureSession startRunning];
 }
 

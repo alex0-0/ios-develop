@@ -17,6 +17,7 @@
 		55417AA21CE749C600860E4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55417AA11CE749C600860E4F /* ViewController.m */; };
 		55417AA71CE749C600860E4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55417AA61CE749C600860E4F /* Assets.xcassets */; };
 		554D759F1CF6E0A7004BA1BA /* OCRManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 554D759E1CF6E0A7004BA1BA /* OCRManager.m */; };
+		55663E801D1A48E3006CBC44 /* PassportScanResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 55663E7F1D1A48E3006CBC44 /* PassportScanResult.m */; };
 		559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 559891181D0D5CDA0079A250 /* CameraOverlay.m */; };
 		55A308011D13D58600DFA964 /* bbb in Resources */ = {isa = PBXBuildFile; fileRef = 55A308001D13D58600DFA964 /* bbb */; };
 		55B9C0571D1926770070CC3E /* barcode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55B9C0551D1926770070CC3E /* barcode@2x.png */; };
@@ -44,6 +45,8 @@
 		55417AAB1CE749C600860E4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		554D759D1CF6E0A7004BA1BA /* OCRManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCRManager.h; sourceTree = "<group>"; };
 		554D759E1CF6E0A7004BA1BA /* OCRManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCRManager.m; sourceTree = "<group>"; };
+		55663E7E1D1A48E3006CBC44 /* PassportScanResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PassportScanResult.h; sourceTree = "<group>"; };
+		55663E7F1D1A48E3006CBC44 /* PassportScanResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PassportScanResult.m; sourceTree = "<group>"; };
 		559891171D0D5CDA0079A250 /* CameraOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraOverlay.h; sourceTree = "<group>"; };
 		559891181D0D5CDA0079A250 /* CameraOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlay.m; sourceTree = "<group>"; };
 		55A308001D13D58600DFA964 /* bbb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bbb; sourceTree = "<group>"; };
@@ -91,6 +94,8 @@
 		55417A991CE749C600860E4F /* OCRDemo */ = {
 			isa = PBXGroup;
 			children = (
+				55663E7E1D1A48E3006CBC44 /* PassportScanResult.h */,
+				55663E7F1D1A48E3006CBC44 /* PassportScanResult.m */,
 				55417A9D1CE749C600860E4F /* AppDelegate.h */,
 				55417A9E1CE749C600860E4F /* AppDelegate.m */,
 				55417AA01CE749C600860E4F /* ViewController.h */,
@@ -286,6 +291,7 @@
 				559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */,
 				55417A9F1CE749C600860E4F /* AppDelegate.m in Sources */,
 				55F1358C1D118D40007E4F2B /* LibScanPassport.mm in Sources */,
+				55663E801D1A48E3006CBC44 /* PassportScanResult.m in Sources */,
 				554D759F1CF6E0A7004BA1BA /* OCRManager.m in Sources */,
 				55417A9C1CE749C600860E4F /* main.m in Sources */,
 			);
