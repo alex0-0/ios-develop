@@ -12,7 +12,7 @@
 #define ScreenHeight [[UIScreen mainScreen] bounds].size.height
 #define ScreenWidth [[UIScreen mainScreen] bounds].size.width
 
-#define kDefaultWidth 640.0
+#define kDefaultWidth 320.0
 
 void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     CGPoint origin = transparentRect.origin;

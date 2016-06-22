@@ -9,6 +9,7 @@
 #import "OverlayViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import "LibScanPassport.h"
+#import "PassportScanResult.h"
 
 int getPixelByCharImage(int *arr, int num, int x, int y){
     int a = arr[num * 25 + (y * 13 + x)/8];
@@ -103,7 +104,7 @@ void saveBitmap(int* arr){
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-//    [self ocr:[UIImage imageNamed:@"abc.jpg"]];
+//    PassportScanResult *aaa = [[PassportScanResult alloc] initWithScanResult:@"P0CHNCHU<<HUIQIA0<<<<<<<<<<<<<<<<<<<<<<<<<<<E448424219CHN9211214F2502276PBNCLLNLMHMFA926"];
     [_captureSession startRunning];
 }
 
@@ -231,7 +232,9 @@ void saveBitmap(int* arr){
 }
 
 - (void)back{
-    [_captureSession stopRunning];
+    if ([_captureSession isRunning]) {
+        [_captureSession stopRunning];
+    }
     if ([self presentingViewController] != nil) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
@@ -349,19 +352,25 @@ void saveBitmap(int* arr){
 
 }
 
--(void)tmpOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{
+-(void)tmpOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
     CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-    UIImage *newImage   = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
     CGImageRelease(imageRef);
 
     char *result = LibScanPassport_test(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
 
-    NSString *number = [NSString stringWithUTF8String:result];
-    if (![number  isEqual: @"8"]) {
+    NSString *scanResult = [NSString stringWithUTF8String:result];
+    if (![scanResult  isEqual: @"8"]) {
+        PassportScanResult *resultModel = [[PassportScanResult alloc] initWithScanResult:scanResult];
+        if (resultModel.gotLegalData) {
+            if ([_captureSession isRunning]) {
+                [_captureSession stopRunning];
+            }
+        }
         NSLog(@"Right");
     }
-    NSLog(@"%@",number);
+    NSLog(@"%@", scanResult);
     //    free(tmpMap);
     free(YUVData);
 //    free(_bitMap);
