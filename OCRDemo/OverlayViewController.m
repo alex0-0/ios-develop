@@ -106,7 +106,7 @@ void saveBitmap(int* arr){
 }
 
 @interface OverlayViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
-
+@property (strong, nonatomic) PassportScanResult *resultModel;
 @end
 
 @implementation OverlayViewController{
@@ -393,6 +393,22 @@ void saveBitmap(int* arr){
             }
             //crop image for user to validate the information extracted from the scanning
             [resultModel cropImage:image inRect:bounds withPositions:letterPosArray];
+            NSString *showResult = [NSString stringWithFormat:@"family name:\t%@\ngiven name:\t%@\npassportID:\t%@\nnation:\t%@gender:\t%@",
+                                    resultModel.familyName,
+                                    resultModel.givenName,
+                                    resultModel.passportID,
+                                    resultModel.nation,
+                                    (resultModel.gender == 0)?@"女":@"男"
+                                    ];
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
+                                                            message:showResult
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"OK"
+                                                  otherButtonTitles:nil];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [alert show];
+//                [self back];
+            });
         }
         NSLog(@"Right");
     }

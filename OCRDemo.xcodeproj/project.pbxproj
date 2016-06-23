@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		55073DF01D1B9A6B00E416F9 /* OCRValidationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 55073DEF1D1B9A6B00E416F9 /* OCRValidationView.m */; };
 		5538EF331D0012BA004C2BFC /* tessdata in Resources */ = {isa = PBXBuildFile; fileRef = 5538EF321D0012BA004C2BFC /* tessdata */; };
 		5538EF351D0013F7004C2BFC /* flowers.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 5538EF341D0013F7004C2BFC /* flowers.jpg */; };
 		55396AFE1D0164E40039C59E /* chinese_id_card.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 55396AFC1D0164E40039C59E /* chinese_id_card.jpg */; };
@@ -30,6 +31,8 @@
 
 /* Begin PBXFileReference section */
 		2E096EEB2BD6E9C66D46EBC6 /* Pods-OCRDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-OCRDemo/Pods-OCRDemo.release.xcconfig"; sourceTree = "<group>"; };
+		55073DEE1D1B9A6B00E416F9 /* OCRValidationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCRValidationView.h; sourceTree = "<group>"; };
+		55073DEF1D1B9A6B00E416F9 /* OCRValidationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCRValidationView.m; sourceTree = "<group>"; };
 		5538EF321D0012BA004C2BFC /* tessdata */ = {isa = PBXFileReference; lastKnownFileType = folder; path = tessdata; sourceTree = "<group>"; };
 		5538EF341D0013F7004C2BFC /* flowers.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = flowers.jpg; sourceTree = "<group>"; };
 		55396AFC1D0164E40039C59E /* chinese_id_card.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = chinese_id_card.jpg; sourceTree = "<group>"; };
@@ -94,6 +97,8 @@
 		55417A991CE749C600860E4F /* OCRDemo */ = {
 			isa = PBXGroup;
 			children = (
+				55073DEE1D1B9A6B00E416F9 /* OCRValidationView.h */,
+				55073DEF1D1B9A6B00E416F9 /* OCRValidationView.m */,
 				55663E7E1D1A48E3006CBC44 /* PassportScanResult.h */,
 				55663E7F1D1A48E3006CBC44 /* PassportScanResult.m */,
 				55417A9D1CE749C600860E4F /* AppDelegate.h */,
@@ -285,6 +290,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55073DF01D1B9A6B00E416F9 /* OCRValidationView.m in Sources */,
 				55417AA21CE749C600860E4F /* ViewController.m in Sources */,
 				55F1358D1D118D40007E4F2B /* template.cpp in Sources */,
 				55FD06391D0F16C600F2C5B7 /* OverlayViewController.m in Sources */,
