@@ -11,6 +11,30 @@
 #import "LibScanPassport.h"
 #import "PassportScanResult.h"
 
+static NSMutableArray<LetterPosition*> *letterPosArray;
+
+//get position of 88 letters
+void saveLetterPos(int *pos){
+    NSLock *arrayLock = [[NSLock alloc] init];
+    [arrayLock lock];
+    
+    if (letterPosArray) {
+        [letterPosArray removeAllObjects];
+    }
+    else {
+        letterPosArray = [NSMutableArray array];
+    }
+    for (int i = 0; i < 88; i++) {
+        LetterPosition *tmpLetterPos = [[LetterPosition alloc] init];
+        tmpLetterPos.x = pos[i * 4] - 30;
+        tmpLetterPos.y = pos[i * 4 + 1];
+        tmpLetterPos.toX = pos[i * 4 + 2] - 30;
+        tmpLetterPos.toY = pos[i * 4 + 3];
+        [letterPosArray addObject:tmpLetterPos];
+    }
+    [arrayLock unlock];
+}
+
 int getPixelByCharImage(int *arr, int num, int x, int y){
     int a = arr[num * 25 + (y * 13 + x)/8];
     return  (a >> (7 - (y * 13 + x) % 8))&1;
@@ -367,6 +391,8 @@ void saveBitmap(int* arr){
             if ([_captureSession isRunning]) {
                 [_captureSession stopRunning];
             }
+            //crop image for user to validate the information extracted from the scanning
+            [resultModel cropImage:image inRect:bounds withPositions:letterPosArray];
         }
         NSLog(@"Right");
     }

@@ -7,6 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+
+@interface LetterPosition : NSObject
+
+@property (assign, nonatomic) NSInteger x;
+@property (assign, nonatomic) NSInteger y;
+@property (assign, nonatomic) NSInteger toX;    //right point x
+@property (assign, nonatomic) NSInteger toY;    //bottom point y
+
+@end
 
 @interface PassportScanResult : NSData
 
@@ -20,7 +31,12 @@
 //@property (assign, nonatomic) NSUInteger birthDay;
 @property (assign, nonatomic) NSInteger gender; //0 for female, 1 for male
 @property (assign, nonatomic) BOOL gotLegalData;     //judge if information extracted from the init string is legal
+@property (strong, nonatomic) UIImage *familyNameImage;
+@property (strong, nonatomic) UIImage *givenNameImage;
+@property (strong, nonatomic) UIImage *idImage;
 
 - (PassportScanResult*)initWithScanResult:(NSString *)scanResult;
+
+- (void)cropImage:(UIImage*)image inRect:(CGRect)rect withPositions:(NSArray<LetterPosition*>*)pos;
 
 @end

@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/OverlayViewController.m"
-            timestampString = "488289215.772248"
+            timestampString = "488309782.305161"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "368"
-            endingLineNumber = "368"
+            startingLineNumber = "390"
+            endingLineNumber = "390"
             landmarkName = "-tmpOCR:bounds:width:height:image:"
             landmarkType = "5">
          </BreakpointContent>
@@ -25,13 +25,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "OCRDemo/OverlayViewController.m"
-            timestampString = "488289192.344037"
+            filePath = "OCRDemo/PassportScanResult.m"
+            timestampString = "488312156.970774"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "107"
-            endingLineNumber = "107"
-            landmarkName = "-viewWillAppear:"
+            startingLineNumber = "145"
+            endingLineNumber = "145"
+            landmarkName = "-cropImage:inRect:withPositions:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -42,44 +42,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/PassportScanResult.m"
-            timestampString = "488289195.900705"
+            timestampString = "488312278.909025"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "41"
-            endingLineNumber = "41"
-            landmarkName = "-initWithScanResult:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "OCRDemo/PassportScanResult.m"
-            timestampString = "488291744.021962"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "150"
-            endingLineNumber = "150"
-            landmarkName = "isPinyin()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "OCRDemo/PassportScanResult.m"
-            timestampString = "488290271.153332"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "84"
-            endingLineNumber = "84"
-            landmarkName = "-processPassportScanResult:"
+            startingLineNumber = "151"
+            endingLineNumber = "151"
+            landmarkName = "-cropImage:inRect:withPositions:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

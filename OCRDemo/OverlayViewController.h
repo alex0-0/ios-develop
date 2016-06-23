@@ -11,6 +11,7 @@
 
 void saveSmallBitmap(int* arr);
 void saveBitmap(int* arr);
+void saveLetterPos(int *pos);
 
 @interface OverlayViewController : UIViewController
 

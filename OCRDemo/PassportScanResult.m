@@ -34,7 +34,16 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     return [NSString stringWithString:tmpString];
 }
 
-@implementation PassportScanResult
+@implementation LetterPosition
+
+@end
+
+@implementation PassportScanResult{
+    int _familyNameIndex;
+    int _familyNameLength;
+    int _givenNameIndex;
+    int _givenNameLength;
+}
 
 - (PassportScanResult*)initWithScanResult:(NSString *)scanResult{
     if (self = [super init]) {
@@ -76,6 +85,10 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
         _gotLegalData = false;
         return;
     }
+    _familyNameIndex = 5;
+    _familyNameLength = (int)_familyName.length;
+    _givenNameIndex = (int)5 + _familyNameLength + 2;
+    _givenNameLength = (int)_givenName.length;
     
     //process the second line, from which extracted GENDER, BIRTHDAY, PASSPORT ID
     NSString *idString = [secondLine substringToIndex:9];
@@ -86,14 +99,58 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
 //    [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
     [dateFormatter setDateFormat:@"yyyyMMdd"];
-    birthdayString = (year > 20)?[@"19" stringByAppendingString:birthdayString]:[@"20" stringByAppendingString:birthdayString];
+    birthdayString = (year > 30)?[@"19" stringByAppendingString:birthdayString]:[@"20" stringByAppendingString:birthdayString];
     _birthday = [dateFormatter dateFromString:birthdayString];
     
     _gender = ([secondLine characterAtIndex:20] == 'M')?1:0;
     _gotLegalData = true;
 }
 
-
+//In the OCR processing, the program split the image into 700(width)*131(height)
+//so the positions returned by the program is based on this prequisite
+- (void)cropImage:(UIImage*)image inRect:(CGRect)rect withPositions:(NSArray<LetterPosition*>*)pos{
+    //0.158 = 1/6.33, 6.33 is the ratio of passport id string image's width to height
+    CGRect croppedRect  = CGRectMake(rect.origin.x, rect.origin.y + rect.size.height - rect.size.width * 0.158, rect.size.width, rect.size.width * 0.158);
+    CGFloat widthUnit = croppedRect.size.width / 700;
+    CGFloat heightUnit = croppedRect.size.height / 131;
+    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+    UIImage *croppedImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+    CGImageRelease(imageRef);
+    
+    //TODO: the height should be the max among all the family name's letter
+    CGRect familyNameRect = CGRectMake(pos[_familyNameIndex].x * widthUnit, pos[_familyNameIndex].y * heightUnit,
+                                       (pos[_familyNameIndex + _familyNameLength - 1].toX - pos[_familyNameIndex].x) * widthUnit ,
+                                       (MAX(pos[_familyNameIndex + _familyNameLength - 1].toY, pos[_familyNameIndex].toY) - MIN(pos[_familyNameIndex + _familyNameLength - 1].y, pos[_familyNameIndex].y)) * heightUnit
+                                       );
+    imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, familyNameRect);
+    _familyNameImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    
+    //TODO: the height should be the max among all the given name's letter
+    CGRect givenNameRect = CGRectMake(pos[_givenNameIndex].x * widthUnit, pos[_givenNameIndex].y * heightUnit,
+                                      (pos[_givenNameIndex + _givenNameLength - 1].toX - pos[_givenNameIndex].x) * widthUnit ,
+                                      (MAX(pos[_givenNameIndex + _givenNameLength - 1].toY, pos[_givenNameIndex].toY) - MIN(pos[_givenNameIndex + _givenNameLength - 1].y, pos[_givenNameIndex].y)) * heightUnit
+                                      );
+    imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, givenNameRect);
+    _givenNameImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    
+    //TODO: the height should be the max among all the id string's letter
+    CGRect idRect = CGRectMake(pos[44].x * widthUnit, pos[44].y * heightUnit,
+                                      (pos[52].toX - pos[44].x) * widthUnit,
+                                      MAX(pos[52].toY, pos[44].toY) * heightUnit
+                                      );
+    imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, idRect);
+    _idImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    int i=0;
+    for (LetterPosition *p in pos) {i++;
+        CGRect givenNameRect = CGRectMake(p.x * widthUnit, p.y * heightUnit, (p.toX - p.x) * widthUnit, (p.toY - p.y) * heightUnit);
+        imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, givenNameRect);
+        UIImage *tmpImage = [UIImage imageWithCGImage:imageRef];
+        CGImageRelease(imageRef);
+    }
+}
 
 @end
 

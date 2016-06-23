@@ -757,6 +757,16 @@ A:  if(result[0] == 0){
         result[0] = le;
         result[1] = 0;
     }
+    else {
+        int *letterPos;
+        letterPos = (int *)malloc(44 * 4 * sizeof(int));
+        for (int i = 0; i < 44; i++) {
+            for (int j = 0; j < 4; j++) {
+                letterPos[4 * i + j] = lettersxy[i][j];
+            }
+        }
+        saveLetterPos(letterPos);
+    }
 
     resultstring = &result[0];
     return resultstring;
@@ -813,7 +823,17 @@ char* LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int
     }
 A:  if(result[0] == 0){
     strcat(result,"8");
-}
+    }
+    else {
+        int *letterPos;
+        letterPos = (int *)malloc(88 * 4 * sizeof(int));
+        for (int i = 0; i < 88; i++) {
+            for (int j = 0; j < 4; j++) {
+                letterPos[4 * i + j] = lettersxy[i][j];
+            }
+        }
+        saveLetterPos(letterPos);
+    }
     gettimeofday(&end, NULL);
     printf("%ld",start.tv_sec);
     printf("%ld",end.tv_sec);
