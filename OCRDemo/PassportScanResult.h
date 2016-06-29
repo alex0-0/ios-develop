@@ -26,16 +26,13 @@
 @property (strong, nonatomic) NSString *passportID;
 @property (strong, nonatomic) NSString *nation;
 @property (strong, nonatomic) NSDate *birthday;
-//@property (assign, nonatomic) NSUInteger birthYear;
-//@property (assign, nonatomic) NSUInteger birthMonth;
-//@property (assign, nonatomic) NSUInteger birthDay;
 @property (assign, nonatomic) NSInteger gender; //0 for female, 1 for male
 @property (assign, nonatomic) BOOL gotLegalData;     //judge if information extracted from the init string is legal
 @property (strong, nonatomic) UIImage *familyNameImage;
 @property (strong, nonatomic) UIImage *givenNameImage;
 @property (strong, nonatomic) UIImage *idImage;
 
-- (PassportScanResult*)initWithScanResult:(NSString *)scanResult;
+- (instancetype)initWithScanResult:(NSString *)scanResult;
 
 - (void)cropImage:(UIImage*)image inRect:(CGRect)rect withPositions:(NSArray<LetterPosition*>*)pos;
 

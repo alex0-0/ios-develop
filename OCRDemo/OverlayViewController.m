@@ -9,7 +9,6 @@
 #import "OverlayViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import "LibScanPassport.h"
-#import "PassportScanResult.h"
 
 static NSMutableArray<LetterPosition*> *letterPosArray;
 
@@ -28,7 +27,7 @@ void saveLetterPos(int *pos){
         LetterPosition *tmpLetterPos = [[LetterPosition alloc] init];
         tmpLetterPos.x = pos[i * 4] - 30;
         tmpLetterPos.y = pos[i * 4 + 1];
-        tmpLetterPos.toX = pos[i * 4 + 2] - 30;
+        tmpLetterPos.toX = pos[i * 4 + 2] - 20;
         tmpLetterPos.toY = pos[i * 4 + 3];
         [letterPosArray addObject:tmpLetterPos];
     }
@@ -105,6 +104,10 @@ void saveBitmap(int* arr){
     CGImageRelease(cgImage);
 }
 
+
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define ColorHex(c) [UIColor colorWithRed:((c>>16)&0xFF)/255.0 green:((c>>8)&0xFF)/255.0 blue:((c)&0xFF)/255.0 alpha:1.0]
+
 @interface OverlayViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (strong, nonatomic) PassportScanResult *resultModel;
 @end
@@ -141,24 +144,59 @@ void saveBitmap(int* arr){
     // Dispose of any resources that can be recreated.
 }
 
+- (void)initObServer{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleError:) name:AVCaptureSessionRuntimeErrorNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruption:) name:AVCaptureSessionWasInterruptedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruptionEnded:) name:AVCaptureSessionInterruptionEndedNotification object:nil];
+}
+
 - (void)initCapture{
     AVCaptureDevice *captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     AVCaptureDeviceInput *captureInput = [AVCaptureDeviceInput deviceInputWithDevice:captureDevice error:nil];
     if (!captureInput) {
         return;
     }
+    AVCaptureDeviceFormat *bestFormat = nil;
+    AVFrameRateRange *bestFrameRateRange = nil;
+    for (AVCaptureDeviceFormat *format in [captureDevice formats]) {
+        for (AVFrameRateRange *range in format.videoSupportedFrameRateRanges) {
+            if (!bestFrameRateRange) {
+                bestFrameRateRange = range;
+                bestFormat = format;
+            }
+            if (range.minFrameRate < bestFrameRateRange.minFrameRate) {
+                bestFormat = format;
+                bestFrameRateRange = range;
+            }
+        }
+    }
     AVCaptureVideoDataOutput *captureOutput = [[AVCaptureVideoDataOutput alloc] init];
-    dispatch_queue_t cameraQueue = dispatch_queue_create("cameraQueue", NULL);
-    [captureOutput setSampleBufferDelegate:self queue:cameraQueue];
+    captureOutput.alwaysDiscardsLateVideoFrames = true;
+    dispatch_queue_t sessionQueue = dispatch_queue_create("cameraQueue", NULL);
+    _captureSession = [[AVCaptureSession alloc] init];
+    
+    [_captureSession beginConfiguration];
+    if (bestFormat) {
+        if ([captureDevice lockForConfiguration:nil] == YES) {
+            captureDevice.activeFormat = bestFormat;
+            captureDevice.activeVideoMaxFrameDuration = bestFrameRateRange.minFrameDuration;
+            captureDevice.activeVideoMinFrameDuration = bestFrameRateRange.minFrameDuration;
+            [captureDevice unlockForConfiguration];
+        }
+    }
+    [captureOutput setSampleBufferDelegate:self queue:sessionQueue];
     [captureOutput setAlwaysDiscardsLateVideoFrames:YES];
     NSString *key = (NSString *)kCVPixelBufferPixelFormatTypeKey;
     NSNumber *value = [NSNumber numberWithUnsignedInteger:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange];
     NSDictionary *videoSetting = [NSDictionary dictionaryWithObject:value forKey:key];
     [captureOutput setVideoSettings:videoSetting];
-    _captureSession = [[AVCaptureSession alloc] init];
     NSString *preset = 0;
     if (!preset) {
-        preset = AVCaptureSessionPresetHigh;
+        if ([captureDevice supportsAVCaptureSessionPreset:AVCaptureSessionPresetHigh]) {
+            preset = AVCaptureSessionPresetHigh;
+        }
+        else
+            preset = AVCaptureSessionPresetMedium;
     }
     _captureSession.sessionPreset = preset;
     if ([_captureSession canAddInput:captureInput]) {
@@ -175,6 +213,8 @@ void saveBitmap(int* arr){
     _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [_previewLayer setPosition:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))];
     [self.view.layer addSublayer:_previewLayer];
+    
+    [_captureSession commitConfiguration];
 }
 
 - (void)initTipView{
@@ -184,16 +224,26 @@ void saveBitmap(int* arr){
     UIView *containerView = [[UIView alloc] init];
     
     _tipView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, width, height)];
-    _tipView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+        _tipView.backgroundColor = [UIColor clearColor];
+        UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+        UIVisualEffectView *blurEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+        blurEffectView.frame = _tipView.bounds;
+        blurEffectView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [_tipView addSubview:blurEffectView];
+    }
+    else {
+        _tipView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
+    }
     UILabel *tips = [[UILabel alloc] init];
     tips.numberOfLines = 0;
     tips.font = [UIFont systemFontOfSize:15.0];
     tips.textColor = [UIColor whiteColor];
-    tips.text = @"      请确保：\n\
-    \u2022 证件为有效证件；\n\
-    \u2022 扫描角度正对证件，无倾斜、无抖动；\n\
-    \u2022 证件无反光且清晰。若灯光过暗，请打开闪光灯\n\
-      或至明亮的地方扫描。\n\
+    tips.text = @"      请确保：\n\n\
+    \u2022 证件为有效证件（暂仅支持中国大陆护照）；\n\n\
+    \u2022 扫描角度正对证件，无倾斜、无抖动；\n\n\
+    \u2022 证件无反光且清晰。若灯光过暗，请打开闪光灯\n\n\
+    或至明亮的地方扫描。\n\n\
     \u2022 网络顺畅";
     CGSize labelSize = [tips.text sizeWithAttributes:@{NSFontAttributeName:tips.font}];
     tips.frame = CGRectMake(0, 0, labelSize.width, labelSize.height);
@@ -210,10 +260,15 @@ void saveBitmap(int* arr){
     okButton.layer.cornerRadius = 4.0f;
     [containerView addSubview:okButton];
     
-    containerView.frame = CGRectMake((width - labelSize.width) / 2, (height - labelSize.height) / 2, labelSize.width, labelSize.height + okButton.frame.size.height + 60);
     [containerView setTransform:CGAffineTransformMakeRotation(M_PI/2)];
+    containerView.frame = CGRectMake((width - labelSize.height - 60 - okButton.frame.size.height) / 2, (height - labelSize.width) / 2, labelSize.height + okButton.frame.size.height + 60, MAX(labelSize.width, okButton.frame.size.width));
     [_tipView addSubview:containerView];
-    [self.view addSubview:_tipView];
+    
+    static BOOL firstTime = TRUE;   //only automaticall show if the app enters for the first time
+    if (firstTime) {
+        [self.view addSubview:_tipView];
+        firstTime = NO;
+    }
 }
 
 - (void)initOverlayView{
@@ -315,7 +370,7 @@ void saveBitmap(int* arr){
                 size_t size = CVPixelBufferGetDataSize(imageBuffer);
                 int8_t *byteMap = malloc(size * sizeof(int8_t) - 16);
                 memcpy(byteMap, baseAddress+16, size);
-                NSData *data = [NSData dataWithBytes:baseAddress length:size-16];
+//                NSData *data = [NSData dataWithBytes:baseAddress length:size-16];
                 CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
                 
                 UIImage *tttImage = [UIImage imageWithCGImage:[[CIContext contextWithOptions:nil] createCGImage:ciimage fromRect:ciimage.extent]];
@@ -385,7 +440,7 @@ void saveBitmap(int* arr){
     char *result = LibScanPassport_test(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
 
     NSString *scanResult = [NSString stringWithUTF8String:result];
-    if (![scanResult  isEqual: @"8"]) {
+    if (scanResult && scanResult.length >= 88) {
         PassportScanResult *resultModel = [[PassportScanResult alloc] initWithScanResult:scanResult];
         if (resultModel.gotLegalData) {
             if ([_captureSession isRunning]) {

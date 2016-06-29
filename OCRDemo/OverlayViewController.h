@@ -8,11 +8,22 @@
 
 #import <UIKit/UIKit.h>
 #import "CameraOverlay.h"
+#import "PassportScanResult.h"
 
 void saveSmallBitmap(int* arr);
 void saveBitmap(int* arr);
 void saveLetterPos(int *pos);
 
+@protocol PassportScannerDelegate <NSObject>
+
+@optional
+
+- (void)CTPassportScannerDidFinish:(PassportScanResult*)scanResult;
+
+@end
+
 @interface OverlayViewController : UIViewController
+
+@property (strong, nonatomic) id<PassportScannerDelegate> delegate;
 
 @end

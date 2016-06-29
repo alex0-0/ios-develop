@@ -45,7 +45,7 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     int _givenNameLength;
 }
 
-- (PassportScanResult*)initWithScanResult:(NSString *)scanResult{
+- (instancetype)initWithScanResult:(NSString *)scanResult{
     if (self = [super init]) {
         if (scanResult && scanResult.length == 88) {
             [self processPassportScanResult:scanResult];
@@ -97,7 +97,7 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     NSString *birthdayString = [secondLine substringWithRange:NSMakeRange(13, 6)];
     int year = [[birthdayString substringToIndex:2] intValue];
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-//    [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
+    //    [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
     [dateFormatter setDateFormat:@"yyyyMMdd"];
     birthdayString = (year > 30)?[@"19" stringByAppendingString:birthdayString]:[@"20" stringByAppendingString:birthdayString];
     _birthday = [dateFormatter dateFromString:birthdayString];
@@ -114,7 +114,7 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     CGFloat widthUnit = croppedRect.size.width / 700;
     CGFloat heightUnit = croppedRect.size.height / 131;
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-    UIImage *croppedImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+    UIImage *croppedImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
     
     //TODO: the height should be the max among all the family name's letter
@@ -136,20 +136,26 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     CGImageRelease(imageRef);
     
     //TODO: the height should be the max among all the id string's letter
-    CGRect idRect = CGRectMake((pos[44].x - 4) * widthUnit, pos[44].y * heightUnit,
-                                      (pos[52].toX - pos[44].x + 4) * widthUnit,
-                                      (MAX(pos[44].toY, pos[52].toY) - MIN(pos[44].y, pos[52].y)) * heightUnit
-                                      );
+    NSInteger idImageY = INT_MAX;
+    for (int i = 44; i < 52; i++) {
+        if (pos[i].y < idImageY) {
+            idImageY = pos[i].y;
+        }
+    }
+    CGRect idRect = CGRectMake((pos[44].x - 4) * widthUnit, idImageY * heightUnit,
+                               (pos[52].toX - pos[44].x + 4) * widthUnit,
+                               (MAX(pos[44].toY, pos[52].toY) - MIN(pos[44].y, pos[52].y)) * heightUnit
+                               );
     imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, idRect);
     _idImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
-    int i=0;
-    for (LetterPosition *p in pos) {i++;
-        CGRect givenNameRect = CGRectMake(p.x * widthUnit, p.y * heightUnit, (p.toX - p.x) * widthUnit, (p.toY - p.y) * heightUnit);
-        imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, givenNameRect);
-        UIImage *tmpImage = [UIImage imageWithCGImage:imageRef];
-        CGImageRelease(imageRef);
-    }
+    //    int i=0;
+    //    for (LetterPosition *p in pos) {i++;
+    //        CGRect givenNameRect = CGRectMake(p.x * widthUnit, p.y * heightUnit, (p.toX - p.x) * widthUnit, (p.toY - p.y) * heightUnit);
+    //        imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, givenNameRect);
+    //        UIImage *tmpImage = [UIImage imageWithCGImage:imageRef];
+    //        CGImageRelease(imageRef);
+    //    }
 }
 
 @end
@@ -157,51 +163,51 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
 BOOL isPinyin(NSString *string){
     
     NSArray *pinyin = @[@"A", @"AI", @"AN", @"ANG", @"AO", @"BA", @"BAI", @"BAN",
-        @"BANG", @"BAO", @"BEI", @"BEN", @"BENG", @"BI", @"BIAN", @"BIAO", @"BIE",
-        @"BIN", @"BING", @"BO", @"BU", @"CA", @"CAI", @"CAN", @"CANG", @"CAO", @"CE",
-        @"CEN", @"CENG", @"CHA", @"CHAI", @"CHAN", @"CHANG", @"CHAO", @"CHE",
-        @"CHEN", @"CHENG", @"CHI", @"CHONG", @"CHOU", @"CHU", @"CHUA", @"CHUAI",
-        @"CHUAN", @"CHUANG", @"CHUI", @"CHUN", @"CHUO", @"CI", @"CONG", @"COU",
-        @"CU", @"CUAN", @"CUI", @"CUN", @"CUO", @"DA", @"DAI", @"DAN", @"DANG",
-        @"DAO", @"DE", @"DEN", @"DEI", @"DENG", @"DI", @"DIA", @"DIAN", @"DIAO",
-        @"DIE", @"DING", @"DIU", @"DONG", @"DOU", @"DU", @"DUAN", @"DUI", @"DUN",
-        @"DUO", @"E", @"EI", @"EN", @"ENG", @"ER", @"FA", @"FAN", @"FANG", @"FEI",
-        @"FEN", @"FENG", @"FO", @"FOU", @"FU", @"GA", @"GAI", @"GAN", @"GANG", @"GAO",
-        @"GE", @"GEI", @"GEN", @"GENG", @"GONG", @"GOU", @"GU", @"GUA", @"GUAI",
-        @"GUAN", @"GUANG", @"GUI", @"GUN", @"GUO", @"HA", @"HAI", @"HAN", @"HANG",
-        @"HAO", @"HE", @"HEI", @"HEN", @"HENG", @"HONG", @"HOU", @"HU", @"HUA",
-        @"HUAI", @"HUAN", @"HUANG", @"HUI", @"HUN", @"HUO", @"JI", @"JIA", @"JIAN",
-        @"JIANG", @"JIAO", @"JIE", @"JIN", @"JING", @"JIONG", @"JIU", @"JU", @"JUAN",
-        @"JUE", @"JUN", @"KA", @"KAI", @"KAN", @"KANG", @"KAO", @"KE", @"KEN",
-        @"KENG", @"KONG", @"KOU", @"KU", @"KUA", @"KUAI", @"KUAN", @"KUANG", @"KUI",
-        @"KUN", @"KUO", @"LA", @"LAI", @"LAN", @"LANG", @"LAO", @"LE", @"LEI",
-        @"LENG", @"LI", @"LIAN", @"LIANG", @"LIAO", @"LIE", @"LIN", @"LING",
-        @"LIU", @"LONG", @"LOU", @"LU", @"LV", @"LUAN", @"LUE", @"LVE", @"LUN",
-        @"LUO", @"MA", @"MAI", @"MAN", @"MANG", @"MAO", @"ME", @"MEI", @"MEN",
-        @"MENG", @"MI", @"MIAN", @"MIAO", @"MIE", @"MIN", @"MING", @"MIU", @"MO",
-        @"MOU", @"MU", @"NA", @"NAI", @"NAN", @"NANG", @"NAO", @"NE", @"NEI", @"NEN",
-        @"NENG", @"NI", @"NIAN", @"NIANG", @"NIAO", @"NIE", @"NIN", @"NING", @"NIU",
-        @"NONG", @"NOU", @"NU", @"NV", @"NUAN", @"NVE", @"NUE", @"NUO", @"NUN", @"O",
-        @"OU", @"PA", @"PAI", @"PAN", @"PANG", @"PAO", @"PEI", @"PEN", @"PENG", @"PI",
-        @"PIAN", @"PIAO", @"PIE", @"PIN", @"PING", @"PO", @"POU", @"PU", @"QI",
-        @"QIA", @"QIAN", @"QIANG", @"QIAO", @"QIE", @"QIN", @"QING", @"QIONG",
-        @"QIU", @"QU", @"QUAN", @"QUE", @"QUN", @"RAN", @"RANG", @"RAO", @"RE",
-        @"REN", @"RENG", @"RI", @"RONG", @"ROU", @"RU", @"RUAN", @"RUI", @"RUN",
-        @"RUO", @"SA", @"SAI", @"SAN", @"SANG", @"SAO", @"SE", @"SEN", @"SENG",
-        @"SHA", @"SHAI", @"SHAN", @"SHANG", @"SHAO", @"SHE", @"SHEI", @"SHEN",
-        @"SHENG", @"SHI", @"SHOU", @"SHU", @"SHUA", @"SHUAI", @"SHUAN", @"SHUANG",
-        @"SHUI", @"SHUN", @"SHUO", @"SI", @"SONG", @"SOU", @"SU", @"SUAN", @"SUI",
-        @"SUN", @"SUO", @"TA", @"TAI", @"TAN", @"TANG", @"TAO", @"TE", @"TENG", @"TI",
-        @"TIAN", @"TIAO", @"TIE", @"TING", @"TONG", @"TOU", @"TU", @"TUAN", @"TUI",
-        @"TUN", @"TUO", @"WA", @"WAI", @"WAN", @"WANG", @"WEI", @"WEN", @"WENG",
-        @"WO", @"WU", @"XI", @"XIA", @"XIAN", @"XIANG", @"XIAO", @"XIE", @"XIN",
-        @"XING", @"XIONG", @"XIU", @"XU", @"XUAN", @"XUE", @"XUN", @"YA", @"YAN",
-        @"YANG", @"YAO", @"YE", @"YI", @"YIN", @"YING", @"YO", @"YONG", @"YOU", @"YU",
-        @"YUAN", @"YUE", @"YUN", @"ZA", @"ZAI", @"ZAN", @"ZANG", @"ZAO", @"ZE",
-        @"ZEI", @"ZEN", @"ZENG", @"ZHA", @"ZHAI", @"ZHAN", @"ZHANG", @"ZHAO", @"ZHE",
-        @"ZHEI", @"ZHEN", @"ZHENG", @"ZHI", @"ZHONG", @"ZHOU", @"ZHU", @"ZHUA",
-        @"ZHUAI", @"ZHUAN", @"ZHUANG", @"ZHUI", @"ZHUN", @"ZHUO", @"ZI", @"ZONG",
-        @"ZOU", @"ZU", @"ZUAN", @"ZUI", @"ZUN", @"ZUO"];
+                        @"BANG", @"BAO", @"BEI", @"BEN", @"BENG", @"BI", @"BIAN", @"BIAO", @"BIE",
+                        @"BIN", @"BING", @"BO", @"BU", @"CA", @"CAI", @"CAN", @"CANG", @"CAO", @"CE",
+                        @"CEN", @"CENG", @"CHA", @"CHAI", @"CHAN", @"CHANG", @"CHAO", @"CHE",
+                        @"CHEN", @"CHENG", @"CHI", @"CHONG", @"CHOU", @"CHU", @"CHUA", @"CHUAI",
+                        @"CHUAN", @"CHUANG", @"CHUI", @"CHUN", @"CHUO", @"CI", @"CONG", @"COU",
+                        @"CU", @"CUAN", @"CUI", @"CUN", @"CUO", @"DA", @"DAI", @"DAN", @"DANG",
+                        @"DAO", @"DE", @"DEN", @"DEI", @"DENG", @"DI", @"DIA", @"DIAN", @"DIAO",
+                        @"DIE", @"DING", @"DIU", @"DONG", @"DOU", @"DU", @"DUAN", @"DUI", @"DUN",
+                        @"DUO", @"E", @"EI", @"EN", @"ENG", @"ER", @"FA", @"FAN", @"FANG", @"FEI",
+                        @"FEN", @"FENG", @"FO", @"FOU", @"FU", @"GA", @"GAI", @"GAN", @"GANG", @"GAO",
+                        @"GE", @"GEI", @"GEN", @"GENG", @"GONG", @"GOU", @"GU", @"GUA", @"GUAI",
+                        @"GUAN", @"GUANG", @"GUI", @"GUN", @"GUO", @"HA", @"HAI", @"HAN", @"HANG",
+                        @"HAO", @"HE", @"HEI", @"HEN", @"HENG", @"HONG", @"HOU", @"HU", @"HUA",
+                        @"HUAI", @"HUAN", @"HUANG", @"HUI", @"HUN", @"HUO", @"JI", @"JIA", @"JIAN",
+                        @"JIANG", @"JIAO", @"JIE", @"JIN", @"JING", @"JIONG", @"JIU", @"JU", @"JUAN",
+                        @"JUE", @"JUN", @"KA", @"KAI", @"KAN", @"KANG", @"KAO", @"KE", @"KEN",
+                        @"KENG", @"KONG", @"KOU", @"KU", @"KUA", @"KUAI", @"KUAN", @"KUANG", @"KUI",
+                        @"KUN", @"KUO", @"LA", @"LAI", @"LAN", @"LANG", @"LAO", @"LE", @"LEI",
+                        @"LENG", @"LI", @"LIAN", @"LIANG", @"LIAO", @"LIE", @"LIN", @"LING",
+                        @"LIU", @"LONG", @"LOU", @"LU", @"LV", @"LUAN", @"LUE", @"LVE", @"LUN",
+                        @"LUO", @"MA", @"MAI", @"MAN", @"MANG", @"MAO", @"ME", @"MEI", @"MEN",
+                        @"MENG", @"MI", @"MIAN", @"MIAO", @"MIE", @"MIN", @"MING", @"MIU", @"MO",
+                        @"MOU", @"MU", @"NA", @"NAI", @"NAN", @"NANG", @"NAO", @"NE", @"NEI", @"NEN",
+                        @"NENG", @"NI", @"NIAN", @"NIANG", @"NIAO", @"NIE", @"NIN", @"NING", @"NIU",
+                        @"NONG", @"NOU", @"NU", @"NV", @"NUAN", @"NVE", @"NUE", @"NUO", @"NUN", @"O",
+                        @"OU", @"PA", @"PAI", @"PAN", @"PANG", @"PAO", @"PEI", @"PEN", @"PENG", @"PI",
+                        @"PIAN", @"PIAO", @"PIE", @"PIN", @"PING", @"PO", @"POU", @"PU", @"QI",
+                        @"QIA", @"QIAN", @"QIANG", @"QIAO", @"QIE", @"QIN", @"QING", @"QIONG",
+                        @"QIU", @"QU", @"QUAN", @"QUE", @"QUN", @"RAN", @"RANG", @"RAO", @"RE",
+                        @"REN", @"RENG", @"RI", @"RONG", @"ROU", @"RU", @"RUAN", @"RUI", @"RUN",
+                        @"RUO", @"SA", @"SAI", @"SAN", @"SANG", @"SAO", @"SE", @"SEN", @"SENG",
+                        @"SHA", @"SHAI", @"SHAN", @"SHANG", @"SHAO", @"SHE", @"SHEI", @"SHEN",
+                        @"SHENG", @"SHI", @"SHOU", @"SHU", @"SHUA", @"SHUAI", @"SHUAN", @"SHUANG",
+                        @"SHUI", @"SHUN", @"SHUO", @"SI", @"SONG", @"SOU", @"SU", @"SUAN", @"SUI",
+                        @"SUN", @"SUO", @"TA", @"TAI", @"TAN", @"TANG", @"TAO", @"TE", @"TENG", @"TI",
+                        @"TIAN", @"TIAO", @"TIE", @"TING", @"TONG", @"TOU", @"TU", @"TUAN", @"TUI",
+                        @"TUN", @"TUO", @"WA", @"WAI", @"WAN", @"WANG", @"WEI", @"WEN", @"WENG",
+                        @"WO", @"WU", @"XI", @"XIA", @"XIAN", @"XIANG", @"XIAO", @"XIE", @"XIN",
+                        @"XING", @"XIONG", @"XIU", @"XU", @"XUAN", @"XUE", @"XUN", @"YA", @"YAN",
+                        @"YANG", @"YAO", @"YE", @"YI", @"YIN", @"YING", @"YO", @"YONG", @"YOU", @"YU",
+                        @"YUAN", @"YUE", @"YUN", @"ZA", @"ZAI", @"ZAN", @"ZANG", @"ZAO", @"ZE",
+                        @"ZEI", @"ZEN", @"ZENG", @"ZHA", @"ZHAI", @"ZHAN", @"ZHANG", @"ZHAO", @"ZHE",
+                        @"ZHEI", @"ZHEN", @"ZHENG", @"ZHI", @"ZHONG", @"ZHOU", @"ZHU", @"ZHUA",
+                        @"ZHUAI", @"ZHUAN", @"ZHUANG", @"ZHUI", @"ZHUN", @"ZHUO", @"ZI", @"ZONG",
+                        @"ZOU", @"ZU", @"ZUAN", @"ZUI", @"ZUN", @"ZUO"];
     
     for (NSString *str in pinyin) {
         if (str.length > string.length) {
