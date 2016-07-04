@@ -814,7 +814,7 @@ char* LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int
                 }
                 for(int i = 2200;i<2288;i++) bbb[i] = iaa[i-2200];
                 memcpy(jjarray, bbb, 2288 * sizeof(int32_t));
-                saveSmallBitmap(jjarray);
+//                saveSmallBitmap(jjarray);
                 free(jjarray);
             }
             printf("%s",result);

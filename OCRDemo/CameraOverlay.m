@@ -7,7 +7,6 @@
 //
 
 #import "CameraOverlay.h"
-#import "AppDelegate.h"
 
 #define ScreenHeight [[UIScreen mainScreen] bounds].size.height
 #define ScreenWidth [[UIScreen mainScreen] bounds].size.width
@@ -46,9 +45,6 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
 
 - (instancetype)init{
     if (self = [super init]) {
-//        [((AppDelegate *)[UIApplication sharedApplication].delegate) setAllowRotation:TRUE];
-//        NSNumber *value = [NSNumber numberWithInt:UIDeviceOrientationLandscapeLeft];
-//        [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
         _height = (ScreenWidth > ScreenHeight)?ScreenWidth : ScreenHeight;
         _width = (ScreenWidth < ScreenHeight)?ScreenWidth : ScreenHeight;
         [self initView];
@@ -57,8 +53,8 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
 }
 
 - (void)initView{
-    float scaleRatio = 1.0;//ScreenWidth / kDefaultWidth;
-//    self.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.6];
+    float scaleRatio = ScreenWidth / kDefaultWidth;
+    //    self.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.6];
     self.opaque = NO;
     self.frame = CGRectMake(0, 0, ScreenWidth, ScreenHeight);
     
@@ -75,9 +71,9 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     barCodeView.frame = CGRectMake(0, 0, 56 * scaleRatio, passportMask.frame.size.height);
     [passportMask addSubview:barCodeView];
     
-    //CGRect for cropping the passport from camera preview. Due to the horizontal display, the frame has to rotate PI
-    _idStringRect = CGRectMake(0, 193 * scaleRatio, 354 * scaleRatio, 112 * scaleRatio);
-    _passportRect = CGRectMake(passportRect.origin.y * scaleRatio, passportRect.origin.x * scaleRatio, passportRect.size.height * scaleRatio, passportRect.size.width * scaleRatio);
+    //    //CGRect for cropping the passport from camera preview. Due to the horizontal display, the frame has to rotate PI
+    //    _idStringRect = CGRectMake(0, 193 * scaleRatio, 354 * scaleRatio, 112 * scaleRatio);
+    //    _passportRect = CGRectMake(passportRect.origin.y * scaleRatio, passportRect.origin.x * scaleRatio, passportRect.size.height * scaleRatio, passportRect.size.width * scaleRatio);
     
     addMask(container, passportRect, [[UIColor blackColor] colorWithAlphaComponent:0.85]);
     UILabel *tipLabel = [[UILabel alloc] init];
@@ -86,28 +82,42 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     tipLabel.textColor = [UIColor whiteColor];
     tipLabel.text = @"请将护照个人资料页底部条码置于下方框内";
     CGSize tipLabelSize = [tipLabel.text sizeWithAttributes:@{NSFontAttributeName:tipLabel.font}];
-    tipLabel.frame = CGRectMake((ScreenWidth - tipLabelSize.width) / 2, ScreenHeight / 2, tipLabelSize.width, tipLabelSize.height);
     tipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
+    tipLabel.frame = CGRectMake((ScreenWidth - tipLabelSize.height) / 2 - 30 * scaleRatio, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
     [container addSubview:tipLabel];
+    
+    UILabel *ligthtTipLabel = [[UILabel alloc] init];
+    ligthtTipLabel.numberOfLines = 1;
+    ligthtTipLabel.font = [UIFont systemFontOfSize:13.0];
+    ligthtTipLabel.textColor = [UIColor whiteColor];
+    ligthtTipLabel.text = @"注意证件表面不要有反光";
+    tipLabelSize = [ligthtTipLabel.text sizeWithAttributes:@{NSFontAttributeName:ligthtTipLabel.font}];
+    ligthtTipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
+    ligthtTipLabel.frame = CGRectMake((ScreenWidth - tipLabelSize.height) / 2 - 30 * scaleRatio - tipLabel.frame.size.width, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
+    [container addSubview:ligthtTipLabel];
+    
     [self addSubview:container];
     
-    UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(ScreenWidth - 80, 50, 50, 50)];
-    [backButton setTitle:@"Back" forState:UIControlStateNormal];
-    [backButton setBackgroundColor:[UIColor blackColor]];
+    UIButton *backButton = [[UIButton alloc] init];
+    [backButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+    [backButton setBackgroundColor:[UIColor clearColor]];
     [backButton addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
     backButton.transform = CGAffineTransformMakeRotation(M_PI/2);
+    backButton.frame = CGRectMake(ScreenWidth - 33 - 5, 10, 33, 33);
     [self addSubview:backButton];
-    UIButton *flashButton = [[UIButton alloc] initWithFrame:CGRectMake(ScreenWidth - 80, ScreenHeight - 100, 50, 50)];
-    [flashButton.titleLabel setTextAlignment:NSTextAlignmentCenter];
-    [flashButton setTitle:@"flash" forState:UIControlStateNormal];
-    [flashButton setBackgroundColor:[UIColor redColor]];
-    [flashButton addTarget:self action:@selector(flashLight) forControlEvents:UIControlEventTouchUpInside];
+    UIButton *flashButton = [[UIButton alloc] init];
+    [flashButton setBackgroundColor:[UIColor clearColor]];
+    [flashButton setImage:[UIImage imageNamed:@"light_off"] forState:UIControlStateNormal];
+    [flashButton addTarget:self action:@selector(flashLight:) forControlEvents:UIControlEventTouchUpInside];
     flashButton.transform = CGAffineTransformMakeRotation(M_PI/2);
+    flashButton.frame = CGRectMake(ScreenWidth - 33 - 5, ScreenHeight - 33 - 10, 33, 33);
     [self addSubview:flashButton];
-    UIButton *tipButton = [[UIButton alloc] initWithFrame:CGRectMake(ScreenWidth - 50, ScreenHeight - 50, 50, 50)];
+    UIButton *tipButton = [[UIButton alloc] init];
     [tipButton setTitle:@"?" forState:UIControlStateNormal];
     [tipButton addTarget:self action:@selector(tip) forControlEvents:UIControlEventTouchUpInside];
+    [tipButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
     tipButton.transform = CGAffineTransformMakeRotation(M_PI/2);
+    tipButton.frame = CGRectMake(flashButton.frame.origin.x, flashButton.frame.origin.y - 10 - 33, 33, 33);
     [self addSubview:tipButton];
 }
 
@@ -117,7 +127,7 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     }
 }
 
-- (void)flashLight{
+- (void)flashLight:(id)sender{
     if (_tapFlashLight) {
         _tapFlashLight();
     }
