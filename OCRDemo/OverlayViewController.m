@@ -333,59 +333,64 @@ void saveBitmap(int* arr){
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection{
     @autoreleasepool {
-    CIImage *ciimage = [CIImage imageWithCVPixelBuffer:CMSampleBufferGetImageBuffer(sampleBuffer)];
-    CIImage *croppedRecImage = nil;
-    CIDetector *faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:[CIContext contextWithOptions:nil] options:nil];
-    CIDetector *rectangleDetector = [CIDetector detectorOfType:CIDetectorTypeRectangle context:[CIContext contextWithOptions:nil] options:nil];
-    NSArray *rectangleFeatures = [rectangleDetector featuresInImage:ciimage options:nil];
-    CGRect rectangleRect = CGRectZero;
-    for (CIFeature *feature in rectangleFeatures) {
-        if ( ![feature isKindOfClass:[CIRectangleFeature class]]) {
-            continue;
-        }
-
-        CIVector *cropRect = [CIVector vectorWithCGRect:feature.bounds];
-        CIFilter *cropFilter = [CIFilter filterWithName:@"CICrop"];
-        [cropFilter setValue:ciimage forKey:@"inputImage"];
-        [cropFilter setValue:cropRect forKey:@"inputRectangle"];
-        croppedRecImage = [cropFilter valueForKey:@"outputImage"];
-        rectangleRect = feature.bounds;
-    }
-    if (croppedRecImage) {
-        NSArray *faceFeatures = [faceDetector featuresInImage:croppedRecImage options:nil];
-        for (CIFeature *feature in faceFeatures) {
-            if ( [feature isKindOfClass:[CIFaceFeature class]]) {
+        CIImage *ciimage = [CIImage imageWithCVPixelBuffer:CMSampleBufferGetImageBuffer(sampleBuffer)];
+        CIImage *croppedRecImage = nil;
+        CGRect rectangleRect = CGRectZero;
+        
+        if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+            
+            CIDetector *rectangleDetector = [CIDetector detectorOfType:CIDetectorTypeRectangle context:[CIContext contextWithOptions:nil] options:nil];
+            NSArray *rectangleFeatures = [rectangleDetector featuresInImage:ciimage options:nil];
+            for (CIFeature *feature in rectangleFeatures) {
+                if ( ![feature isKindOfClass:[CIRectangleFeature class]]) {
+                    continue;
+                }
+                
                 CIVector *cropRect = [CIVector vectorWithCGRect:feature.bounds];
                 CIFilter *cropFilter = [CIFilter filterWithName:@"CICrop"];
                 [cropFilter setValue:ciimage forKey:@"inputImage"];
                 [cropFilter setValue:cropRect forKey:@"inputRectangle"];
-                CIImage *faceImage = [cropFilter valueForKey:@"outputImage"];
-                CGImageRef faceCGImageRef = [[CIContext contextWithOptions:nil] createCGImage:croppedRecImage fromRect:croppedRecImage.extent];
-                UIImage *tmpImage = [UIImage imageWithCGImage:faceCGImageRef];
-                CGImageRelease(faceCGImageRef);
-//                [self ocr:tmpImage];
-                
-                CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-                CVPixelBufferLockBaseAddress(imageBuffer, 0);
-                void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
-//                size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
-                size_t width = CVPixelBufferGetWidth(imageBuffer);
-                size_t height = CVPixelBufferGetHeight(imageBuffer);
-                size_t size = CVPixelBufferGetDataSize(imageBuffer);
-                int8_t *byteMap = malloc(size * sizeof(int8_t) - 16);
-                memcpy(byteMap, baseAddress+16, size);
-//                NSData *data = [NSData dataWithBytes:baseAddress length:size-16];
-                CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-                
-                CGImageRef tmpCGImageRef = [[CIContext contextWithOptions:nil] createCGImage:croppedRecImage fromRect:croppedRecImage.extent];
-                UIImage *tttImage = [UIImage imageWithCGImage:tmpCGImageRef];
-                CGImageRelease(tmpCGImageRef);
-
-                [self tmpOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)tttImage];
+                croppedRecImage = [cropFilter valueForKey:@"outputImage"];
+                rectangleRect = feature.bounds;
             }
         }
-    }
-        ciimage = nil;
+        else {
+            croppedRecImage = ciimage;
+            CGSize imageSize = ciimage.extent.size;
+            float scaleRatio = imageSize.height / 320;
+            CGRect passportRect = CGRectMake((imageSize.width - 354 * scaleRatio) / 2, (imageSize.height - 249 * scaleRatio) / 2, 354 * scaleRatio, 249 * scaleRatio);
+            rectangleRect = passportRect;
+        }
+        if (croppedRecImage) {
+            BOOL faceDetected = FALSE;
+            CIDetector *faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:[CIContext contextWithOptions:nil] options:nil];
+            NSArray *faceFeatures = [faceDetector featuresInImage:croppedRecImage options:nil];
+            for (CIFeature *feature in faceFeatures) {
+                if ( [feature isKindOfClass:[CIFaceFeature class]]) {
+                    faceDetected = YES;
+                    break;
+                }
+            }
+            if (!faceDetected) {
+                return;
+            }
+            CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+            CVPixelBufferLockBaseAddress(imageBuffer, 0);
+            void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
+            //                size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+            size_t width = CVPixelBufferGetWidth(imageBuffer);
+            size_t height = CVPixelBufferGetHeight(imageBuffer);
+            size_t size = CVPixelBufferGetDataSize(imageBuffer);
+            int8_t *byteMap = malloc(size * sizeof(int8_t) - 16);
+            memcpy(byteMap, baseAddress + 16, size);
+            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+            CGImageRef tmpImageRef = [[CIContext contextWithOptions:nil] createCGImage:ciimage fromRect:ciimage.extent];
+            UIImage *wholeImage = [UIImage imageWithCGImage:tmpImageRef];
+            CGImageRelease(tmpImageRef);
+            
+            [self tmpOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)wholeImage];
+        }
+        
     }
 }
 
