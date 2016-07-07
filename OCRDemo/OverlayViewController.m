@@ -10,6 +10,14 @@
 #import <AVFoundation/AVFoundation.h>
 #import "LibScanPassport.h"
 
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define CTColorHex(c) [UIColor colorWithRed:((c>>16)&0xFF)/255.0 green:((c>>8)&0xFF)/255.0 blue:((c)&0xFF)/255.0 alpha:1.0]
+#define SCREEN_WIDTH ([[UIScreen mainScreen] bounds].size.width)
+#define SCREEN_HEIGHT ([[UIScreen mainScreen] bounds].size.height)
+#define SCREEN_MAX_LENGTH (MAX(SCREEN_WIDTH, SCREEN_HEIGHT))
+#define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+#define IS_IPHONE_4_OR_LESS (IS_IPHONE && SCREEN_MAX_LENGTH < 568.0)
+
 static NSMutableArray<LetterPosition*> *letterPosArray;
 
 //get position of 88 letters
@@ -25,12 +33,22 @@ void saveLetterPos(int *pos){
     }
     for (int i = 0; i < 88; i++) {
         LetterPosition *tmpLetterPos = [[LetterPosition alloc] init];
-        tmpLetterPos.x = pos[i * 4] - 30;
+        if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+            //in iphone4 with ios7, the picture is not cropped correctly
+            tmpLetterPos.x = pos[i * 4] - 50;
+        }
+        else
+            tmpLetterPos.x = pos[i * 4] - 30;
         tmpLetterPos.y = pos[i * 4 + 1];
-        tmpLetterPos.toX = pos[i * 4 + 2] - 20;
+        if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+            tmpLetterPos.toX = pos[i * 4 + 2] - 40;
+        }
+        else
+            tmpLetterPos.toX = pos[i * 4 + 2] - 20;
         tmpLetterPos.toY = pos[i * 4 + 3];
         [letterPosArray addObject:tmpLetterPos];
     }
+    //release memory
     free(pos);
     [arrayLock unlock];
 }
@@ -105,10 +123,6 @@ void saveBitmap(int* arr){
     free(bitMap);
     CGImageRelease(cgImage);
 }
-
-
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define ColorHex(c) [UIColor colorWithRed:((c>>16)&0xFF)/255.0 green:((c>>8)&0xFF)/255.0 blue:((c)&0xFF)/255.0 alpha:1.0]
 
 @interface OverlayViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (strong, nonatomic) PassportScanResult *resultModel;
