@@ -13,7 +13,7 @@
 #import "OCRManager.h"
 //#import "CameraOverlay.h"
 #import "AppDelegate.h"
-#import "OverlayViewController.h"
+#import "ScannerController.h"
 
 #define kScreenWidth [[UIScreen mainScreen] bounds].size.width
 #define kScreenHeight [[UIScreen mainScreen] bounds].size.height
@@ -41,7 +41,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 @implementation ViewController {
     G8Tesseract *_tesseract;
     NSString *_recognizedText;
-    OverlayViewController *_overlayController;
+    ScannerController *_scannerController;
 }
 
 - (void)viewDidLoad {
@@ -63,7 +63,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 //    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
 //        [self presentViewController:self.imagePicker animated:YES completion:nil];
 //    }
-    [self presentViewController:_overlayController animated:YES completion:nil];
+    [self presentViewController:_scannerController animated:YES completion:nil];
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -142,8 +142,8 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
         _imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
         _imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
         
-        _overlayController = [[OverlayViewController alloc] init];
-        _imagePicker.cameraOverlayView = _overlayController.view;
+        _scannerController = [[ScannerController alloc] init];
+        _imagePicker.cameraOverlayView = _scannerController.view;
 
         //make iamge picker full screen
         CGSize screenSize = [UIScreen mainScreen].bounds.size;

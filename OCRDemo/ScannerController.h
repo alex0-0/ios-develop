@@ -22,7 +22,7 @@ void saveLetterPos(int *pos);
 
 @end
 
-@interface OverlayViewController : UIViewController
+@interface ScannerController : UIViewController
 
 @property (strong, nonatomic) id<PassportScannerDelegate> delegate;
 

@@ -6,7 +6,7 @@
 //  Copyright © 2016 ltp. All rights reserved.
 //
 
-#import "OverlayViewController.h"
+#import "ScannerController.h"
 #import <AVFoundation/AVFoundation.h>
 #import "LibScanPassport.h"
 
@@ -124,11 +124,11 @@ void saveBitmap(int* arr){
     CGImageRelease(cgImage);
 }
 
-@interface OverlayViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface ScannerController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (strong, nonatomic) PassportScanResult *resultModel;
 @end
 
-@implementation OverlayViewController{
+@implementation ScannerController{
     UIView *_tipView;
     CameraOverlay *_overlay;
     AVCaptureSession *_captureSession;
@@ -256,10 +256,10 @@ void saveBitmap(int* arr){
     tips.font = [UIFont systemFontOfSize:15.0];
     tips.textColor = [UIColor whiteColor];
     tips.text = @"      请确保：\n\n\
-    \u2022 证件为有效证件（暂仅支持中国大陆护照）；\n\n\
-    \u2022 扫描角度正对证件，无倾斜、无抖动；\n\n\
+    \u2022 证件为有效证件（暂仅支持中国大陆护照）\n\n\
+    \u2022 扫描角度正对证件，无倾斜、无抖动\n\n\
     \u2022 证件无反光且清晰。若灯光过暗，请打开闪光灯\n\n\
-    或至明亮的地方扫描。\n\n\
+    或至明亮的地方扫描\n\n\
     \u2022 网络顺畅";
     CGSize labelSize = [tips.text sizeWithAttributes:@{NSFontAttributeName:tips.font}];
     tips.frame = CGRectMake(0, 0, labelSize.width, labelSize.height);
@@ -351,7 +351,7 @@ void saveBitmap(int* arr){
         CIImage *croppedRecImage = nil;
         CGRect rectangleRect = CGRectZero;
         
-        if (!SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
             
             CIDetector *rectangleDetector = [CIDetector detectorOfType:CIDetectorTypeRectangle context:[CIContext contextWithOptions:nil] options:nil];
             NSArray *rectangleFeatures = [rectangleDetector featuresInImage:ciimage options:nil];

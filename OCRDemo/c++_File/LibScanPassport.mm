@@ -1,17 +1,8 @@
-
-typedef unsigned char  uc;
-
-typedef struct _Variance{
-    int va;
-    int height;
-    float ang;
-    int oldva;
-} Varivance;
 #include <stdlib.h>
 #include <time.h>
 #include "LibScanPassport.h"
 #include <sys/time.h>
-#import "OverlayViewController.h"
+#import "ScannerController.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -22,13 +13,22 @@ typedef struct _Variance{
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 #ifdef __cplusplus
 }
 #endif
 extern int onetable[256];
 extern char templateImage[36][200][25];
 extern int charcount[36];
+
+typedef unsigned char  uc;
+
+typedef struct _Variance{
+    int va;
+    int height;
+    float ang;
+    int oldva;
+} Varivance;
 
 int times = 0;
 
@@ -42,7 +42,7 @@ int cmpheight(const void* a,const void* b){
 
 //二值化 黑色为1， 白色为0      //TODO: Otsu's method may be a better method to get black image
 static void blackImage(int oldwidth,int oldheight,uc grayimage[135][700],uc blackimage[135][88]){
-//    int threshold = otsu(oldwidth,oldheight,grayimage);
+    //    int threshold = otsu(oldwidth,oldheight,grayimage);
     uc thre[7] = {0};
     uc means1 = 0;
     uc means2 = 0;
@@ -75,7 +75,7 @@ static void blackImage(int oldwidth,int oldheight,uc grayimage[135][700],uc blac
         }
         thre[i] = finalthre;
     }
-
+    
     for(int i =0;i<oldheight;i++){
         uc tmp = 0;
         uc tmpbyte = 0;
@@ -85,7 +85,7 @@ static void blackImage(int oldwidth,int oldheight,uc grayimage[135][700],uc blac
             }else{
                 tmpbyte=tmpbyte<<1;
             }
-
+            
             tmp++;
             if(tmp == 8){
                 blackimage[i][j/8] = tmpbyte;
@@ -140,14 +140,14 @@ static bool checkInt(int oldwidth,int oldheight,uc blackimage[135][88],int* a,fl
     }
     width = d1 / 3;
     for (int j = 1; j < 3; j++) {
-//        int var = variance(blackImage, peak.get(i) + j * width, angle);
+        //        int var = variance(blackImage, peak.get(i) + j * width, angle);
         if (getVariance(oldwidth,oldheight,blackimage,ang, roundf(a[0]+j*width)) < 80) {
             return false;
         }
     }
     width = d3 / 3;
     for (int j = 1; j < 3; j++) {
-//        int var = variance(blackImage, peak.get(i + 2) + j * width, angle);
+        //        int var = variance(blackImage, peak.get(i + 2) + j * width, angle);
         if (getVariance(oldwidth,oldheight,blackimage,ang, roundf(a[2]+j*width)) < 80) {
             return false;
         }
@@ -181,13 +181,13 @@ static bool getHeightEdge(int oldwidth,int oldheight,uc blackimage[135][88],floa
                 Varivance v = {abs(varivance-varivances[i+2][j-6].oldva),j-3,ii,varivance};
                 varivances[i+2][j] =v;
                 if(v.va>minva||count <10){
-//                    struct VarivanceNode * node = (struct VarivanceNode *)malloc(sizeof(VarivanceNode));
+                    //                    struct VarivanceNode * node = (struct VarivanceNode *)malloc(sizeof(VarivanceNode));
                     struct VarivanceNode* node = &(nodes[nodescount++]);
                     node->ang = ii;
                     node->va = v.va;
                     node->next = NULL;
                     node->before = NULL;
-//                    struct VarivanceNode node = {NULL,NULL,ii,v.va};
+                    //                    struct VarivanceNode node = {NULL,NULL,ii,v.va};
                     if(count<10){
                         if(count == 0){
                             maxva =minva= v.va;
@@ -238,7 +238,7 @@ static bool getHeightEdge(int oldwidth,int oldheight,uc blackimage[135][88],floa
         if(head->next!=NULL) {
             head = head->next;
         } else {
-//            head == NULL; //alex changed
+            //            head == NULL; //alex changed
             head = NULL;
             break;
         }
@@ -248,7 +248,7 @@ static bool getHeightEdge(int oldwidth,int oldheight,uc blackimage[135][88],floa
     Varivance *v =  varivances[ang];
     qsort(v, oldheight, sizeof(Varivance), cmpVariance);
     qsort(v, 24, sizeof(Varivance), cmpheight);
-
+    
     int heights[24];
     count = 0;
     int peaks[24]={0};
@@ -286,122 +286,122 @@ static uc getpixelbyblackimage(uc blackimage[135][88],int x,int y){
 }
 
 static bool generateLetterX(int up,int down,uc blackimage[135][88],float angle,int width,int height,int result[130],int* spaces){
-//    LOGE("%d",blackimage[83][13]);
+    //    LOGE("%d",blackimage[83][13]);
     int x12[120][2] = {0};
-        uc count = 0;
-        uc d = (down-up)/3;
-        up = up-d<0?0:up-d;
-        down = down+d>height?height:down+d;
-        int lastWhite = -1;
-        for(int i =0;i<width;i++){
-            int isWhite = 0;
-            int startY = (int)(down+angle*i);
-            startY = startY>=height?height-1:startY;
-            startY = startY >= height ? height - 1 : startY;
-            for (int j = 0; j < down - up; j++) {
-                if (i + (j * angle) < 0 || i + (j * angle) >= width) {
-                    continue;
-                }
-                uc rgb = getpixelbyblackimage(blackimage, (i + (j * angle)), startY - j);
-                if(rgb != 0){
-                    isWhite += 1;
-                    if (isWhite >= 2) {//willard
-                        break;
-                    }
-                }
+    uc count = 0;
+    uc d = (down-up)/3;
+    up = up-d<0?0:up-d;
+    down = down+d>height?height:down+d;
+    int lastWhite = -1;
+    for(int i =0;i<width;i++){
+        int isWhite = 0;
+        int startY = (int)(down+angle*i);
+        startY = startY>=height?height-1:startY;
+        startY = startY >= height ? height - 1 : startY;
+        for (int j = 0; j < down - up; j++) {
+            if (i + (j * angle) < 0 || i + (j * angle) >= width) {
+                continue;
             }
-            if (isWhite > 1) {
-                if (lastWhite != -1) {
-                    if (i - lastWhite == 1) {// 忽略字符中间的断裂
-                        lastWhite = -1;
-                        continue;
-                    }
-                    x12[count][0] = lastWhite;
-                    x12[count++][1] = i-lastWhite;
-                    lastWhite = -1;
-                }
-            } else {
-                if (lastWhite == -1) {
-                    lastWhite = i;
-                    // todo 优化i的值
-                    if(count!=0&&x12[count-1][0]+x12[count-1][1]>=i-2){
-                        lastWhite = x12[count-1][0];
-    //                    lastWhite = fourInts.get(fourInts.size() - 1).a;
-                        count--;
-                    }
-                }
-            }
-        }
-        if (lastWhite != -1) {
-            x12[count][0] = lastWhite;
-            x12[count++][1] = width+1-lastWhite;
-    //        fourInts.add(new FourInt().setA(lastWhite).setB(blackImage.getWidth() + 1 - lastWhite));
-        }
-        for(int i = 0;i<count;i++){
-//            cout<<(int)(x12[i][0])<<"__"<<(int)(x12[i][1])<<endl;
-//            LOGE("%d_%d",x12[i][0],x12[i][1]);
-        }
-//        LOGE("*******");
-        if (count < 30) {
-//            cout<<"空格数小于30"<<endl;
-            return false;
-        }
-        int resultcount  = 0;
-        // result.add(fourInts.get(0).a == 0 ? fourInts.get(0).b - 1 + fourInts.get(0).a : -1);
-        if(x12[0][0] == 0){
-            result[resultcount++] = x12[0][1]-1;
-    //        result.add(fourInts.get(0).b - 1 + fourInts.get(0).a);
-        } else {
-            result[resultcount++] = 0;
-            result[resultcount++] = x12[0][0];
-            if(result[1]-result[0]<4||result[1]-result[0]>(float)width/43){
-                resultcount = 0;
-            }
-            result[resultcount++] = x12[0][1]+x12[0][0]-1;
-        }
-        int maxWidth =  width/ 43;
-        for (int i = 1; i < count; i++) {
-    //        if (fourInts.get(i).b > maxWidth) {
-            if(x12[i][1]>maxWidth){
-                if (resultcount > 60) {
-    //                result.add(fourInts.get(i).a);
-                    result[resultcount++] = x12[i][0];
+            uc rgb = getpixelbyblackimage(blackimage, (i + (j * angle)), startY - j);
+            if(rgb != 0){
+                isWhite += 1;
+                if (isWhite >= 2) {//willard
                     break;
                 }
-                resultcount = 0;
-    //            if (fourInts.size() - i + 1 < 30) {
-                if(count-i+1<30){
-    //                System.out.println("空格数小于43" + "........" + i);
-//                    cout<<"空格数小于30"<<endl;
-                    return false;
+            }
+        }
+        if (isWhite > 1) {
+            if (lastWhite != -1) {
+                if (i - lastWhite == 1) {// 忽略字符中间的断裂
+                    lastWhite = -1;
+                    continue;
                 }
-    //            result.add(fourInts.get(i).a + fourInts.get(i).b - 1);
-                result[resultcount++] = x12[i][0]+x12[i][1]-1;
-            } else {
-    //            if (fourInts.get(i).a - result.get(result.size() - 1) > (double) blackImage.getWidth() / 43d) {
-                if(x12[i][0]-result[resultcount-1]>(float)width/43){
-    //                System.out.println(fourInts.get(i).a - result.get(result.size() - 1));
-    //                System.out.println((double) blackImage.getWidth() / 43d * 0.8);
-    //                System.out.println("字符过长.........失败");
-                    return false;
-                }
-                result[resultcount++] = x12[i][0];
-                if(i!=count-1){
-                    result[resultcount++] = x12[i][0]+x12[i][1]-1;
+                x12[count][0] = lastWhite;
+                x12[count++][1] = i-lastWhite;
+                lastWhite = -1;
+            }
+        } else {
+            if (lastWhite == -1) {
+                lastWhite = i;
+                // todo 优化i的值
+                if(count!=0&&x12[count-1][0]+x12[count-1][1]>=i-2){
+                    lastWhite = x12[count-1][0];
+                    //                    lastWhite = fourInts.get(fourInts.size() - 1).a;
+                    count--;
                 }
             }
         }
-        for(int i = 0;i<resultcount;i++){
-//            cout<<result[i]<<endl;
-//            LOGE("%d",result[i]);
+    }
+    if (lastWhite != -1) {
+        x12[count][0] = lastWhite;
+        x12[count++][1] = width+1-lastWhite;
+        //        fourInts.add(new FourInt().setA(lastWhite).setB(blackImage.getWidth() + 1 - lastWhite));
+    }
+    for(int i = 0;i<count;i++){
+        //            cout<<(int)(x12[i][0])<<"__"<<(int)(x12[i][1])<<endl;
+        //            LOGE("%d_%d",x12[i][0],x12[i][1]);
+    }
+    //        LOGE("*******");
+    if (count < 30) {
+        //            cout<<"空格数小于30"<<endl;
+        return false;
+    }
+    int resultcount  = 0;
+    // result.add(fourInts.get(0).a == 0 ? fourInts.get(0).b - 1 + fourInts.get(0).a : -1);
+    if(x12[0][0] == 0){
+        result[resultcount++] = x12[0][1]-1;
+        //        result.add(fourInts.get(0).b - 1 + fourInts.get(0).a);
+    } else {
+        result[resultcount++] = 0;
+        result[resultcount++] = x12[0][0];
+        if(result[1]-result[0]<4||result[1]-result[0]>(float)width/43){
+            resultcount = 0;
         }
-        if(resultcount < 88){
-            printf("字符数不对 count = %d\n",resultcount);
-            printf("白格数过少,最少88个, count = %d\n",resultcount);
-            return false;
+        result[resultcount++] = x12[0][1]+x12[0][0]-1;
+    }
+    int maxWidth =  width/ 43;
+    for (int i = 1; i < count; i++) {
+        //        if (fourInts.get(i).b > maxWidth) {
+        if(x12[i][1]>maxWidth){
+            if (resultcount > 60) {
+                //                result.add(fourInts.get(i).a);
+                result[resultcount++] = x12[i][0];
+                break;
+            }
+            resultcount = 0;
+            //            if (fourInts.size() - i + 1 < 30) {
+            if(count-i+1<30){
+                //                System.out.println("空格数小于43" + "........" + i);
+                //                    cout<<"空格数小于30"<<endl;
+                return false;
+            }
+            //            result.add(fourInts.get(i).a + fourInts.get(i).b - 1);
+            result[resultcount++] = x12[i][0]+x12[i][1]-1;
+        } else {
+            //            if (fourInts.get(i).a - result.get(result.size() - 1) > (double) blackImage.getWidth() / 43d) {
+            if(x12[i][0]-result[resultcount-1]>(float)width/43){
+                //                System.out.println(fourInts.get(i).a - result.get(result.size() - 1));
+                //                System.out.println((double) blackImage.getWidth() / 43d * 0.8);
+                //                System.out.println("字符过长.........失败");
+                return false;
+            }
+            result[resultcount++] = x12[i][0];
+            if(i!=count-1){
+                result[resultcount++] = x12[i][0]+x12[i][1]-1;
+            }
         }
-        *spaces = resultcount;
-        return true;
+    }
+    for(int i = 0;i<resultcount;i++){
+        //            cout<<result[i]<<endl;
+        //            LOGE("%d",result[i]);
+    }
+    if(resultcount < 88){
+        //            printf("字符数不对 count = %d\n",resultcount);
+        //            printf("白格数过少,最少88个, count = %d\n",resultcount);
+        return false;
+    }
+    *spaces = resultcount;
+    return true;
 }
 
 static int checkWhite(uc blackImage[135][88],int x1,int x2,int y){
@@ -409,7 +409,7 @@ static int checkWhite(uc blackImage[135][88],int x1,int x2,int y){
     for (int i = 0; i < x2 - x1 + 1; i++) {
         // System.out.println(image.getWidth() + "****" + image.getHeight());
         // System.out.println((x1 + i) + "****" + y);
-//        if ((image.getPixel(x1 + i, y) & 0xff) < 127) {
+        //        if ((image.getPixel(x1 + i, y) & 0xff) < 127) {
         if(getpixelbyblackimage(blackImage, x1+i, y) != 0){
             count++;
             if (count > 3) {
@@ -424,9 +424,9 @@ static void expandFourInt(int letteredge[4],uc blackImage[135][88],int width,int
     int flag = -1;
     while (flag != 0) {// flag = -1 向上扩张
         if (flag < 0) {
-//            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.b - 1) >= 2) {
+            //            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.b - 1) >= 2) {
             if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[1] - 1) >= 2) {
-//                fourInt.b += flag;
+                //                fourInt.b += flag;
                 letteredge[1]+=flag;
                 if (letteredge[1]== 0) {
                     flag = 0;
@@ -435,11 +435,11 @@ static void expandFourInt(int letteredge[4],uc blackImage[135][88],int width,int
                 flag = 1;
             }
         } else {// 向下扩张
-//            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.b) < 2) {
+            //            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.b) < 2) {
             if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[1]) < 2) {
-//                fourInt.b += flag;
+                //                fourInt.b += flag;
                 letteredge[1] += flag;
-//                if (fourInt.b == blackImage.getHeight() - 1 || fourInt.b == fourInt.d - 3) {
+                //                if (fourInt.b == blackImage.getHeight() - 1 || fourInt.b == fourInt.d - 3) {
                 if (letteredge[1] == height - 1 || letteredge[1] == letteredge[3] - 3) {
                     flag = 0;
                 }
@@ -451,11 +451,11 @@ static void expandFourInt(int letteredge[4],uc blackImage[135][88],int width,int
     flag = 1;
     while (flag != 0) {// flag = 1 向下扩张
         if (flag > 0) {
-//            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.d + 1) >= 2) {
+            //            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.d + 1) >= 2) {
             if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[3] + 1) >= 2) {
-//                fourInt.d += flag;
+                //                fourInt.d += flag;
                 letteredge[3]+= flag;
-//                if (fourInt.d == blackImage.getHeight() - 1) {
+                //                if (fourInt.d == blackImage.getHeight() - 1) {
                 if (letteredge[3] == height - 1) {
                     flag = 0;
                 }
@@ -463,9 +463,9 @@ static void expandFourInt(int letteredge[4],uc blackImage[135][88],int width,int
                 flag = -1;
             }
         } else {// 向下扩张
-//            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.d) < 2) {
+            //            if (checkWhite(blackImage, fourInt.a, fourInt.c, fourInt.d) < 2) {
             if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[3]) < 2) {
-//                fourInt.d += flag;
+                //                fourInt.d += flag;
                 letteredge[3] += flag;
                 if (letteredge[3] == 0 || letteredge[3] == letteredge[1] + 2) {
                     flag = 0;
@@ -486,13 +486,13 @@ static bool getlettersxy(int letters[88][4],int upLetterX[130],int downLetterX[1
             leftX = upLetterX[i];
             continue;
         }
-//        FourInt fourInt = new FourInt().setA(leftX + 1).setB(heightEdge.a).setC(upLetterX.get(i) - 1).setD(heightEdge.b);
+        //        FourInt fourInt = new FourInt().setA(leftX + 1).setB(heightEdge.a).setC(upLetterX.get(i) - 1).setD(heightEdge.b);
         diff = angle*(leftX+1);
         int letteredge[4] = {leftX+1,heightedge[0]+diff,upLetterX[i]-1,heightedge[1]+diff};
         expandFourInt(letteredge, blackImage,width,height);
-//        if (fourInt.d - fourInt.b + 1 > (heightEdge.b - heightEdge.a + 1) * 0.7 && fourInt.d - fourInt.b + 1 < (heightEdge.b - heightEdge.a + 1) * 1.25) {
+        //        if (fourInt.d - fourInt.b + 1 > (heightEdge.b - heightEdge.a + 1) * 0.7 && fourInt.d - fourInt.b + 1 < (heightEdge.b - heightEdge.a + 1) * 1.25) {
         if(letteredge[3]-letteredge[1]+1>(heightedge[1]-heightedge[0]+1)*0.6&&letteredge[3]-letteredge[1]+1<(heightedge[1]-heightedge[0]+1)*1.35){//todo willard
-//            letters.add(fourInt);
+            //            letters.add(fourInt);
             letters[count][0] = letteredge[0];
             letters[count][1] = letteredge[1];
             letters[count][2] = letteredge[2];
@@ -507,13 +507,13 @@ static bool getlettersxy(int letters[88][4],int upLetterX[130],int downLetterX[1
             leftX = downLetterX[i];
             continue;
         }
-//        FourInt fourInt = new FourInt().setA(leftX + 1).setB(heightEdge.c).setC(downLetterX.get(i) - 1).setD(heightEdge.d);
+        //        FourInt fourInt = new FourInt().setA(leftX + 1).setB(heightEdge.c).setC(downLetterX.get(i) - 1).setD(heightEdge.d);
         diff = angle*(leftX+1);
         int letteredge[4] = {leftX+1,heightedge[2]+diff,downLetterX[i]-1,heightedge[3]+diff};
         expandFourInt(letteredge, blackImage,width,height);
-//        if (fourInt.d - fourInt.b + 1 > (heightEdge.d - heightEdge.c + 1) * 0.8 && fourInt.d - fourInt.b + 1 < (heightEdge.d - heightEdge.c + 1) * 1.15) {
+        //        if (fourInt.d - fourInt.b + 1 > (heightEdge.d - heightEdge.c + 1) * 0.8 && fourInt.d - fourInt.b + 1 < (heightEdge.d - heightEdge.c + 1) * 1.15) {
         if(letteredge[3]-letteredge[1]+1>(heightedge[3]-heightedge[2]+1)*0.6&&letteredge[3]-letteredge[1]+1<(heightedge[3]-heightedge[2]+1)*1.35){//todo willard
-//            letters.add(fourInt);
+            //            letters.add(fourInt);
             letters[count][0] = letteredge[0];
             letters[count][1] = letteredge[1];
             letters[count][2] = letteredge[2];
@@ -535,7 +535,7 @@ static char getcharbyint(int maxI){
     return (char) (55 + maxI);
 }
 
-static bool debugable = true;
+static bool debugable = false;
 
 static void ocr(uc letterimage[88][25],char* result,int* iaa){
     int min = 0xfffff;
@@ -569,9 +569,9 @@ static void dividechar(uc blackimage[135][88],int lettersxy[88][4],uc letterimag
         uc image[131][700] = {0};
         for(int j = 0;j<height;j++){
             for(int k = 0;k<width;k++){
-//                image[j][k] = getpixelbyblackimage(blackimage, k, j);
+                //                image[j][k] = getpixelbyblackimage(blackimage, k, j);
                 char a =getpixelbyblackimage(blackimage, k+lettersxy[i][0], j+lettersxy[i][1]);
-//                *(image+j*width+k) = a;
+                //                *(image+j*width+k) = a;
                 image[j][k] = a;
             }
         }
@@ -626,7 +626,7 @@ static void dividechar(uc blackimage[135][88],int lettersxy[88][4],uc letterimag
                                 dd = 1;
                             }
                         }
-//                        color+=d*dd*(*(image+m*width+n));
+                        //                        color+=d*dd*(*(image+m*width+n));
                         color += d*dd*image[m][n];
                     }
                 }
@@ -653,8 +653,8 @@ static void dividechar(uc blackimage[135][88],int lettersxy[88][4],uc letterimag
 }
 
 static void generateGrayImage(int8_t* arr,uc grayimage[135][700],int hw,int hh,int x,int y,int w,int h){
-//    uc* graytmp = (uc*) malloc(sizeof(uc)*w*h);
-//    uc graytmp[1000000] = {0};
+    //    uc* graytmp = (uc*) malloc(sizeof(uc)*w*h);
+    //    uc graytmp[1000000] = {0};
     float pixelwidth = (float)w/700;
     float pixelheight = (float)h/131;
     for(int j = 0;j<131;j++){
@@ -706,19 +706,19 @@ static void generateGrayImage(int8_t* arr,uc grayimage[135][700],int hw,int hh,i
                     color+=d*dd*((int)(*(arr+m*hw+n))&0xff);
                 }
             }
-//            if(color/((endy-starty)*(endx-startx))>=0.5){
+            //            if(color/((endy-starty)*(endx-startx))>=0.5){
             grayimage[j][k] = roundf(color/((endy-starty)*(endx-startx)));
         }
     }
-//    int32_t* tmpArray;
-//    tmpArray = (int32_t*)malloc(131 * 700 * sizeof(int32_t));
-//    for(int i = 0;i<131;i++){
-//        for (int j = 0; j < 700; j++) {
-//            tmpArray[i * 700 + j] =grayimage[i][j];
-//        }
-//    }
-//    saveBitmap(tmpArray);
-////    free(graytmp);
+    //    int32_t* tmpArray;
+    //    tmpArray = (int32_t*)malloc(131 * 700 * sizeof(int32_t));
+    //    for(int i = 0;i<131;i++){
+    //        for (int j = 0; j < 700; j++) {
+    //            tmpArray[i * 700 + j] =grayimage[i][j];
+    //        }
+    //    }
+    //    saveBitmap(tmpArray);
+    ////    free(graytmp);
 }
 
 char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
@@ -740,7 +740,6 @@ char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h
     int upwhitespaces = 0;
     int downwhitespaces = 0;
     if(!getHeightEdge(width,height,blackimage,&angle,(int*) heightEdge)){
-        printf("get no height edge!\n");
         goto A;
     }
     level++;
@@ -753,21 +752,21 @@ char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h
         }
     }
 A:  if(result[0] == 0){
-        char le = '0'+level;
-        result[0] = le;
-        result[1] = 0;
-    }
-    else {
-        int *letterPos;
-        letterPos = (int *)malloc(44 * 4 * sizeof(int));
-        for (int i = 0; i < 44; i++) {
-            for (int j = 0; j < 4; j++) {
-                letterPos[4 * i + j] = lettersxy[i][j];
-            }
+    char le = '0'+level;
+    result[0] = le;
+    result[1] = 0;
+}
+else {
+    int *letterPos;
+    letterPos = (int *)malloc(88 * 4 * sizeof(int));
+    for (int i = 0; i < 88; i++) {
+        for (int j = 0; j < 4; j++) {
+            letterPos[4 * i + j] = lettersxy[i][j];
         }
-        saveLetterPos(letterPos);
     }
-
+    saveLetterPos(letterPos);
+}
+    
     resultstring = &result[0];
     return resultstring;
 }
@@ -814,7 +813,7 @@ char* LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int
                 }
                 for(int i = 2200;i<2288;i++) bbb[i] = iaa[i-2200];
                 memcpy(jjarray, bbb, 2288 * sizeof(int32_t));
-//                saveSmallBitmap(jjarray);
+                //                saveSmallBitmap(jjarray);
                 free(jjarray);
             }
             printf("%s",result);
@@ -823,17 +822,17 @@ char* LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int
     }
 A:  if(result[0] == 0){
     strcat(result,"8");
-    }
-    else {
-        int *letterPos;
-        letterPos = (int *)malloc(88 * 4 * sizeof(int));
-        for (int i = 0; i < 88; i++) {
-            for (int j = 0; j < 4; j++) {
-                letterPos[4 * i + j] = lettersxy[i][j];
-            }
+}
+else {
+    int *letterPos;
+    letterPos = (int *)malloc(88 * 4 * sizeof(int));
+    for (int i = 0; i < 88; i++) {
+        for (int j = 0; j < 4; j++) {
+            letterPos[4 * i + j] = lettersxy[i][j];
         }
-        saveLetterPos(letterPos);
     }
+    saveLetterPos(letterPos);
+}
     gettimeofday(&end, NULL);
     printf("%ld",start.tv_sec);
     printf("%ld",end.tv_sec);
