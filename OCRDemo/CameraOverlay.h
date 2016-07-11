@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
+typedef enum {
+    CameraOverlayTypePassport,
+    CameraOverlayTypeIDCard
+} CameraOverlayType ;
 typedef void(^doBlock) (void);
 
 @interface CameraOverlay : UIView
@@ -17,5 +20,8 @@ typedef void(^doBlock) (void);
 @property (copy, nonatomic) doBlock tapTip;
 @property (assign, nonatomic) CGRect idStringRect;
 @property (assign, nonatomic) CGRect passportRect;
+
+//overlay for passport scanner or id card scanner
+- (instancetype)init:(CameraOverlayType)type;
 
 @end

@@ -43,16 +43,16 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     CGFloat _height;
 }
 
-- (instancetype)init{
+- (instancetype)init:(CameraOverlayType)type{
     if (self = [super init]) {
         _height = (ScreenWidth > ScreenHeight)?ScreenWidth : ScreenHeight;
         _width = (ScreenWidth < ScreenHeight)?ScreenWidth : ScreenHeight;
-        [self initView];
+        [self initView:type];
     }
     return self;
 }
 
-- (void)initView{
+- (void)initView:(CameraOverlayType)type{
     float scaleRatio = ScreenWidth / kDefaultWidth;
     //    self.backgroundColor = [[UIColor greenColor] colorWithAlphaComponent:0.6];
     self.opaque = NO;
@@ -60,41 +60,60 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     
     //init mask view
     UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0, 0, ScreenWidth, ScreenHeight)];
-    CGRect passportRect = CGRectMake((ScreenWidth - 249 * scaleRatio) / 2, (ScreenHeight - 354 * scaleRatio) / 2, 249 * scaleRatio, 354 * scaleRatio);
-    UIView *passportMask = [[UIView alloc] initWithFrame:passportRect];
-    [container addSubview:passportMask];
-    UIView *innerOverlay = [[UIView alloc] initWithFrame:CGRectMake(56 * scaleRatio, 0, 193 * scaleRatio, 354 * scaleRatio)];
-    innerOverlay.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.65];
-    [passportMask addSubview:innerOverlay];
-    UIImageView *barCodeView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"barcode"]];
-    barCodeView.transform = CGAffineTransformMakeRotation(M_PI/2);
-    barCodeView.frame = CGRectMake(0, 0, 56 * scaleRatio, passportMask.frame.size.height);
-    [passportMask addSubview:barCodeView];
-    
-    //    //CGRect for cropping the passport from camera preview. Due to the horizontal display, the frame has to rotate PI
-    //    _idStringRect = CGRectMake(0, 193 * scaleRatio, 354 * scaleRatio, 112 * scaleRatio);
-    //    _passportRect = CGRectMake(passportRect.origin.y * scaleRatio, passportRect.origin.x * scaleRatio, passportRect.size.height * scaleRatio, passportRect.size.width * scaleRatio);
-    
-    addMask(container, passportRect, [[UIColor blackColor] colorWithAlphaComponent:0.85]);
-    UILabel *tipLabel = [[UILabel alloc] init];
-    tipLabel.numberOfLines = 1;
-    tipLabel.font = [UIFont systemFontOfSize:13.0];
-    tipLabel.textColor = [UIColor whiteColor];
-    tipLabel.text = @"请将护照个人资料页底部条码置于下方框内";
-    CGSize tipLabelSize = [tipLabel.text sizeWithAttributes:@{NSFontAttributeName:tipLabel.font}];
-    tipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
-    tipLabel.frame = CGRectMake((ScreenWidth - tipLabelSize.height) / 2 - 30 * scaleRatio, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
-    [container addSubview:tipLabel];
-    
-    UILabel *ligthtTipLabel = [[UILabel alloc] init];
-    ligthtTipLabel.numberOfLines = 1;
-    ligthtTipLabel.font = [UIFont systemFontOfSize:13.0];
-    ligthtTipLabel.textColor = [UIColor whiteColor];
-    ligthtTipLabel.text = @"注意证件表面不要有反光";
-    tipLabelSize = [ligthtTipLabel.text sizeWithAttributes:@{NSFontAttributeName:ligthtTipLabel.font}];
-    ligthtTipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
-    ligthtTipLabel.frame = CGRectMake((ScreenWidth - tipLabelSize.height) / 2 - 30 * scaleRatio - tipLabel.frame.size.width, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
-    [container addSubview:ligthtTipLabel];
+    switch (type) {
+        case CameraOverlayTypePassport:
+        {
+            CGRect passportRect = CGRectMake((ScreenWidth - 249 * scaleRatio) / 2, (ScreenHeight - 354 * scaleRatio) / 2, 249 * scaleRatio, 354 * scaleRatio);
+            UIView *passportMask = [[UIView alloc] initWithFrame:passportRect];
+            UIView *innerOverlay = [[UIView alloc] initWithFrame:CGRectMake(56 * scaleRatio, 0, 193 * scaleRatio, 354 * scaleRatio)];
+            innerOverlay.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.65];
+            [passportMask addSubview:innerOverlay];
+            UIImageView *barCodeView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"barcode"]];
+            barCodeView.transform = CGAffineTransformMakeRotation(M_PI/2);
+            barCodeView.frame = CGRectMake(0, 0, 56 * scaleRatio, passportMask.frame.size.height);
+            [passportMask addSubview:barCodeView];
+            [container addSubview:passportMask];
+            addMask(container, passportRect, [[UIColor blackColor] colorWithAlphaComponent:0.85]);
+            
+            UILabel *tipLabel = [[UILabel alloc] init];
+            tipLabel.numberOfLines = 1;
+            tipLabel.font = [UIFont systemFontOfSize:13.0];
+            tipLabel.textColor = [UIColor whiteColor];
+            tipLabel.text = @"请将护照个人资料页底部条码置于下方框内";
+            CGSize tipLabelSize = [tipLabel.text sizeWithAttributes:@{NSFontAttributeName:tipLabel.font}];
+            tipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
+            tipLabel.frame = CGRectMake((ScreenWidth - tipLabelSize.height) / 2 - 30 * scaleRatio, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
+            [container addSubview:tipLabel];
+            
+            UILabel *ligthtTipLabel = [[UILabel alloc] init];
+            ligthtTipLabel.numberOfLines = 1;
+            ligthtTipLabel.font = [UIFont systemFontOfSize:13.0];
+            ligthtTipLabel.textColor = [UIColor whiteColor];
+            ligthtTipLabel.text = @"注意证件表面不要有反光";
+            tipLabelSize = [ligthtTipLabel.text sizeWithAttributes:@{NSFontAttributeName:ligthtTipLabel.font}];
+            ligthtTipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
+            ligthtTipLabel.frame = CGRectMake((ScreenWidth - tipLabelSize.height) / 2 - 30 * scaleRatio - tipLabel.frame.size.width, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
+            [container addSubview:ligthtTipLabel];
+        }
+            break;
+        case CameraOverlayTypeIDCard:
+        {
+            CGRect cardRect = CGRectMake((ScreenWidth - 232 * scaleRatio) / 2, (ScreenHeight - 365 * scaleRatio) / 2, 232 * scaleRatio, 365 * scaleRatio);
+            addMask(container, cardRect, [[UIColor blackColor] colorWithAlphaComponent:0.85]);
+            UILabel *tipLabel = [[UILabel alloc] init];
+            tipLabel.numberOfLines = 1;
+            tipLabel.font = [UIFont systemFontOfSize:14.0];
+            tipLabel.textColor = [UIColor whiteColor];
+            tipLabel.text = @"请将身份证置于框内并尝试对齐边缘";
+            CGSize tipLabelSize = [tipLabel.text sizeWithAttributes:@{NSFontAttributeName:tipLabel.font}];
+            tipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
+            tipLabel.frame = CGRectMake(cardRect.origin.x - 12 * scaleRatio - tipLabel.frame.size.height, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
+            [container addSubview:tipLabel];
+        }
+            break;
+        default:
+            break;
+    }
     
     [self addSubview:container];
     
