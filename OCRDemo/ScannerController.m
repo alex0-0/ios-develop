@@ -147,7 +147,7 @@ void saveBitmap(int* arr){
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-
+    [[UIApplication sharedApplication] setStatusBarHidden:true];
     [_captureSession startRunning];
 }
 
@@ -160,11 +160,11 @@ void saveBitmap(int* arr){
     // Dispose of any resources that can be recreated.
 }
 
-- (void)initObServer{
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleError:) name:AVCaptureSessionRuntimeErrorNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruption:) name:AVCaptureSessionWasInterruptedNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruptionEnded:) name:AVCaptureSessionInterruptionEndedNotification object:nil];
-}
+//- (void)initObServer{
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleError:) name:AVCaptureSessionRuntimeErrorNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruption:) name:AVCaptureSessionWasInterruptedNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruptionEnded:) name:AVCaptureSessionInterruptionEndedNotification object:nil];
+//}
 
 - (void)initCapture{
     AVCaptureDevice *captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
@@ -288,7 +288,7 @@ void saveBitmap(int* arr){
 }
 
 - (void)initOverlayView{
-    _overlay = [[CameraOverlay alloc] init];
+    _overlay = [[CameraOverlay alloc] init:CameraOverlayTypeIDCard];
     _overlay.frame = [UIScreen mainScreen].bounds;
     __weak typeof(self) weakSelf = self;
     _overlay.tapFlashLight = ^{
@@ -333,10 +333,6 @@ void saveBitmap(int* arr){
     if ([self presentingViewController] != nil) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
-//    else {
-//        [self dismissViewControllerAnimated:YES completion:nil];
-//    }
-//    [_imagePicker dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)showTip{
@@ -412,7 +408,7 @@ void saveBitmap(int* arr){
 -(void)tmpOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
     CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+//    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
     CGImageRelease(imageRef);
 
     char *result = LibScanPassport_test(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33

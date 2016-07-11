@@ -107,7 +107,7 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
             tipLabel.text = @"请将身份证置于框内并尝试对齐边缘";
             CGSize tipLabelSize = [tipLabel.text sizeWithAttributes:@{NSFontAttributeName:tipLabel.font}];
             tipLabel.transform = CGAffineTransformMakeRotation(M_PI/2);
-            tipLabel.frame = CGRectMake(cardRect.origin.x - 12 * scaleRatio - tipLabel.frame.size.height, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
+            tipLabel.frame = CGRectMake(cardRect.origin.x - 12 * scaleRatio - tipLabelSize.height, (ScreenHeight - tipLabelSize.width) / 2, tipLabelSize.height, tipLabelSize.width);
             [container addSubview:tipLabel];
         }
             break;
@@ -118,7 +118,7 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     [self addSubview:container];
     
     UIButton *backButton = [[UIButton alloc] init];
-    [backButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+    [backButton setImage:[UIImage imageNamed:@"back_arrow"] forState:UIControlStateNormal];
     [backButton setBackgroundColor:[UIColor clearColor]];
     [backButton addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
     backButton.transform = CGAffineTransformMakeRotation(M_PI/2);
