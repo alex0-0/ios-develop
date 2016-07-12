@@ -28,7 +28,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     return ret;
 }
 
-@interface ViewController () <UINavigationControllerDelegate,UIImagePickerControllerDelegate, G8TesseractDelegate>
+@interface ViewController () <UINavigationControllerDelegate,UIImagePickerControllerDelegate, G8TesseractDelegate, UIActionSheetDelegate>
 
 @property (strong, nonatomic) UIImagePickerController *imagePicker;
 @property (strong, nonatomic) UIImage *image;
@@ -57,13 +57,9 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 -(void) takePhoto{
-//    [((AppDelegate *)[UIApplication sharedApplication].delegate) setRotateLeft:TRUE];
-//    NSNumber *value = [NSNumber numberWithInt:UIDeviceOrientationLandscapeLeft];
-//    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
-//    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-//        [self presentViewController:self.imagePicker animated:YES completion:nil];
-//    }
-    [self presentViewController:_scannerController animated:YES completion:nil];
+//    [self presentViewController:_scannerController animated:YES completion:nil];
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
+    [actionSheet showInView:self.view];
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -169,6 +165,13 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 
 - (BOOL)shouldCancelImageRecognitionForTesseract:(G8Tesseract *)tesseract {
     return NO;
+}
+
+#pragma mark ------------------- UIActionSheetDelegate --------------------
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 0) {
+        NSLog(@"1");
+    }
 }
 
 @end

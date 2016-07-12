@@ -11,7 +11,6 @@
 #import "LibScanPassport.h"
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define CTColorHex(c) [UIColor colorWithRed:((c>>16)&0xFF)/255.0 green:((c>>8)&0xFF)/255.0 blue:((c)&0xFF)/255.0 alpha:1.0]
 #define SCREEN_WIDTH ([[UIScreen mainScreen] bounds].size.width)
 #define SCREEN_HEIGHT ([[UIScreen mainScreen] bounds].size.height)
 #define SCREEN_MAX_LENGTH (MAX(SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -52,77 +51,77 @@ void saveLetterPos(int *pos){
     free(pos);
     [arrayLock unlock];
 }
-
-int getPixelByCharImage(int *arr, int num, int x, int y){
-    int a = arr[num * 25 + (y * 13 + x)/8];
-    return  (a >> (7 - (y * 13 + x) % 8))&1;
-}
-
-char getCharByInt(int maxI){
-    if (maxI < 10) {
-        char a = (char)(48 + maxI);
-        return a;
-    }
-    else if(maxI == 31){
-        return '<';
-    }
-    return (char)(55 + maxI);
-}
-
-void saveSmallBitmap(int* arr){
-    for (int i = 0; i < 88; i++) {
-//        int value = arr[2200 + i];
-        int32_t *bitMap;
-        bitMap = malloc(13 * 15 * sizeof(int32_t));
-        for (int j = 0; j < 13; j++) {
-            for (int k = 0; k < 15; k++) {
-                if (getPixelByCharImage(arr, i, j, k)) {
-                    bitMap[j * 15 + k] = 0xff000000;
-                }
-                else
-                    bitMap[j * 15 + k] = 0xffffffff;
-            }
-        }
-        CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
-        CGContextRef bitmapContext=CGBitmapContextCreate(bitMap, 13, 15, 8, 4*13, colorSpace,  kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrderDefault);
-        CFRelease(colorSpace);
-        free(bitMap);
-        CGImageRef cgImage=CGBitmapContextCreateImage(bitmapContext);
-        CGContextRelease(bitmapContext);
-        
-        UIImage * newimage = [UIImage imageWithCGImage:cgImage];
-        CGImageRelease(cgImage);
-        free(bitMap);
-    }
-}
-
-int getPixelByBlackImage(int32_t *arr, int x, int y){
-    uint32_t tmpInt = arr[y * 88 + x / 8];
-    return (tmpInt>>(7 - x % 8)) & 1;
-}
-
-void saveBitmap(int* arr){
-    int32_t *bitMap;
-    bitMap = malloc(131 * 700 * sizeof(int32_t));
-    for (int i = 0; i < 700; i++) {
-        for (int j = 0; j < 131; j++) {
-            if (getPixelByBlackImage(arr, i, j) != 0) {
-                bitMap[j * 700 + i] = 0xff000000;
-            }
-            else
-                bitMap[j * 700 + i] = 0xffffffff;
-        }
-    }
-    CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
-    CGContextRef bitmapContext=CGBitmapContextCreate(bitMap, 700, 131, 8, 4*700, colorSpace,  kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrderDefault);
-    CFRelease(colorSpace);
-    CGImageRef cgImage=CGBitmapContextCreateImage(bitmapContext);
-    CGContextRelease(bitmapContext);
-    
-    UIImage * newimage = [UIImage imageWithCGImage:cgImage];
-    free(bitMap);
-    CGImageRelease(cgImage);
-}
+//
+//int getPixelByCharImage(int *arr, int num, int x, int y){
+//    int a = arr[num * 25 + (y * 13 + x)/8];
+//    return  (a >> (7 - (y * 13 + x) % 8))&1;
+//}
+//
+//char getCharByInt(int maxI){
+//    if (maxI < 10) {
+//        char a = (char)(48 + maxI);
+//        return a;
+//    }
+//    else if(maxI == 31){
+//        return '<';
+//    }
+//    return (char)(55 + maxI);
+//}
+//
+//void saveSmallBitmap(int* arr){
+//    for (int i = 0; i < 88; i++) {
+////        int value = arr[2200 + i];
+//        int32_t *bitMap;
+//        bitMap = malloc(13 * 15 * sizeof(int32_t));
+//        for (int j = 0; j < 13; j++) {
+//            for (int k = 0; k < 15; k++) {
+//                if (getPixelByCharImage(arr, i, j, k)) {
+//                    bitMap[j * 15 + k] = 0xff000000;
+//                }
+//                else
+//                    bitMap[j * 15 + k] = 0xffffffff;
+//            }
+//        }
+//        CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+//        CGContextRef bitmapContext=CGBitmapContextCreate(bitMap, 13, 15, 8, 4*13, colorSpace,  kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrderDefault);
+//        CFRelease(colorSpace);
+//        free(bitMap);
+//        CGImageRef cgImage=CGBitmapContextCreateImage(bitmapContext);
+//        CGContextRelease(bitmapContext);
+//        
+//        UIImage *newimage = [UIImage imageWithCGImage:cgImage];
+//        CGImageRelease(cgImage);
+//        free(bitMap);
+//    }
+//}
+//
+//int getPixelByBlackImage(int32_t *arr, int x, int y){
+//    uint32_t tmpInt = arr[y * 88 + x / 8];
+//    return (tmpInt>>(7 - x % 8)) & 1;
+//}
+//
+//void saveBitmap(int* arr){
+//    int32_t *bitMap;
+//    bitMap = malloc(131 * 700 * sizeof(int32_t));
+//    for (int i = 0; i < 700; i++) {
+//        for (int j = 0; j < 131; j++) {
+//            if (getPixelByBlackImage(arr, i, j) != 0) {
+//                bitMap[j * 700 + i] = 0xff000000;
+//            }
+//            else
+//                bitMap[j * 700 + i] = 0xffffffff;
+//        }
+//    }
+//    CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+//    CGContextRef bitmapContext=CGBitmapContextCreate(bitMap, 700, 131, 8, 4*700, colorSpace,  kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrderDefault);
+//    CFRelease(colorSpace);
+//    CGImageRef cgImage=CGBitmapContextCreateImage(bitmapContext);
+//    CGContextRelease(bitmapContext);
+//    
+//    UIImage *newimage = [UIImage imageWithCGImage:cgImage];
+//    free(bitMap);
+//    CGImageRelease(cgImage);
+//}
 
 @interface ScannerController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (strong, nonatomic) PassportScanResult *resultModel;
@@ -130,12 +129,10 @@ void saveBitmap(int* arr){
 
 @implementation ScannerController{
     UIView *_tipView;
-    CameraOverlay *_overlay;
+    CameraOverlay *_passportOverlay;
+    CameraOverlay *_idCardOverlay;
     AVCaptureSession *_captureSession;
     AVCaptureVideoPreviewLayer *_previewLayer;
-//    AVCaptureStillImageOutput *_stillImageOutput;
-//    CIDetector *_faceDetector;
-    int8_t *_bitMap;
 }
 
 - (void)viewDidLoad {
@@ -148,6 +145,23 @@ void saveBitmap(int* arr){
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [[UIApplication sharedApplication] setStatusBarHidden:true];
+    switch (_scannerType) {
+        case PassportScanner:{
+            if ([_idCardOverlay superview]) {
+                [_idCardOverlay removeFromSuperview];
+            }
+            [self.view addSubview:_passportOverlay];
+        }
+            break;
+        case IDCardScanner:{
+            if ([_passportOverlay superview]) {
+                [_passportOverlay removeFromSuperview];
+            }
+            [self.view addSubview:_idCardOverlay];
+        }
+        default:
+            break;
+    }
     [_captureSession startRunning];
 }
 
@@ -231,6 +245,9 @@ void saveBitmap(int* arr){
     [self.view.layer addSublayer:_previewLayer];
     
     [_captureSession commitConfiguration];
+    if (!_scannerType) {
+        _scannerType = IDCardScanner;
+    }
 }
 
 - (void)initTipView{
@@ -288,22 +305,36 @@ void saveBitmap(int* arr){
 }
 
 - (void)initOverlayView{
-    _overlay = [[CameraOverlay alloc] init:CameraOverlayTypeIDCard];
-    _overlay.frame = [UIScreen mainScreen].bounds;
+    _passportOverlay = [[CameraOverlay alloc] init:CameraOverlayTypePassport];
+    _passportOverlay.frame = [UIScreen mainScreen].bounds;
     __weak typeof(self) weakSelf = self;
-    _overlay.tapFlashLight = ^{
+    _passportOverlay.tapFlashLight = ^{
         __weak typeof(weakSelf) self = weakSelf;
         [self flashLight];
     };
-    _overlay.dismissImagePicker = ^{
+    _passportOverlay.dismissImagePicker = ^{
         __weak typeof(weakSelf) self = weakSelf;
         [self back];
     };
-    _overlay.tapTip = ^{
+    _passportOverlay.tapTip = ^{
         __weak typeof(weakSelf) self = weakSelf;
         [self showTip];
     };
-    [self.view addSubview:_overlay];
+    _idCardOverlay = [[CameraOverlay alloc] init:CameraOverlayTypeIDCard];
+    _idCardOverlay.frame = [UIScreen mainScreen].bounds;
+    _idCardOverlay.tapFlashLight = ^{
+        __weak typeof(weakSelf) self = weakSelf;
+        [self flashLight];
+    };
+    _idCardOverlay.dismissImagePicker = ^{
+        __weak typeof(weakSelf) self = weakSelf;
+        [self back];
+    };
+    _idCardOverlay.tapTip = ^{
+        __weak typeof(weakSelf) self = weakSelf;
+        [self showTip];
+    };
+
 }
 
 - (void)dismissTipView{
@@ -398,22 +429,39 @@ void saveBitmap(int* arr){
             UIImage *wholeImage = [UIImage imageWithCGImage:tmpImageRef];
             CGImageRelease(tmpImageRef);
             
-            [self tmpOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)wholeImage];
+            switch (_scannerType) {
+                case PassportScanner:
+                    [self passportOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)wholeImage];
+                    break;
+                case IDCardScanner:
+                    [self IDCardOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)wholeImage];
+                default:
+                    break;
+            }
+            
         }
         
     }
 }
 
+-(void)IDCardOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
+    CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
+    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+    //    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+    CGImageRelease(imageRef);
 
--(void)tmpOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
+}
+
+-(void)passportOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
     CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
     CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
 //    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
     CGImageRelease(imageRef);
 
-    char *result = LibScanPassport_test(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
+    char *result = LibScanPassport_scanByte(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
+    free(YUVData);
 
-    NSString *scanResult = [NSString stringWithUTF8String:result];
+    NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
     if (scanResult && scanResult.length >= 88) {
         PassportScanResult *resultModel = [[PassportScanResult alloc] initWithScanResult:scanResult];
         if (resultModel.gotLegalData) {
@@ -436,16 +484,13 @@ void saveBitmap(int* arr){
                                                   otherButtonTitles:nil];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [alert show];
-//                [self back];
+                if ([_passportDelegate respondsToSelector:@selector(PassportScannerDidFinish:)]) {
+                    [_passportDelegate PassportScannerDidFinish:resultModel];
+                }
             });
         }
-        NSLog(@"Right");
     }
     NSLog(@"%@", scanResult);
-    //    free(tmpMap);
-    free(YUVData);
-//    free(_bitMap);
-
 }
 
 @end

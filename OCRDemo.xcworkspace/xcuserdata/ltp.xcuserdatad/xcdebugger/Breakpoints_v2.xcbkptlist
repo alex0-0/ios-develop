@@ -9,14 +9,30 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "OCRDemo/ScannerController.m"
-            timestampString = "489913165.814505"
+            filePath = "OCRDemo/c++_File/LibScanPassport.mm"
+            timestampString = "489913241.205959"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "414"
-            endingLineNumber = "414"
-            landmarkName = "-tmpOCR:bounds:width:height:image:"
-            landmarkType = "5">
+            startingLineNumber = "823"
+            endingLineNumber = "823"
+            landmarkName = "LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int h)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "OCRDemo/c++_File/LibScanPassport.mm"
+            timestampString = "489913238.3646"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "842"
+            endingLineNumber = "842"
+            landmarkName = "LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int h)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

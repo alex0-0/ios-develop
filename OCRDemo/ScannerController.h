@@ -17,13 +17,33 @@ void saveLetterPos(int *pos);
 @protocol PassportScannerDelegate <NSObject>
 
 @optional
-
-- (void)CTPassportScannerDidFinish:(PassportScanResult*)scanResult;
+//model as parameter
+- (void)PassportScannerDidFinish:(PassportScanResult*)scanResult;
 
 @end
 
+@protocol idCardScannerDelegate <NSObject>
+
+@optional
+//id card string as parameter
+- (void)idCardScannerDidFinish:(NSString*)scanResult;
+
+@end
+
+typedef enum {
+    PassportScanner,
+    IDCardScanner
+} ScannerType;
+
 @interface ScannerController : UIViewController
 
-@property (strong, nonatomic) id<PassportScannerDelegate> delegate;
+@property (strong, nonatomic) id<PassportScannerDelegate> passportDelegate;
+
+@property (strong, nonatomic) id<idCardScannerDelegate> idCardDelegate;
+
+/**
+ **  ATTENTION: please set the desired scannerType before present view controller, otherwise the scanner controller will use default type, i.e., idCardScanner, for now.
+ **/
+@property ScannerType scannerType;
 
 @end

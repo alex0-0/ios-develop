@@ -653,8 +653,6 @@ static void dividechar(uc blackimage[135][88],int lettersxy[88][4],uc letterimag
 }
 
 static void generateGrayImage(int8_t* arr,uc grayimage[135][700],int hw,int hh,int x,int y,int w,int h){
-    //    uc* graytmp = (uc*) malloc(sizeof(uc)*w*h);
-    //    uc graytmp[1000000] = {0};
     float pixelwidth = (float)w/700;
     float pixelheight = (float)h/131;
     for(int j = 0;j<131;j++){
