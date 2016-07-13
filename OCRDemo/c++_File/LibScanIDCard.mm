@@ -8,15 +8,12 @@ typedef struct _Variance{
     int oldva;
 } Varivance;
 #include <stdlib.h>
-#include <time.h>
-
 #include <sys/time.h>
-
 #include <stdio.h>
 #include <time.h>
 #include <dlfcn.h>
 #include <math.h>
-
+#import "LibScanIDCard.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,7 +82,7 @@ static void blackImageIDCard(int oldwidth,int oldheight,uc grayimage[100][407],u
             }
         }
 
-        blackimage[i][51] = tmpbyte<<4;
+        blackimage[i][50] = tmpbyte<<4;
     }
 }
 static int getVarianceIDCard(int oldwidth,int oldheight,uc blackimage[100][51],float ang,int height){
@@ -445,7 +442,7 @@ void static ocrIDCard(uc letterimage[18][25],char* result,int* iaa) {
 static bool CheckValue(char* result) {
     //region  check null
     for(int i=0;i<18;i++){
-        if(result[i]==' '||result[i]==NULL){
+        if(result[i]==' '||!result[i]){
             return false;
         }
     }
@@ -662,5 +659,7 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
         return resultstring;
     }
     B:
-    return "0";
+    char *tmpChar = (char*)malloc(sizeof(char));
+    *tmpChar = '0';
+    return tmpChar;
 }

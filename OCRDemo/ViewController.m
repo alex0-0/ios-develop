@@ -57,7 +57,6 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 -(void) takePhoto{
-//    [self presentViewController:_scannerController animated:YES completion:nil];
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
     [actionSheet showInView:self.view];
 }
@@ -169,8 +168,18 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 
 #pragma mark ------------------- UIActionSheetDelegate --------------------
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-    if (buttonIndex == 0) {
-        NSLog(@"1");
+    switch (buttonIndex) {
+        case 0:
+            _scannerController.scannerType = IDCardScanner;
+            [self presentViewController:_scannerController animated:YES completion:nil];
+            break;
+            
+        case 1:
+            _scannerController.scannerType = PassportScanner;
+            [self presentViewController:_scannerController animated:YES completion:nil];
+            break;
+        default:
+            break;
     }
 }
 

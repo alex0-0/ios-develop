@@ -5,7 +5,6 @@
 #import "ScannerController.h"
 
 #include <stdio.h>
-#include <time.h>
 #include <dlfcn.h>
 #include <math.h>
 

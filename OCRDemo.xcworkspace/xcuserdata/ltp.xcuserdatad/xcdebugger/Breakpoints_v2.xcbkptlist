@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/c++_File/LibScanPassport.mm"
-            timestampString = "489913241.205959"
+            timestampString = "490071649.858655"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "823"
-            endingLineNumber = "823"
+            startingLineNumber = "820"
+            endingLineNumber = "820"
             landmarkName = "LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int h)"
             landmarkType = "7">
          </BreakpointContent>
@@ -26,13 +26,29 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/c++_File/LibScanPassport.mm"
-            timestampString = "489913238.3646"
+            timestampString = "490071649.858655"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "842"
-            endingLineNumber = "842"
+            startingLineNumber = "839"
+            endingLineNumber = "839"
             landmarkName = "LibScanPassport_test(int8_t *arr, int hw, int hh, int x, int y, int w, int h)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "OCRDemo/ScannerController.m"
+            timestampString = "490073038.55806"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "472"
+            endingLineNumber = "472"
+            landmarkName = "-IDCardOCR:bounds:width:height:image:"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
