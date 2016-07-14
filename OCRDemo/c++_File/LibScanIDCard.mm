@@ -21,9 +21,20 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-extern int byteOneCount[256];
-extern char charsTemplate[11][200][25];
-extern int charTemplateCount[36];
+extern int onetable[256];
+extern char templateImage[36][200][25];
+extern int charcount[36];
+/*
+ extern int byteOneCount[256];
+ extern char templateImage[36][200][25];
+ extern int charTemplateCount[36];
+ */
+static void free2DArray(void** array, int length){
+    for (int i = 0; i < length; i++) {
+        free(array[i]);
+    }
+    free(array);
+}
 
 static int cmpVarianceIDCard(const void* a,const void* b){
     return (( Varivance *)b)->va-((Varivance *)a)->va;
@@ -31,7 +42,7 @@ static int cmpVarianceIDCard(const void* a,const void* b){
 int cmpheightIDCard(const void* a,const void* b){
     return ((Varivance*)a)->height-((Varivance*)b)->height;
 }
-static void blackImageIDCard(int oldwidth,int oldheight,uc grayimage[100][407],uc blackimage[100][51]){
+static void blackImageIDCard(int oldwidth,int oldheight,uc **grayimage,int gWidth,int gHeight,uc **blackimage){
     uc thre[4] = {0};
     uc means1 = 0;
     uc means2 = 0;
@@ -39,13 +50,13 @@ static void blackImageIDCard(int oldwidth,int oldheight,uc grayimage[100][407],u
     int sub2 = 0;
     int sub1count = 0;
     int sub2count = 0;
-    for(int i = 0;i<4;i++){
+    for(int i = 0;i<(int)(gWidth/100);i++){
         uc finalthre = 0;
         uc inithreshold = 40;
         while(finalthre!=inithreshold){
             finalthre = inithreshold;
             sub1 = sub1count = sub2 = sub2count = 0;
-            for(int j = 0;j<10000;j++){
+            for(int j = 0;j<(gHeight*100);j++){
                 uc pixtmp = grayimage[j/100][i*100+j%100];
                 if(pixtmp<=inithreshold){
                     sub1+=pixtmp;
@@ -82,17 +93,17 @@ static void blackImageIDCard(int oldwidth,int oldheight,uc grayimage[100][407],u
             }
         }
 
-        blackimage[i][50] = tmpbyte<<4;
+        blackimage[i][gWidth/8] = tmpbyte<<4;
     }
 }
-static int getVarianceIDCard(int oldwidth,int oldheight,uc blackimage[100][51],float ang,int height){
+static int getVarianceIDCard(int oldwidth,int oldheight,uc **blackimage,float ang,int height){
     int result = 0;
     for(int i = 0;i<oldwidth;i+=8){
         int h = (int)round(i*ang)+height;
         if(h<0||h>=oldheight) break;
         int wid = i/8;
         uc tmp = ((blackimage[h][wid]>>1)^(blackimage[h][wid])&0x7f);
-        result += byteOneCount[tmp];
+        result += onetable[tmp];
         if((blackimage[h][wid]&1) != ((blackimage[h][wid+1]&0x80)>>7)){
             result++;
         }
@@ -106,7 +117,8 @@ static int getMeansIDCard(int* a,int count){
     }
     return (int)roundf((float)total/count);
 }
-static bool checkIntIDCard(int oldwidth,int oldheight,uc blackimage[100][51],int* a,float ang){
+//ps: specified for id card
+static bool checkIntIDCard(int oldwidth,int oldheight,uc **blackimage,int* a,float ang){
     float d1;//, d2, d3;
     d1 = a[1] - a[0];
     float width = d1 / 3;
@@ -118,135 +130,136 @@ static bool checkIntIDCard(int oldwidth,int oldheight,uc blackimage[100][51],int
     }
     return true;
 }
-static bool getHeightEdgeIDCard(int oldwidth,int oldheight,uc blackimage[100][51],float* angle,int* heightEdge){
+static bool getHeightEdgeIDCard(int oldwidth,int oldheight,uc **blackimage,int bWidth,int bHeight,float* angle,int* heightEdge){//100*51
     if(oldwidth<=0)
         return false;
     if(oldheight<=0)
         return false;
-        Varivance varivances[5][100];
-        struct VarivanceNode {
-            struct VarivanceNode *next;
-            struct VarivanceNode *before;
-            float ang;
-            int va;
-        };
-        struct VarivanceNode *head = NULL;
-        struct VarivanceNode *tail = NULL;
-        int maxva = 0, minva = 0xfffff;
-        int count = 0;
-        struct VarivanceNode nodes[500];
-        int nodescount = 0;
-        for (int i = -2; i <= 2; i++) {
-            for (int j = 0; j < oldheight; j++) {
-                float ii = (float) i / 100;
-                int varivance = getVarianceIDCard(oldwidth, oldheight, blackimage, ii, j);
-                if (j <= 5) {
-                    Varivance v = {0, 0, 0, varivance};
-                    varivances[i + 2][j] = v;
-                } else {
-                    Varivance v = {abs(varivance - varivances[i + 2][j - 6].oldva), j - 3, ii,
-                                   varivance};
-                    varivances[i + 2][j] = v;
-                    if (v.va > minva || count < 10) {
-                        struct VarivanceNode *node = &(nodes[nodescount++]);
-                        node->ang = ii;
-                        node->va = v.va;
-                        node->next = NULL;
-                        node->before = NULL;
-                        if (count < 10) {
-                            if (count == 0) {
-                                maxva = minva = v.va;
+    Varivance varivances[5][bHeight];
+    struct VarivanceNode {
+        struct VarivanceNode *next;
+        struct VarivanceNode *before;
+        float ang;
+        int va;
+    };
+    struct VarivanceNode *head = NULL;
+    struct VarivanceNode *tail = NULL;
+    int maxva = 0, minva = 0xfffff;
+    int count = 0;
+    struct VarivanceNode nodes[5*bHeight];
+    int nodescount = 0;
+    for (int i = -2; i <= 2; i++) {
+        for (int j = 0; j < oldheight; j++) {
+            float ii = (float) i / 100;
+            int varivance = getVarianceIDCard(oldwidth, oldheight, blackimage, ii, j);
+            if (j <= 5) {
+                Varivance v = {0, 0, 0, varivance};
+                varivances[i + 2][j] = v;
+            } else {
+                Varivance v = {abs(varivance - varivances[i + 2][j - 6].oldva), j - 3, ii,
+                    varivance};
+                varivances[i + 2][j] = v;
+                if (v.va > minva || count < 10) {
+                    struct VarivanceNode *node = &(nodes[nodescount++]);
+                    node->ang = ii;
+                    node->va = v.va;
+                    node->next = NULL;
+                    node->before = NULL;
+                    if (count < 10) {
+                        if (count == 0) {
+                            maxva = minva = v.va;
+                            head = node;
+                            tail = node;
+                        } else {
+                            if (maxva <= v.va) {
+                                maxva = v.va;
+                                node->next = head;
+                                head->before = node;
                                 head = node;
+                            } else if (minva > v.va) {
+                                minva = v.va;
+                                node->before = tail;
+                                tail->next = node;
                                 tail = node;
-                            } else {
-                                if (maxva <= v.va) {
-                                    maxva = v.va;
-                                    node->next = head;
-                                    head->before = node;
-                                    head = node;
-                                } else if (minva > v.va) {
-                                    minva = v.va;
-                                    node->before = tail;
-                                    tail->next = node;
-                                    tail = node;
-                                }else {
-                                    for (node->next = head; node->va <
-                                                            node->next->va; node->next = node->next->next) { }
-                                    node->before = node->next->before;
-                                    node->before->next = node;
-                                    node->next->before = node;
-                                }
-                            }
-                            count++;
-                       } else {
-                            node->next = head;
-                            for (; node->va < node->next->va; node->next = node->next->next) { }
-                            if (node->next != head) {
+                            }else {
+                                for (node->next = head; node->va <
+                                     node->next->va; node->next = node->next->next) { }
                                 node->before = node->next->before;
                                 node->before->next = node;
-                            } else {
-                                head = node;
+                                node->next->before = node;
                             }
-                            node->next->before = node;
-                            tail = tail->before;
-                            minva = tail->va;
-                            tail->next = NULL;
                         }
+                        count++;
+                    } else {
+                        node->next = head;
+                        for (; node->va < node->next->va; node->next = node->next->next) { }
+                        if (node->next != head) {
+                            node->before = node->next->before;
+                            node->before->next = node;
+                        } else {
+                            head = node;
+                        }
+                        node->next->before = node;
+                        tail = tail->before;
+                        minva = tail->va;
+                        tail->next = NULL;
                     }
                 }
             }
         }
-        float countva = 0;
-        count = 0;
-        for (; ;) {
-            count++;
-            if (head != NULL&&head->ang==head->ang) {
-                countva += head->ang;
-                if (head->next != NULL) {
-                    head = head->next;
-                } else {
-                    head = NULL;
-                    break;
-                }
-            }
-        }
-        int ang = (int) roundf(countva *= 10) + 2;
-        *angle = (float) (ang - 2) / 100;
-        Varivance *v = varivances[ang];
-        qsort(v, oldheight, sizeof(Varivance), cmpVarianceIDCard);
-        qsort(v, 24, sizeof(Varivance), cmpheightIDCard);
-        int heights[24];
-        count = 0;
-        int peaks[24] = {0};
-        int peaknum = 0;
-        for (int i = 0; i < 24; i++) {
-            int h = v[i].height;
-            if (count == 0) {
-                heights[count++] = h;
-            } else if (heights[count - 1] + 3 < h) {
-                peaks[peaknum++] = getMeansIDCard(heights, count);
-                count = 1;
-                heights[0] = h;
+    }
+    float countva = 0;
+    count = 0;
+    for (; ;) {
+        count++;
+        if (head != NULL&&head->ang==head->ang) {
+            countva += head->ang;
+            if (head->next != NULL) {
+                head = head->next;
             } else {
-                heights[count++] = h;
+                head = NULL;
+                break;
             }
         }
-        if (count > 1) {
+    }
+    int ang = (int) roundf(countva *= 10) + 2;
+    *angle = (float) (ang - 2) / 100;
+    Varivance *v = varivances[ang];
+    qsort(v, oldheight, sizeof(Varivance), cmpVarianceIDCard);
+    qsort(v, 24, sizeof(Varivance), cmpheightIDCard);
+    int heights[24];
+    count = 0;
+    int peaks[24] = {0};
+    int peaknum = 0;
+    for (int i = 0; i < 24; i++) {
+        int h = v[i].height;
+        if (count == 0) {
+            heights[count++] = h;
+        } else if (heights[count - 1] + 3 < h) {
             peaks[peaknum++] = getMeansIDCard(heights, count);
+            count = 1;
+            heights[0] = h;
+        } else {
+            heights[count++] = h;
         }
-        for (int i = 0; i < peaknum - 1; i++) {
-            if (checkIntIDCard(oldwidth, oldheight, blackimage, &(peaks[0]), *angle)) {
-                heightEdge[0] = peaks[0];
-                heightEdge[1] = peaks[1];
-                return true;
-            }
+    }
+    if (count > 1) {
+        peaks[peaknum++] = getMeansIDCard(heights, count);
+    }
+    for (int i = 0; i < peaknum - 1; i++) {
+        if (checkIntIDCard(oldwidth, oldheight, blackimage, &(peaks[0]), *angle)) {
+            heightEdge[0] = peaks[0];
+            heightEdge[1] = peaks[1];
+            return true;
         }
+    }
     return false;
 }
-static uc getpixelbyblackimageIDCard(uc blackimage[100][51],int x,int y){
+static uc getpixelbyblackimageIDCard(uc **blackimage,int x,int y){
     return (blackimage[y][x/8]>>(7-x%8))&1;
 }
-static bool generateLetterXIDCard(int up,int down,uc blackimage[100][51],float angle,int width,int height,int result[130],int* spaces){
+//ps: different
+static bool generateLetterXIDCard(int up,int down,uc **blackimage,float angle,int width,int height,int result[130],int* spaces){
     int x12[120][2] = {0};
     uc count = 0;
     uc d = (down-up)/3;
@@ -330,7 +343,7 @@ static bool generateLetterXIDCard(int up,int down,uc blackimage[100][51],float a
     return true;
 }
 
-static int checkWhiteIDCard(uc blackImage[100][51],int x1,int x2,int y){
+static int checkWhiteIDCard(uc **blackImage,int x1,int x2,int y){
     int count = 0;
     for (int i = 0; i < x2 - x1 + 1; i++) {
         if(getpixelbyblackimageIDCard(blackImage, x1+i, y) != 0){
@@ -342,7 +355,7 @@ static int checkWhiteIDCard(uc blackImage[100][51],int x1,int x2,int y){
     }
     return count;
 }
-static void expandFourIntIDCard(int letteredge[4],uc blackImage[100][51],int width,int height){
+static void expandFourIntIDCard(int letteredge[4],uc **blackImage,int width,int height){
     int flag = -1;
     while (flag != 0) {
         if (flag < 0) {
@@ -388,7 +401,8 @@ static void expandFourIntIDCard(int letteredge[4],uc blackImage[100][51],int wid
         }
     }
 }
-static bool getlettersxyIDCard(int letters[18][4],int upletterX[130],int heightedge[2],uc blackImage[100][51],float angle,int width,int height,int upspaces){
+//PS: different
+static bool getlettersxyIDCard(int **letters,int upletterX[130],int heightedge[2],uc **blackImage,float angle,int width,int height,int upspaces){
     int count = 0;
     int leftX = -1;
     int diff;
@@ -417,18 +431,18 @@ static char getcharbyintIDCard(int maxI){
     }
     return 'X';
 }
-void static ocrIDCard(uc letterimage[18][25],char* result,int* iaa) {
-    int min = 0xfffff;
+void static ocrIDCard(uc **letterimage,int letterNum,char* result,int* iaa) {
+    int min = 0xfffff; 
     int answer = 0;
-    for(int m = 0;m<18;m++){
+    for(int m = 0;m<letterNum;m++){
         answer = 0;
         min = 0xfffff;
-        for(int k = 0;k<11;k++){
-            for(int l =0;l<charTemplateCount[k];l++){
+        for(int k = 0;k<36;k++){
+            for(int l =0;l<charcount[k];l++){
                 int relations = 0;
                 for(int i = 0;i<25;i++){
-                    uc r =letterimage[m][i]^charsTemplate[k][l][i];
-                    relations += byteOneCount[r];
+                    uc r =letterimage[m][i]^templateImage[k][l][i];
+                    relations += onetable[r];
                 }
                 if(relations<min){
                     min = relations;
@@ -470,12 +484,19 @@ static bool CheckValue(char* result) {
     return true;
 }
 
-static void dividecharIDCard(uc blackimage[100][51],int lettersxy[18][4],uc letterimage[18][25]){
+static void dividecharIDCard(uc **blackimage,int **lettersxy,uc **letterimage,int letterNum,int imageWidth,int imageHeight){
     int width,height;
-    for(int i = 0;i<18;i++){
+    for(int i = 0;i<letterNum;i++){
         width = lettersxy[i][2]-lettersxy[i][0]+1;
         height = lettersxy[i][3]-lettersxy[i][1]+1;
-        uc image[100][407] = {0};
+        uc **image;//[100][407] = {0};
+        image = (uc**)malloc(sizeof(uc*)*imageHeight);
+        for (int i = 0; i < imageHeight; i++) {
+            image[i] = (uc*)malloc(sizeof(*image)*imageWidth);
+            for (int d = 0; d < imageWidth; d++) {
+                image[i][d] = 0;
+            }
+        }
         for(int j = 0;j<height;j++){
             for(int k = 0;k<width;k++){
                 char a =getpixelbyblackimageIDCard(blackimage, k+lettersxy[i][0], j+lettersxy[i][1]);
@@ -554,13 +575,14 @@ static void dividecharIDCard(uc blackimage[100][51],int lettersxy[18][4],uc lett
             }
             }
         }
+        free2DArray((void**)image, imageHeight);
     }
 }
-static void generateGrayImageIDCard(int8_t* arr,uc grayimage[100][407],int hw,int hh,int x,int y,int w,int h){
-    float pixelwidth =(float)w/407;
-    float pixelheight =(float)h/100;
-    for(int j = 0;j<100;j++){
-        for(int k = 0;k<407;k++) {
+static void generateGrayImageIDCard(int8_t* arr,uc **grayimage,int imageWidth,int imageHeight,int hw,int hh,int x,int y,int w,int h){
+    float pixelwidth =(float)w/imageWidth;
+    float pixelheight =(float)h/imageHeight;
+    for(int j = 0;j<imageHeight;j++){
+        for(int k = 0;k<imageWidth;k++) {
             float startx = x + k * pixelwidth;
             float starty = y + j * pixelheight;
             float endx = startx + pixelwidth;
@@ -617,36 +639,76 @@ static void generateGrayImageIDCard(int8_t* arr,uc grayimage[100][407],int hw,in
     }
 }
 char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
-    uc letterimage[18][25]={0};
+    uc **letterimage;//[18][25]={0};
+    letterimage = (uc**)malloc(sizeof(uc*)*18);
+    for (int i = 0; i < 18; i++) {
+        letterimage[i] = (uc*)malloc(sizeof(*letterimage)*25);
+        for (int d = 0; d < 25; d++) {
+            letterimage[i][d] = 0;
+        }
+    }
     char *resultstring;
-    uc grayimage[100][407]={0};
-    uc blackimage[100][51]={0};
+    uc **grayimage;//[100][407]={0};
+    grayimage = (uc**)malloc(sizeof(uc*)*100);
+    for (int i = 0; i < 100; i++) {
+        grayimage[i] = (uc*)malloc(sizeof(*grayimage)*407);
+        for (int d = 0; d < 407; d++) {
+            grayimage[i][d] = 0;
+        }
+    }
+    uc **blackimage;//[100][51]={0};
+    blackimage = (uc**)malloc(sizeof(uc*)*100);
+    for (int i = 0; i < 100; i++) {
+        blackimage[i] = (uc*)malloc(sizeof(*blackimage)*51);
+        for (int d = 0; d < 51; d++) {
+            blackimage[i][d] = 0;
+        }
+    }
     int width = 407;
     int height = 100;
     float angle = 0;
     int heightEdge[2]={0};
-    generateGrayImageIDCard(arr,grayimage,hw,hh,x,y,w,h);
-     blackImageIDCard(width,height,grayimage,blackimage);
+    generateGrayImageIDCard(arr,grayimage,407,100,hw,hh,x,y,w,h);
+     blackImageIDCard(width,height,grayimage,407,100,blackimage);
     char result[19] = {0};
     int upletterX[130] = {0};
-    int lettersxy[18][4] = {0};
     int upwhitespaces = 0;
-    if(!getHeightEdgeIDCard(width,height,blackimage,&angle,(int*) heightEdge)){
+    int **lettersxy;//[18][4] = {0};
+    lettersxy = (int**)malloc(sizeof(int*)*18);
+    for (int i = 0; i < 18; i++) {
+        lettersxy[i] = (int*)malloc(sizeof(*lettersxy)*4);
+        for (int d = 0; d < 4; d++) {
+            lettersxy[i][d] = 0;
+        }
+    }
+    
+    if(!getHeightEdgeIDCard(width,height,blackimage,51,100,&angle,(int*) heightEdge)){
+        free2DArray((void**)blackimage, 100);
+        free2DArray((void**)grayimage, 100);
+        free2DArray((void**)letterimage, 18);
         goto A;
     }
    if(generateLetterXIDCard(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)){
         if(getlettersxyIDCard(lettersxy,upletterX,heightEdge,blackimage,angle,width,height,upwhitespaces)){
-            dividecharIDCard(blackimage,lettersxy,letterimage);
-            ocrIDCard(letterimage, result,NULL);
+            dividecharIDCard(blackimage,lettersxy,letterimage,18,407,100);
+            ocrIDCard(letterimage,18,result,NULL);
             if(!CheckValue(result)){
+                free2DArray((void**)lettersxy, 18);
+                free2DArray((void**)blackimage, 100);
+                free2DArray((void**)grayimage, 100);
+                free2DArray((void**)letterimage, 18);
                 goto B;
             }
+            free(blackimage);
+            free(grayimage);
+            free(letterimage);
             goto A;
         }
     }
     A:  if(result[0] == 0){
         result[1] = 0;
         resultstring = &result[0];
+        free2DArray((void**)lettersxy, 18);
         return resultstring;
     }else {
         int bbb[72];
@@ -656,6 +718,7 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
             }
         }
         resultstring = &result[0];
+        free2DArray((void**)lettersxy, 18);
         return resultstring;
     }
     B:

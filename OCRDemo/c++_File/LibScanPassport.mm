@@ -296,7 +296,6 @@ static bool generateLetterX(int up,int down,uc blackimage[135][88],float angle,i
         int isWhite = 0;
         int startY = (int)(down+angle*i);
         startY = startY>=height?height-1:startY;
-        startY = startY >= height ? height - 1 : startY;
         for (int j = 0; j < down - up; j++) {
             if (i + (j * angle) < 0 || i + (j * angle) >= width) {
                 continue;
@@ -336,10 +335,10 @@ static bool generateLetterX(int up,int down,uc blackimage[135][88],float angle,i
         x12[count++][1] = width+1-lastWhite;
         //        fourInts.add(new FourInt().setA(lastWhite).setB(blackImage.getWidth() + 1 - lastWhite));
     }
-    for(int i = 0;i<count;i++){
+//    for(int i = 0;i<count;i++){
         //            cout<<(int)(x12[i][0])<<"__"<<(int)(x12[i][1])<<endl;
         //            LOGE("%d_%d",x12[i][0],x12[i][1]);
-    }
+//    }
     //        LOGE("*******");
     if (count < 30) {
         //            cout<<"空格数小于30"<<endl;
@@ -390,10 +389,10 @@ static bool generateLetterX(int up,int down,uc blackimage[135][88],float angle,i
             }
         }
     }
-    for(int i = 0;i<resultcount;i++){
+//    for(int i = 0;i<resultcount;i++){
         //            cout<<result[i]<<endl;
         //            LOGE("%d",result[i]);
-    }
+//    }
     if(resultcount < 88){
         //            printf("字符数不对 count = %d\n",resultcount);
         //            printf("白格数过少,最少88个, count = %d\n",resultcount);
@@ -578,7 +577,7 @@ static void dividechar(uc blackimage[135][88],int lettersxy[88][4],uc letterimag
         float pixelheight = (float)height/15;
         int flag = 0;
         int count = 0;
-        uc newblackimage[15][13] = {0};
+//        uc newblackimage[15][13] = {0};
         for(int j = 0;j<15;j++){
             for(int k = 0;k<13;k++){
                 float startx = k*pixelwidth;
@@ -636,7 +635,7 @@ static void dividechar(uc blackimage[135][88],int lettersxy[88][4],uc letterimag
                         flag++;
                         count = 0;
                     }
-                    newblackimage[j][k] = 1;
+//                    newblackimage[j][k] = 1;
                 }else{
                     letterimage[i][flag] = (letterimage[i][flag]<<1)+0;
                     count++;
@@ -644,7 +643,7 @@ static void dividechar(uc blackimage[135][88],int lettersxy[88][4],uc letterimag
                         flag++;
                         count = 0;
                     }
-                    newblackimage[j][k] = 0;
+//                    newblackimage[j][k] = 0;
                 }
             }
         }
