@@ -14,6 +14,7 @@ typedef struct _Variance{
 #include <dlfcn.h>
 #include <math.h>
 #import "LibScanIDCard.h"
+#import "string.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -647,7 +648,6 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
             letterimage[i][d] = 0;
         }
     }
-    char *resultstring;
     uc **grayimage;//[100][407]={0};
     grayimage = (uc**)malloc(sizeof(uc*)*100);
     for (int i = 0; i < 100; i++) {
@@ -670,7 +670,8 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     int heightEdge[2]={0};
     generateGrayImageIDCard(arr,grayimage,407,100,hw,hh,x,y,w,h);
      blackImageIDCard(width,height,grayimage,407,100,blackimage);
-    char result[19] = {0};
+    char *result = new char[19];
+    memset(result, 0, 19 * sizeof(char));
     int upletterX[130] = {0};
     int upwhitespaces = 0;
     int **lettersxy;//[18][4] = {0};
@@ -709,9 +710,8 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     }
     A:  if(result[0] == 0){
         result[1] = 0;
-        resultstring = &result[0];
         free2DArray((void**)lettersxy, 18);
-        return resultstring;
+        return result;
     }else {
         int bbb[72];
         for (int i = 0; i < 18; i++) {
@@ -719,12 +719,10 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
                 bbb[i * 4 + j] = lettersxy[i][j];
             }
         }
-        resultstring = (char*)malloc(sizeof(char)*19);
-        resultstring = &result[0];
         free2DArray((void**)lettersxy, 18);
-        return resultstring;
+        return result;
     }
     B:
-    resultstring = &result[0];
-    return resultstring;
+    result[0]=0;
+    return result;
 }
