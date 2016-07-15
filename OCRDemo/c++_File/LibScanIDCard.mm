@@ -686,12 +686,14 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
         free2DArray((void**)blackimage, 100);
         free2DArray((void**)grayimage, 100);
         free2DArray((void**)letterimage, 18);
+        printf("寻找上下边框失败");
         goto A;
     }
    if(generateLetterXIDCard(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)){
         if(getlettersxyIDCard(lettersxy,upletterX,heightEdge,blackimage,angle,width,height,upwhitespaces)){
             dividecharIDCard(blackimage,lettersxy,letterimage,18,407,100);
             ocrIDCard(letterimage,18,result,NULL);
+            printf("%s",result);
             if(!CheckValue(result)){
                 free2DArray((void**)lettersxy, 18);
                 free2DArray((void**)blackimage, 100);
@@ -717,12 +719,12 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
                 bbb[i * 4 + j] = lettersxy[i][j];
             }
         }
+        resultstring = (char*)malloc(sizeof(char)*19);
         resultstring = &result[0];
         free2DArray((void**)lettersxy, 18);
         return resultstring;
     }
     B:
-    char *tmpChar = (char*)malloc(sizeof(char));
-    *tmpChar = '0';
-    return tmpChar;
+    resultstring = &result[0];
+    return resultstring;
 }

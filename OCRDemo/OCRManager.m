@@ -32,6 +32,26 @@ static const int kBlue = 3;
     return self;
 }
 
+- (void)dealloc{
+//    [super dealloc];
+    if (_imageData) {
+        free(_imageData);
+        _imageData = NULL;
+    }
+    if (_mag) {
+        free(_mag);
+        _mag = NULL;
+    }
+    if (_gradx) {
+        free(_gradx);
+        _gradx = NULL;
+    }
+    if (_grady) {
+        free(_grady);
+        _grady = NULL;
+    }
+}
+
 -(NSString *)scanPic{
     NSString *res = @"";
     
@@ -50,6 +70,10 @@ static const int kBlue = 3;
     NSInteger height = size.height / 4;
     _width = width;
     _height = height;
+    if (_imageData) {
+        free(_imageData);
+        _imageData = NULL;
+    }
     _imageData = malloc(sizeof(uint8_t) * width * height);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
     CGContextRef context = CGBitmapContextCreate(_imageData, width, height, 8, width, colorSpace, kCGImageAlphaNone);
@@ -114,13 +138,16 @@ static const int kBlue = 3;
     memset(filteredImage, 0, sizeof(uint8_t) * retWidth * retHeight);
     [self suppressNonMaxium:filteredImage];
 
-    free(diffx);
-    free(diffy);
+    free(_gradx);
+    _gradx = NULL;
+    free(_grady);
+    _grady = NULL;
     
     uint8_t *edge = malloc(sizeof(uint8_t)*retHeight*retWidth);
     memset(edge, 0, sizeof(uint8_t) * retWidth * retHeight);
     [self applyHystesis:filteredImage highThreshold:highThreshhold lowThreshold:lowThreshhold edge:edge];
     free(filteredImage);
+    filteredImage = NULL;
     
     _imageData = edge ;
 }
@@ -460,6 +487,10 @@ static const int kBlue = 3;
     }
     _width -= 5;
     _height -= 5;
+    if (_imageData) {
+        free(_imageData);
+        _imageData = NULL;
+    }
     _imageData = blurImage;
 }
 
@@ -516,6 +547,7 @@ static const int kBlue = 3;
     CGContextRelease(context);
     CGColorSpaceRelease(colorSpace);
     free(bitMap);
+    bitMap = NULL;
     
     UIImage *returnImage = [UIImage imageWithCGImage:imageRef];
     
