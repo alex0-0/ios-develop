@@ -1,6 +1,18 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#import "LibOCR.h"
+#import "string.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern void saveLetterPos(int *pos);    //save the positions of letters to the program(implemeted in Objective-c file, which can be found in runtime)
+#ifdef __cplusplus
+}
+#endif
 
 typedef unsigned char  uc;
-
 typedef struct _Variance{
     int va;
     int height;
@@ -11,22 +23,7 @@ typedef enum{
     LibScanIDCard,
     LibScanPassport
 }LibScanType;
-#include <stdlib.h>
-#include <sys/time.h>
-#include <stdio.h>
-#include <time.h>
-#include <dlfcn.h>
-#include <math.h>
-#import "LibScanIDCard.h"
-#import "string.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    extern void saveLetterPos(int *pos);    //save the positions of letters to the program(implemeted in Objective-c file, which can be found in runtime)
-#ifdef __cplusplus
-}
-#endif
 extern int byteOneCount[256];
 extern char templateImage[36][200][25];
 extern int charTemplateCount[36];
@@ -886,7 +883,7 @@ static void generateGrayImage(int8_t* arr,uc **grayImage,int imageWidth,int imag
 }
 
 //Scan ID Card
-char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
+char* libOCRScanIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
     uc **letterImage;//[18][25]={0};
     letterImage = (uc**)malloc(sizeof(uc*)*18);
     *letterImage = (uc*)malloc(18 * 25 * sizeof(uc));
@@ -969,7 +966,7 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     return result;
 }
 
-char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
+char* libOCRScanPassport(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
     uc **letterImage;//[88][25]={0};//88 leters 13width 15 height;
     letterImage = (uc**)malloc(sizeof(uc*)*88);
     *letterImage = (uc*)malloc(88 * 25 * sizeof(uc));

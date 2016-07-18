@@ -8,7 +8,7 @@
 
 #import "ScannerController.h"
 #import <AVFoundation/AVFoundation.h>
-#import "LibScanIDCard.h"
+#import "LibOCR.h"
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 #define SCREEN_WIDTH ([[UIScreen mainScreen] bounds].size.width)
@@ -465,7 +465,7 @@ void saveLetterPos(int *pos){
         
         static int count = 0;
         printf("%d",++count);
-        char *result = LibScanIDCard_scanByteIDCard(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height);
+        char *result = libOCRScanIDCard(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height);
         free(YUVData);
         NSString *scanResult = (*result)?[NSString stringWithUTF8String:result]:@"";
         free(result);
@@ -499,7 +499,7 @@ void saveLetterPos(int *pos){
             static int count = 0;
             printf("%d",++count);
 
-        char *result = LibScanPassport_scanByte(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
+        char *result = libOCRScanPassport(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
         free(YUVData);
         NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
             free(result);
