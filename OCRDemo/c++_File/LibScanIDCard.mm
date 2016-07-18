@@ -257,6 +257,9 @@ static bool getHeightEdgeIDCard(int oldwidth,int oldheight,uc **blackimage,int b
     return false;
 }
 static uc getpixelbyblackimageIDCard(uc **blackimage,int x,int y){
+    if (x < 0 || y < 0) {
+        return 0;
+    }
     return (blackimage[y][x/8]>>(7-x%8))&1;
 }
 //ps: different
@@ -408,6 +411,9 @@ static bool getlettersxyIDCard(int **letters,int upletterX[130],int heightedge[2
     int leftX = -1;
     int diff;
         for (int i = 0; i < upspaces; i++) {
+            if (count >= 18) {
+                return false;
+            }
         if (leftX == -1) {
             leftX = upletterX[i];
             continue;
@@ -492,11 +498,12 @@ static void dividecharIDCard(uc **blackimage,int **lettersxy,uc **letterimage,in
         height = lettersxy[i][3]-lettersxy[i][1]+1;
         uc **image;//[100][407] = {0};
         image = (uc**)malloc(sizeof(uc*)*imageHeight);
-        for (int i = 0; i < imageHeight; i++) {
-            image[i] = (uc*)malloc(sizeof(*image)*imageWidth);
-            for (int d = 0; d < imageWidth; d++) {
-                image[i][d] = 0;
-            }
+        *image = (uc*)malloc(sizeof(**image) * imageWidth * imageHeight);
+        memset(*image, 0, imageHeight * imageWidth);
+        for (int i = 1; i < imageHeight; i++) {
+//            image[i] = (uc*)malloc(sizeof(**image)*imageWidth);
+//            memset(image[i], 0, imageWidth);
+            image[i] = *image + imageWidth * i;
         }
         for(int j = 0;j<height;j++){
             for(int k = 0;k<width;k++){
@@ -576,7 +583,9 @@ static void dividecharIDCard(uc **blackimage,int **lettersxy,uc **letterimage,in
             }
             }
         }
-        free2DArray((void**)image, imageHeight);
+//        free2DArray((void**)image, imageHeight);
+        free(*image);
+        free(image);
     }
 }
 static void generateGrayImageIDCard(int8_t* arr,uc **grayimage,int imageWidth,int imageHeight,int hw,int hh,int x,int y,int w,int h){
@@ -642,27 +651,30 @@ static void generateGrayImageIDCard(int8_t* arr,uc **grayimage,int imageWidth,in
 char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
     uc **letterimage;//[18][25]={0};
     letterimage = (uc**)malloc(sizeof(uc*)*18);
-    for (int i = 0; i < 18; i++) {
-        letterimage[i] = (uc*)malloc(sizeof(*letterimage)*25);
-        for (int d = 0; d < 25; d++) {
-            letterimage[i][d] = 0;
-        }
+    *letterimage = (uc*)malloc(18 * 25 * sizeof(uc));
+    memset(*letterimage, 0, 18 * 25);
+    for (int i = 1; i < 18; i++) {
+//        letterimage[i] = (uc*)malloc(sizeof(**letterimage)*25);
+//        memset(letterimage[i], 0, 25);
+        letterimage[i] = *letterimage + i * 25;
     }
     uc **grayimage;//[100][407]={0};
     grayimage = (uc**)malloc(sizeof(uc*)*100);
-    for (int i = 0; i < 100; i++) {
-        grayimage[i] = (uc*)malloc(sizeof(*grayimage)*407);
-        for (int d = 0; d < 407; d++) {
-            grayimage[i][d] = 0;
-        }
+    *grayimage = (uc*)malloc(sizeof(**grayimage) * 100 * 407);
+    memset(*grayimage, 0, 100 * 407);
+    for (int i = 1; i < 100; i++) {
+//        grayimage[i] = (uc*)malloc(sizeof(**grayimage)*407);
+//        memset(grayimage[i], 0, 407);
+        grayimage[i] = *grayimage + i * 407;
     }
     uc **blackimage;//[100][51]={0};
     blackimage = (uc**)malloc(sizeof(uc*)*100);
-    for (int i = 0; i < 100; i++) {
-        blackimage[i] = (uc*)malloc(sizeof(*blackimage)*51);
-        for (int d = 0; d < 51; d++) {
-            blackimage[i][d] = 0;
-        }
+    *blackimage = (uc*)malloc(sizeof(**blackimage) * 51 * 100);
+    memset(*blackimage, 0, 51 * 100);
+    for (int i = 1; i < 100; i++) {
+//        blackimage[i] = (uc*)malloc(sizeof(**blackimage)*51);
+//        memset(blackimage[i], 0, 51);
+        blackimage[i] = *blackimage + i * 51;
     }
     int width = 407;
     int height = 100;
@@ -676,53 +688,62 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     int upwhitespaces = 0;
     int **lettersxy;//[18][4] = {0};
     lettersxy = (int**)malloc(sizeof(int*)*18);
-    for (int i = 0; i < 18; i++) {
-        lettersxy[i] = (int*)malloc(sizeof(*lettersxy)*4);
-        for (int d = 0; d < 4; d++) {
-            lettersxy[i][d] = 0;
-        }
+    *lettersxy = (int*)malloc(sizeof(**lettersxy) * 4 * 18);
+    memset(*lettersxy, 0, 4 * 18);
+    for (int i = 1; i < 18; i++) {
+//        lettersxy[i] = (int*)malloc(sizeof(**lettersxy)*4);
+//        memset(lettersxy[i], 0, 4);
+        lettersxy[i] = *lettersxy + 4 * i;
     }
     
     if(!getHeightEdgeIDCard(width,height,blackimage,51,100,&angle,(int*) heightEdge)){
-        free2DArray((void**)blackimage, 100);
-        free2DArray((void**)grayimage, 100);
-        free2DArray((void**)letterimage, 18);
+//        free2DArray((void**)blackimage, 100);
+//        free2DArray((void**)grayimage, 100);
+//        free2DArray((void**)letterimage, 18);
+//        free2DArray((void**)lettersxy, 18);
+        free(*blackimage);
+        free(blackimage);
+        free(*grayimage);
+        free(grayimage);
+        free(*lettersxy);
+        free(lettersxy);
+        free(*letterimage);
+        free(letterimage);
         printf("寻找上下边框失败");
-        goto A;
+        result[0]=0;
+        return result;
     }
    if(generateLetterXIDCard(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)){
         if(getlettersxyIDCard(lettersxy,upletterX,heightEdge,blackimage,angle,width,height,upwhitespaces)){
             dividecharIDCard(blackimage,lettersxy,letterimage,18,407,100);
             ocrIDCard(letterimage,18,result,NULL);
             printf("%s",result);
-            if(!CheckValue(result)){
-                free2DArray((void**)lettersxy, 18);
-                free2DArray((void**)blackimage, 100);
-                free2DArray((void**)grayimage, 100);
-                free2DArray((void**)letterimage, 18);
-                goto B;
+            if(CheckValue(result)){
+                free(blackimage);
+                free(grayimage);
+                free(letterimage);
+                if(result[0] == 0){
+                    result[1] = 0;
+//                    free2DArray((void**)lettersxy, 18);
+                    free(*lettersxy);
+                    free(lettersxy);
+
+                    return result;
+                }else {
+                    int bbb[72];
+                    for (int i = 0; i < 18; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            bbb[i * 4 + j] = lettersxy[i][j];
+                        }
+                    }
+//                    free2DArray((void**)lettersxy, 18);
+                    free(*lettersxy);
+                    free(lettersxy);
+                    return result;
+                }
             }
-            free(blackimage);
-            free(grayimage);
-            free(letterimage);
-            goto A;
         }
     }
-    A:  if(result[0] == 0){
-        result[1] = 0;
-        free2DArray((void**)lettersxy, 18);
-        return result;
-    }else {
-        int bbb[72];
-        for (int i = 0; i < 18; i++) {
-            for (int j = 0; j < 4; j++) {
-                bbb[i * 4 + j] = lettersxy[i][j];
-            }
-        }
-        free2DArray((void**)lettersxy, 18);
-        return result;
-    }
-    B:
     result[0]=0;
     return result;
 }

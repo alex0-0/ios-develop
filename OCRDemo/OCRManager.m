@@ -514,6 +514,7 @@ static const int kBlue = 3;
     CIImage *filtedImage = [filter valueForKey:kCIOutputImageKey];
     CGImageRef cgImage = [context createCGImage:filtedImage fromRect:[filtedImage extent]];
     retImg = [UIImage imageWithCGImage:cgImage];
+    CGImageRelease(cgImage);
     return retImg;
 }
 
@@ -550,6 +551,7 @@ static const int kBlue = 3;
     bitMap = NULL;
     
     UIImage *returnImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
     
     return returnImage;
 }

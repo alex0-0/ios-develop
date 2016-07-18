@@ -53,7 +53,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     
     [self initView];
     [self setupImagePicker];
-    [self configTesseract];
+//    [self configTesseract];
 }
 
 -(void) takePhoto{

@@ -40,7 +40,7 @@
     _tipLabel.backgroundColor = [UIColor clearColor];
     [_tipLabel setTextColor:[UIColor whiteColor]];
     _tipLabel.numberOfLines = 1;
-    CGSize tipLabelSize = [_tipLabel.text sizeWithAttributes:@{NSFontAttributeName:_tipLabel.font}];
+//    CGSize tipLabelSize = [_tipLabel.text sizeWithAttributes:@{NSFontAttributeName:_tipLabel.font}];
 //    _okButton = [UIButton alloc] initWithFrame:CGRectMake((kScreenWidth - kButtonWidth) / 2, <#CGFloat y#>, <#CGFloat width#>, <#CGFloat height#>);
 }
 
