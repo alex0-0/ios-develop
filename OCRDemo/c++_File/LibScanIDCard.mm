@@ -23,25 +23,21 @@ typedef enum{
 #ifdef __cplusplus
 extern "C" {
 #endif
+    extern void saveLetterPos(int *pos);    //save the positions of letters to the program(implemeted in Objective-c file, which can be found in runtime)
 #ifdef __cplusplus
 }
 #endif
-extern int onetable[256];
+extern int byteOneCount[256];
 extern char templateImage[36][200][25];
-extern int charcount[36];
-/*
- extern int byteOneCount[256];
- extern char templateImage[36][200][25];
- extern int charTemplateCount[36];
- */
+extern int charTemplateCount[36];
 
 static int cmpVarianceIDCard(const void* a,const void* b){
     return (( Varivance *)b)->va-((Varivance *)a)->va;
 }
-int cmpheightIDCard(const void* a,const void* b){
+int cmpHeight(const void* a,const void* b){
     return ((Varivance*)a)->height-((Varivance*)b)->height;
 }
-static void blackImage(int oldwidth,int oldheight,uc **grayimage,uc **blackimage){
+static void generateBlackImage(int oldwidth,int oldheight,uc **grayimage,uc **blackimage){
     uc *thre;
     thre = (uc*)malloc(sizeof(uc) * ((int)oldwidth / 100));
     memset(thre, 0, ((int)oldwidth / 100));
@@ -105,7 +101,7 @@ static int getVariance(int oldwidth,int oldheight,uc **blackimage,float ang,int 
         if(h<0||h>=oldheight) break;
         int wid = i/8;
         uc tmp = ((blackimage[h][wid]>>1)^(blackimage[h][wid])&0x7f);
-        result += onetable[tmp];
+        result += byteOneCount[tmp];
         if((blackimage[h][wid]&1) != ((blackimage[h][wid+1]&0x80)>>7)){
             result++;
         }
@@ -265,7 +261,7 @@ static bool getHeightEdge(int oldwidth,int oldheight,uc **blackimage,int bWidth,
     *angle = (float) (ang - 2) / 100;
     Varivance *v = varivances[ang];
     qsort(v, oldheight, sizeof(Varivance), cmpVarianceIDCard);
-    qsort(v, 24, sizeof(Varivance), cmpheightIDCard);
+    qsort(v, 24, sizeof(Varivance), cmpHeight);
     int heights[24];
     count = 0;
     int peaks[24] = {0};
@@ -311,14 +307,14 @@ static bool getHeightEdge(int oldwidth,int oldheight,uc **blackimage,int bWidth,
     }
     return false;
 }
-static uc getpixelbyblackimage(uc **blackimage,int x,int y){
+static uc getPixelByBlackImage(uc **blackImage,int x,int y){
     if (x < 0 || y < 0) {
         return 0;
     }
-    return (blackimage[y][x/8]>>(7-x%8))&1;
+    return (blackImage[y][x/8]>>(7-x%8))&1;
 }
 
-static bool generateLetterXPassport(int up,int down,uc **blackimage,float angle,int width,int height,int result[130],int* spaces){
+static bool generateLetterXPassport(int up,int down,uc **blackImage,float angle,int width,int height,int result[130],int* spaces){
     //    LOGE("%d",blackimage[83][13]);
     int x12[120][2] = {0};
     uc count = 0;
@@ -334,7 +330,7 @@ static bool generateLetterXPassport(int up,int down,uc **blackimage,float angle,
             if (i + (j * angle) < 0 || i + (j * angle) >= width) {
                 continue;
             }
-            uc rgb = getpixelbyblackimage(blackimage, (i + (j * angle)), startY - j);
+            uc rgb = getPixelByBlackImage(blackImage, (i + (j * angle)), startY - j);
             if(rgb != 0){
                 isWhite += 1;
                 if (isWhite >= 2) {//willard
@@ -452,7 +448,7 @@ static bool generateLetterXIDCard(int up,int down,uc **blackimage,float angle,in
             if (i + (j * angle) < 0 || i + (j * angle) >= width) {
                 continue;
             }
-            uc rgb = getpixelbyblackimage(blackimage, (i + (j * angle)), startY - j);
+            uc rgb = getPixelByBlackImage(blackimage, (i + (j * angle)), startY - j);
             if(rgb != 0){
                 isWhite += 1;
                 if (isWhite >= 2) {
@@ -524,7 +520,7 @@ static bool generateLetterXIDCard(int up,int down,uc **blackimage,float angle,in
 static int checkWhite(uc **blackImage,int x1,int x2,int y){
     int count = 0;
     for (int i = 0; i < x2 - x1 + 1; i++) {
-        if(getpixelbyblackimage(blackImage, x1+i, y) != 0){
+        if(getPixelByBlackImage(blackImage, x1+i, y) != 0){
             count++;
             if (count > 3) {
                 return count;
@@ -533,22 +529,22 @@ static int checkWhite(uc **blackImage,int x1,int x2,int y){
     }
     return count;
 }
-static void expandFourInt(int letteredge[4],uc **blackImage,int width,int height){
+static void expandFourInt(int letterEdge[4],uc **blackImage,int width,int height){
     int flag = -1;
     while (flag != 0) {
         if (flag < 0) {
-            if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[1] - 1) >= 2) {
-                letteredge[1]+=flag;
-                if (letteredge[1]== 0) {
+            if (checkWhite(blackImage, letterEdge[0], letterEdge[2], letterEdge[1] - 1) >= 2) {
+                letterEdge[1]+=flag;
+                if (letterEdge[1]== 0) {
                     flag = 0;
                 }
             } else {
                 flag = 1;
             }
         } else {
-            if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[1]) < 2) {
-                letteredge[1] += flag;
-                if (letteredge[1] == height - 1 || letteredge[1] == letteredge[3] - 3) {
+            if (checkWhite(blackImage, letterEdge[0], letterEdge[2], letterEdge[1]) < 2) {
+                letterEdge[1] += flag;
+                if (letterEdge[1] == height - 1 || letterEdge[1] == letterEdge[3] - 3) {
                     flag = 0;
                 }
             } else {
@@ -559,18 +555,18 @@ static void expandFourInt(int letteredge[4],uc **blackImage,int width,int height
     flag = 1;
     while (flag != 0) {
         if (flag > 0) {
-            if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[3] + 1) >= 2) {
-                letteredge[3]+= flag;
-                if (letteredge[3] == height - 1) {
+            if (checkWhite(blackImage, letterEdge[0], letterEdge[2], letterEdge[3] + 1) >= 2) {
+                letterEdge[3]+= flag;
+                if (letterEdge[3] == height - 1) {
                     flag = 0;
                 }
             } else {
                 flag = -1;
             }
         } else {
-            if (checkWhite(blackImage, letteredge[0], letteredge[2], letteredge[3]) < 2) {
-                letteredge[3] += flag;
-                if (letteredge[3] == 0 || letteredge[3] == letteredge[1] + 2) {
+            if (checkWhite(blackImage, letterEdge[0], letterEdge[2], letterEdge[3]) < 2) {
+                letterEdge[3] += flag;
+                if (letterEdge[3] == 0 || letterEdge[3] == letterEdge[1] + 2) {
                     flag = 0;
                 }
             } else {
@@ -580,7 +576,7 @@ static void expandFourInt(int letteredge[4],uc **blackImage,int width,int height
     }
 }
 
-static bool getlettersxyPassport(int **letters,int upLetterX[130],int downLetterX[130],int heightedge[4],uc **blackImage,float angle,int width,int height,int upspaces,int downspaces){
+static bool getLettersXYPassport(int **letters,int upLetterX[130],int downLetterX[130],int heightedge[4],uc **blackImage,float angle,int width,int height,int upspaces,int downspaces){
     int count = 0;
     int leftX = -1;
     int diff;
@@ -591,15 +587,15 @@ static bool getlettersxyPassport(int **letters,int upLetterX[130],int downLetter
         }
         //        FourInt fourInt = new FourInt().setA(leftX + 1).setB(heightEdge.a).setC(upLetterX.get(i) - 1).setD(heightEdge.b);
         diff = angle*(leftX+1);
-        int letteredge[4] = {leftX+1,heightedge[0]+diff,upLetterX[i]-1,heightedge[1]+diff};
-        expandFourInt(letteredge, blackImage,width,height);
+        int letterEdge[4] = {leftX+1,heightedge[0]+diff,upLetterX[i]-1,heightedge[1]+diff};
+        expandFourInt(letterEdge, blackImage,width,height);
         //        if (fourInt.d - fourInt.b + 1 > (heightEdge.b - heightEdge.a + 1) * 0.7 && fourInt.d - fourInt.b + 1 < (heightEdge.b - heightEdge.a + 1) * 1.25) {
-        if(letteredge[3]-letteredge[1]+1>(heightedge[1]-heightedge[0]+1)*0.6&&letteredge[3]-letteredge[1]+1<(heightedge[1]-heightedge[0]+1)*1.35){//todo willard
+        if(letterEdge[3]-letterEdge[1]+1>(heightedge[1]-heightedge[0]+1)*0.6&&letterEdge[3]-letterEdge[1]+1<(heightedge[1]-heightedge[0]+1)*1.35){//todo willard
             //            letters.add(fourInt);
-            letters[count][0] = letteredge[0];
-            letters[count][1] = letteredge[1];
-            letters[count][2] = letteredge[2];
-            letters[count++][3] = letteredge[3];
+            letters[count][0] = letterEdge[0];
+            letters[count][1] = letterEdge[1];
+            letters[count][2] = letterEdge[2];
+            letters[count++][3] = letterEdge[3];
         }
         leftX = -1;
     }
@@ -612,15 +608,15 @@ static bool getlettersxyPassport(int **letters,int upLetterX[130],int downLetter
         }
         //        FourInt fourInt = new FourInt().setA(leftX + 1).setB(heightEdge.c).setC(downLetterX.get(i) - 1).setD(heightEdge.d);
         diff = angle*(leftX+1);
-        int letteredge[4] = {leftX+1,heightedge[2]+diff,downLetterX[i]-1,heightedge[3]+diff};
-        expandFourInt(letteredge, blackImage,width,height);
+        int letterEdge[4] = {leftX+1,heightedge[2]+diff,downLetterX[i]-1,heightedge[3]+diff};
+        expandFourInt(letterEdge, blackImage,width,height);
         //        if (fourInt.d - fourInt.b + 1 > (heightEdge.d - heightEdge.c + 1) * 0.8 && fourInt.d - fourInt.b + 1 < (heightEdge.d - heightEdge.c + 1) * 1.15) {
-        if(letteredge[3]-letteredge[1]+1>(heightedge[3]-heightedge[2]+1)*0.6&&letteredge[3]-letteredge[1]+1<(heightedge[3]-heightedge[2]+1)*1.35){//todo willard
+        if(letterEdge[3]-letterEdge[1]+1>(heightedge[3]-heightedge[2]+1)*0.6&&letterEdge[3]-letterEdge[1]+1<(heightedge[3]-heightedge[2]+1)*1.35){//todo willard
             //            letters.add(fourInt);
-            letters[count][0] = letteredge[0];
-            letters[count][1] = letteredge[1];
-            letters[count][2] = letteredge[2];
-            letters[count++][3] = letteredge[3];
+            letters[count][0] = letterEdge[0];
+            letters[count][1] = letterEdge[1];
+            letters[count][2] = letterEdge[2];
+            letters[count++][3] = letterEdge[3];
         }
         leftX = -1;
     }
@@ -629,7 +625,7 @@ static bool getlettersxyPassport(int **letters,int upLetterX[130],int downLetter
 }
 
 //PS: different
-static bool getlettersxyIDCard(int **letters,int upletterX[130],int heightedge[2],uc **blackImage,float angle,int width,int height,int upspaces){
+static bool getLettersXYIDCard(int **letters,int upletterX[130],int heightedge[2],uc **blackImage,float angle,int width,int height,int upspaces){
     int count = 0;
     int leftX = -1;
     int diff;
@@ -654,14 +650,14 @@ static bool getlettersxyIDCard(int **letters,int upletterX[130],int heightedge[2
     }
     return true;
 }
-static char getcharbyintIDCard(int maxI){
+static char getCharByIntIDCard(int maxI){
     if (maxI < 10) {
         char a = 48+maxI;
         return a;
     }
     return 'X';
 }
-static char getcharbyintPassport(int maxI){
+static char getCharByIntPassport(int maxI){
     if (maxI < 10) {
         char a = 48+maxI;
         return a;
@@ -670,18 +666,18 @@ static char getcharbyintPassport(int maxI){
     }
     return (char) (55 + maxI);
 }
-void static ocr(uc **letterimage,int letterNum,char* result,int* iaa,LibScanType type) {
+void static ocr(uc **letterImage,int letterNum,char* result,int* iaa,LibScanType type) {
     int min = 0xfffff; 
     int answer = 0;
     for(int m = 0;m<letterNum;m++){
         answer = 0;
         min = 0xfffff;
         for(int k = 0;k<36;k++){
-            for(int l =0;l<charcount[k];l++){
+            for(int l =0;l<charTemplateCount[k];l++){
                 int relations = 0;
                 for(int i = 0;i<25;i++){
-                    uc r =letterimage[m][i]^templateImage[k][l][i];
-                    relations += onetable[r];
+                    uc r =letterImage[m][i]^templateImage[k][l][i];
+                    relations += byteOneCount[r];
                 }
                 if(relations<min){
                     min = relations;
@@ -691,16 +687,16 @@ void static ocr(uc **letterimage,int letterNum,char* result,int* iaa,LibScanType
         }
         switch (type) {
             case LibScanPassport:
-                result[m] = getcharbyintPassport(answer);
+                result[m] = getCharByIntPassport(answer);
                 break;
             case LibScanIDCard:
-                result[m] = getcharbyintIDCard(answer);
+                result[m] = getCharByIntIDCard(answer);
             default:
                 break;
         }
     }
 }
-static bool CheckValue(char* result) {
+static bool checkValue(char* result) {
     //region  check null
     for(int i=0;i<18;i++){
         if(result[i]==' '||!result[i]){
@@ -731,11 +727,11 @@ static bool CheckValue(char* result) {
     return true;
 }
 
-static void dividechar(uc **blackimage,int **lettersxy,uc **letterimage,int letterNum,int imageWidth,int imageHeight){
+static void divideChar(uc **blackImage,int **lettersXY,uc **letterImage,int letterNum,int imageWidth,int imageHeight){
     int width,height;
     for(int i = 0;i<letterNum;i++){
-        width = lettersxy[i][2]-lettersxy[i][0]+1;
-        height = lettersxy[i][3]-lettersxy[i][1]+1;
+        width = lettersXY[i][2]-lettersXY[i][0]+1;
+        height = lettersXY[i][3]-lettersXY[i][1]+1;
         uc **image;//[100][407] = {0};
         image = (uc**)malloc(sizeof(uc*)*imageHeight);
         *image = (uc*)malloc(sizeof(**image) * imageWidth * imageHeight);
@@ -747,7 +743,7 @@ static void dividechar(uc **blackimage,int **lettersxy,uc **letterimage,int lett
         }
         for(int j = 0;j<height;j++){
             for(int k = 0;k<width;k++){
-                char a =getpixelbyblackimage(blackimage, k+lettersxy[i][0], j+lettersxy[i][1]);
+                char a =getPixelByBlackImage(blackImage, k+lettersXY[i][0], j+lettersXY[i][1]);
                 image[j][k] = a;
             }
         }
@@ -807,14 +803,14 @@ static void dividechar(uc **blackimage,int **lettersxy,uc **letterimage,int lett
                     }
                 }
                 if(color/((endy-starty)*(endx-startx))>=0.5){
-                    letterimage[i][flag] = (letterimage[i][flag]<<1)+1;
+                    letterImage[i][flag] = (letterImage[i][flag]<<1)+1;
                     count++;
                     if(count == 8){
                         flag++;
                         count = 0;
                     }
                 }else{
-                    letterimage[i][flag] = (letterimage[i][flag]<<1)+0;
+                    letterImage[i][flag] = (letterImage[i][flag]<<1)+0;
                     count++;
                     if(count == 8){
                         flag++;
@@ -828,7 +824,7 @@ static void dividechar(uc **blackimage,int **lettersxy,uc **letterimage,int lett
         free(image);
     }
 }
-static void generateGrayImage(int8_t* arr,uc **grayimage,int imageWidth,int imageHeight,int hw,int hh,int x,int y,int w,int h){
+static void generateGrayImage(int8_t* arr,uc **grayImage,int imageWidth,int imageHeight,int hw,int hh,int x,int y,int w,int h){
     float pixelwidth =(float)w/imageWidth;
     float pixelheight =(float)h/imageHeight;
     for(int j = 0;j<imageHeight;j++){
@@ -882,7 +878,7 @@ static void generateGrayImage(int8_t* arr,uc **grayimage,int imageWidth,int imag
             }
             if (color / ((endy - starty) * (endx - startx)) >= 0.5) {
                 if (endy != starty && endx != startx) {
-                    grayimage[j][k] = roundf(color / ((endy - starty) * (endx - startx)));
+                    grayImage[j][k] = roundf(color / ((endy - starty) * (endx - startx)));
                 }
             }
         }
@@ -891,33 +887,33 @@ static void generateGrayImage(int8_t* arr,uc **grayimage,int imageWidth,int imag
 
 //Scan ID Card
 char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
-    uc **letterimage;//[18][25]={0};
-    letterimage = (uc**)malloc(sizeof(uc*)*18);
-    *letterimage = (uc*)malloc(18 * 25 * sizeof(uc));
-    memset(*letterimage, 0, 18 * 25);
+    uc **letterImage;//[18][25]={0};
+    letterImage = (uc**)malloc(sizeof(uc*)*18);
+    *letterImage = (uc*)malloc(18 * 25 * sizeof(uc));
+    memset(*letterImage, 0, 18 * 25);
     for (int i = 1; i < 18; i++) {
-        letterimage[i] = *letterimage + i * 25;
+        letterImage[i] = *letterImage + i * 25;
     }
-    uc **grayimage;//[100][407]={0};
-    grayimage = (uc**)malloc(sizeof(uc*)*100);
-    *grayimage = (uc*)malloc(sizeof(**grayimage) * 100 * 407);
-    memset(*grayimage, 0, 100 * 407);
+    uc **grayImage;//[100][407]={0};
+    grayImage = (uc**)malloc(sizeof(uc*)*100);
+    *grayImage = (uc*)malloc(sizeof(**grayImage) * 100 * 407);
+    memset(*grayImage, 0, 100 * 407);
     for (int i = 1; i < 100; i++) {
-        grayimage[i] = *grayimage + i * 407;
+        grayImage[i] = *grayImage + i * 407;
     }
-    uc **blackimage;//[100][51]={0};
-    blackimage = (uc**)malloc(sizeof(uc*)*100);
-    *blackimage = (uc*)malloc(sizeof(**blackimage) * 51 * 100);
-    memset(*blackimage, 0, 51 * 100);
+    uc **blackImage;//[100][51]={0};
+    blackImage = (uc**)malloc(sizeof(uc*)*100);
+    *blackImage = (uc*)malloc(sizeof(**blackImage) * 51 * 100);
+    memset(*blackImage, 0, 51 * 100);
     for (int i = 1; i < 100; i++) {
-        blackimage[i] = *blackimage + i * 51;
+        blackImage[i] = *blackImage + i * 51;
     }
     int width = 407;
     int height = 100;
     float angle = 0;
     int heightEdge[2]={0};
-    generateGrayImage(arr,grayimage,407,100,hw,hh,x,y,w,h);
-    blackImage(width,height,grayimage,blackimage);
+    generateGrayImage(arr,grayImage,407,100,hw,hh,x,y,w,h);
+    generateBlackImage(width,height,grayImage,blackImage);
     char *result = new char[19];
     memset(result, 0, 19 * sizeof(char));
     int upletterX[130] = {0};
@@ -930,13 +926,13 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
         lettersxy[i] = *lettersxy + 4 * i;
     }
     
-    if(getHeightEdge(width,height,blackimage,51,100,&angle,(int*) heightEdge,LibScanIDCard)){
-       if(generateLetterXIDCard(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)){
-            if(getlettersxyIDCard(lettersxy,upletterX,heightEdge,blackimage,angle,width,height,upwhitespaces)){
-                dividechar(blackimage,lettersxy,letterimage,18,407,100);
-                ocr(letterimage,18,result,NULL,LibScanIDCard);
+    if(getHeightEdge(width,height,blackImage,51,100,&angle,(int*) heightEdge,LibScanIDCard)){
+       if(generateLetterXIDCard(heightEdge[0],heightEdge[1],blackImage,angle,width,height,upletterX,&upwhitespaces)){
+            if(getLettersXYIDCard(lettersxy,upletterX,heightEdge,blackImage,angle,width,height,upwhitespaces)){
+                divideChar(blackImage,lettersxy,letterImage,18,407,100);
+                ocr(letterImage,18,result,NULL,LibScanIDCard);
                 printf("%s",result);
-                if(CheckValue(result)){
+                if(checkValue(result)){
                     if(result[0] != 0){
                         int bbb[72];
                         for (int i = 0; i < 18; i++) {
@@ -945,12 +941,12 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
                             }
                         }
                     }
-                    free(*blackimage);
-                    free(blackimage);
-                    free(*grayimage);
-                    free(grayimage);
-                    free(*letterimage);
-                    free(letterimage);
+                    free(*blackImage);
+                    free(blackImage);
+                    free(*grayImage);
+                    free(grayImage);
+                    free(*letterImage);
+                    free(letterImage);
                     free(*lettersxy);
                     free(lettersxy);
                     return result;
@@ -961,48 +957,48 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     else {
         printf("寻找上下边框失败");
     }
-    free(*blackimage);
-    free(blackimage);
-    free(*grayimage);
-    free(grayimage);
+    free(*blackImage);
+    free(blackImage);
+    free(*grayImage);
+    free(grayImage);
     free(*lettersxy);
     free(lettersxy);
-    free(*letterimage);
-    free(letterimage);
+    free(*letterImage);
+    free(letterImage);
     result[0]=0;
     return result;
 }
 
 char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
-    uc **letterimage;//[88][25]={0};//88 leters 13width 15 height;
-    letterimage = (uc**)malloc(sizeof(uc*)*88);
-    *letterimage = (uc*)malloc(88 * 25 * sizeof(uc));
-    memset(*letterimage, 0, 88 * 25);
+    uc **letterImage;//[88][25]={0};//88 leters 13width 15 height;
+    letterImage = (uc**)malloc(sizeof(uc*)*88);
+    *letterImage = (uc*)malloc(88 * 25 * sizeof(uc));
+    memset(*letterImage, 0, 88 * 25);
     for (int i = 1; i < 88; i++) {
-        letterimage[i] = *letterimage + i * 25;
+        letterImage[i] = *letterImage + i * 25;
     }
-    uc **grayimage;//[135][700]={0};
-    grayimage = (uc**)malloc(sizeof(uc*)*135);
-    *grayimage = (uc*)malloc(sizeof(**grayimage) * 135 * 700);
-    memset(*grayimage, 0, 135 * 700);
+    uc **grayImage;//[135][700]={0};
+    grayImage = (uc**)malloc(sizeof(uc*)*135);
+    *grayImage = (uc*)malloc(sizeof(**grayImage) * 135 * 700);
+    memset(*grayImage, 0, 135 * 700);
     for (int i = 1; i < 135; i++) {
-        grayimage[i] = *grayimage + i * 700;
+        grayImage[i] = *grayImage + i * 700;
     }
 
-    uc **blackimage;//[135][88]={0};//135*700/8
-    blackimage = (uc**)malloc(sizeof(uc*)*135);
-    *blackimage = (uc*)malloc(sizeof(**blackimage) * 88 * 135);
-    memset(*blackimage, 0, 88 * 135);
+    uc **blackImage;//[135][88]={0};//135*700/8
+    blackImage = (uc**)malloc(sizeof(uc*)*135);
+    *blackImage = (uc*)malloc(sizeof(**blackImage) * 88 * 135);
+    memset(*blackImage, 0, 88 * 135);
     for (int i = 1; i < 135; i++) {
-        blackimage[i] = *blackimage + i * 88;
+        blackImage[i] = *blackImage + i * 88;
     }
 
     int width = 700;
     int height = 131;
     float angle = 0;
     int heightEdge[4]={0};
-    generateGrayImage(arr,grayimage,700,131,hw,hh,x,y,w,h);
-    blackImage(width,height,grayimage,blackimage);
+    generateGrayImage(arr,grayImage,700,131,hw,hh,x,y,w,h);
+    generateBlackImage(width,height,grayImage,blackImage);
     char *result = new char[89];
     memset(result, 0, 89 * sizeof(char));
     int upletterX[130] = {0};
@@ -1017,11 +1013,11 @@ char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h
 
     int upwhitespaces = 0;
     int downwhitespaces = 0;
-    if(getHeightEdge(width,height,blackimage,88,131,&angle,(int*) heightEdge,LibScanPassport)){
-        if(generateLetterXPassport(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)&&generateLetterXPassport(heightEdge[2],heightEdge[3],blackimage,angle,width,height,downletterX,&downwhitespaces)){
-            if(getlettersxyPassport(lettersxy,upletterX,downletterX,heightEdge,blackimage,angle,width,height,upwhitespaces,downwhitespaces)){
-                dividechar(blackimage,lettersxy,letterimage,88,700,131);
-                ocr(letterimage,88,result,NULL,LibScanPassport);
+    if(getHeightEdge(width,height,blackImage,88,131,&angle,(int*) heightEdge,LibScanPassport)){
+        if(generateLetterXPassport(heightEdge[0],heightEdge[1],blackImage,angle,width,height,upletterX,&upwhitespaces)&&generateLetterXPassport(heightEdge[2],heightEdge[3],blackImage,angle,width,height,downletterX,&downwhitespaces)){
+            if(getLettersXYPassport(lettersxy,upletterX,downletterX,heightEdge,blackImage,angle,width,height,upwhitespaces,downwhitespaces)){
+                divideChar(blackImage,lettersxy,letterImage,88,700,131);
+                ocr(letterImage,88,result,NULL,LibScanPassport);
                 printf("%s",result);
                 if(result[0] != 0){
                     int *letterPos;
@@ -1031,17 +1027,18 @@ char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h
                             letterPos[4 * i + j] = lettersxy[i][j];
                         }
                     }
-                    //    saveLetterPos(letterPos);
+                    //save the positions of letters to the program
+                    saveLetterPos(letterPos);
                     free(letterPos);
                     
-                    free(*blackimage);
-                    free(blackimage);
-                    free(*grayimage);
-                    free(grayimage);
+                    free(*blackImage);
+                    free(blackImage);
+                    free(*grayImage);
+                    free(grayImage);
                     free(*lettersxy);
                     free(lettersxy);
-                    free(*letterimage);
-                    free(letterimage);
+                    free(*letterImage);
+                    free(letterImage);
                     return result;
                 }
             }
@@ -1050,14 +1047,14 @@ char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h
     else {
         printf("寻找上下边框失败");
     }
-    free(*blackimage);
-    free(blackimage);
-    free(*grayimage);
-    free(grayimage);
+    free(*blackImage);
+    free(blackImage);
+    free(*grayImage);
+    free(grayImage);
     free(*lettersxy);
     free(lettersxy);
-    free(*letterimage);
-    free(letterimage);
+    free(*letterImage);
+    free(letterImage);
     result[0] = 0;
     return result;
 }

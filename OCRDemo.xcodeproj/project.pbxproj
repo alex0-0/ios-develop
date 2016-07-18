@@ -22,12 +22,10 @@
 		558228BF1D3378D70012E18A /* back_arrow@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 558228BD1D3378D70012E18A /* back_arrow@3x.png */; };
 		558228C01D3378D70012E18A /* light_off@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 558228BE1D3378D70012E18A /* light_off@3x.png */; };
 		5591E4731D2F9E90001A1349 /* LibScanIDCard.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5591E4711D2F9E90001A1349 /* LibScanIDCard.mm */; };
-		5591E4741D2F9E90001A1349 /* templateIDCard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5591E4721D2F9E90001A1349 /* templateIDCard.cpp */; };
 		559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 559891181D0D5CDA0079A250 /* CameraOverlay.m */; };
 		55A308011D13D58600DFA964 /* bbb in Resources */ = {isa = PBXBuildFile; fileRef = 55A308001D13D58600DFA964 /* bbb */; };
 		55B9C0571D1926770070CC3E /* barcode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55B9C0551D1926770070CC3E /* barcode@2x.png */; };
 		55B9C0581D1926770070CC3E /* barcode@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55B9C0561D1926770070CC3E /* barcode@3x.png */; };
-		55F1358C1D118D40007E4F2B /* LibScanPassport.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55F135881D118D40007E4F2B /* LibScanPassport.mm */; };
 		55F1358D1D118D40007E4F2B /* template.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55F135891D118D40007E4F2B /* template.cpp */; };
 		55F2D6DA1D2FA81C00F3057E /* ScannerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55F2D6D91D2FA81C00F3057E /* ScannerController.m */; };
 		C28B029B83B6F40CB22D5739 /* libPods-OCRDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */; };
@@ -57,14 +55,11 @@
 		558228BD1D3378D70012E18A /* back_arrow@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back_arrow@3x.png"; sourceTree = "<group>"; };
 		558228BE1D3378D70012E18A /* light_off@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "light_off@3x.png"; sourceTree = "<group>"; };
 		5591E4711D2F9E90001A1349 /* LibScanIDCard.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LibScanIDCard.mm; sourceTree = "<group>"; };
-		5591E4721D2F9E90001A1349 /* templateIDCard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = templateIDCard.cpp; sourceTree = "<group>"; };
 		559891171D0D5CDA0079A250 /* CameraOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraOverlay.h; sourceTree = "<group>"; };
 		559891181D0D5CDA0079A250 /* CameraOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlay.m; sourceTree = "<group>"; };
 		55A308001D13D58600DFA964 /* bbb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bbb; sourceTree = "<group>"; };
 		55B9C0551D1926770070CC3E /* barcode@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "barcode@2x.png"; sourceTree = "<group>"; };
 		55B9C0561D1926770070CC3E /* barcode@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "barcode@3x.png"; sourceTree = "<group>"; };
-		55F135871D118D40007E4F2B /* LibScanPassport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibScanPassport.h; sourceTree = "<group>"; };
-		55F135881D118D40007E4F2B /* LibScanPassport.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LibScanPassport.mm; sourceTree = "<group>"; };
 		55F135891D118D40007E4F2B /* template.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = template.cpp; sourceTree = "<group>"; };
 		55F2D6D91D2FA81C00F3057E /* ScannerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerController.m; sourceTree = "<group>"; };
 		55F54E421D34E590002D19DB /* LibScanIDCard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LibScanIDCard.h; sourceTree = "<group>"; };
@@ -151,9 +146,6 @@
 			children = (
 				55F54E421D34E590002D19DB /* LibScanIDCard.h */,
 				5591E4711D2F9E90001A1349 /* LibScanIDCard.mm */,
-				5591E4721D2F9E90001A1349 /* templateIDCard.cpp */,
-				55F135871D118D40007E4F2B /* LibScanPassport.h */,
-				55F135881D118D40007E4F2B /* LibScanPassport.mm */,
 				55F135891D118D40007E4F2B /* template.cpp */,
 			);
 			path = "c++_File";
@@ -308,11 +300,9 @@
 			files = (
 				55073DF01D1B9A6B00E416F9 /* OCRValidationView.m in Sources */,
 				55417AA21CE749C600860E4F /* ViewController.m in Sources */,
-				5591E4741D2F9E90001A1349 /* templateIDCard.cpp in Sources */,
 				55F1358D1D118D40007E4F2B /* template.cpp in Sources */,
 				559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */,
 				55417A9F1CE749C600860E4F /* AppDelegate.m in Sources */,
-				55F1358C1D118D40007E4F2B /* LibScanPassport.mm in Sources */,
 				55663E801D1A48E3006CBC44 /* PassportScanResult.m in Sources */,
 				55F2D6DA1D2FA81C00F3057E /* ScannerController.m in Sources */,
 				554D759F1CF6E0A7004BA1BA /* OCRManager.m in Sources */,

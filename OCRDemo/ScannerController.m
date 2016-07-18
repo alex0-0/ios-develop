@@ -8,7 +8,6 @@
 
 #import "ScannerController.h"
 #import <AVFoundation/AVFoundation.h>
-#import "LibScanPassport.h"
 #import "LibScanIDCard.h"
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
@@ -49,7 +48,6 @@ void saveLetterPos(int *pos){
         [letterPosArray addObject:tmpLetterPos];
     }
     //release memory
-    free(pos);
     [arrayLock unlock];
 }
 //
