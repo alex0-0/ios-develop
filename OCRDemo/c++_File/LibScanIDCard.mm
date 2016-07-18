@@ -654,8 +654,6 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     *letterimage = (uc*)malloc(18 * 25 * sizeof(uc));
     memset(*letterimage, 0, 18 * 25);
     for (int i = 1; i < 18; i++) {
-//        letterimage[i] = (uc*)malloc(sizeof(**letterimage)*25);
-//        memset(letterimage[i], 0, 25);
         letterimage[i] = *letterimage + i * 25;
     }
     uc **grayimage;//[100][407]={0};
@@ -663,8 +661,6 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     *grayimage = (uc*)malloc(sizeof(**grayimage) * 100 * 407);
     memset(*grayimage, 0, 100 * 407);
     for (int i = 1; i < 100; i++) {
-//        grayimage[i] = (uc*)malloc(sizeof(**grayimage)*407);
-//        memset(grayimage[i], 0, 407);
         grayimage[i] = *grayimage + i * 407;
     }
     uc **blackimage;//[100][51]={0};
@@ -672,8 +668,6 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     *blackimage = (uc*)malloc(sizeof(**blackimage) * 51 * 100);
     memset(*blackimage, 0, 51 * 100);
     for (int i = 1; i < 100; i++) {
-//        blackimage[i] = (uc*)malloc(sizeof(**blackimage)*51);
-//        memset(blackimage[i], 0, 51);
         blackimage[i] = *blackimage + i * 51;
     }
     int width = 407;
@@ -691,52 +685,33 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
     *lettersxy = (int*)malloc(sizeof(**lettersxy) * 4 * 18);
     memset(*lettersxy, 0, 4 * 18);
     for (int i = 1; i < 18; i++) {
-//        lettersxy[i] = (int*)malloc(sizeof(**lettersxy)*4);
-//        memset(lettersxy[i], 0, 4);
         lettersxy[i] = *lettersxy + 4 * i;
     }
     
-    if(!getHeightEdgeIDCard(width,height,blackimage,51,100,&angle,(int*) heightEdge)){
-//        free2DArray((void**)blackimage, 100);
-//        free2DArray((void**)grayimage, 100);
-//        free2DArray((void**)letterimage, 18);
-//        free2DArray((void**)lettersxy, 18);
-        free(*blackimage);
-        free(blackimage);
-        free(*grayimage);
-        free(grayimage);
-        free(*lettersxy);
-        free(lettersxy);
-        free(*letterimage);
-        free(letterimage);
-        printf("寻找上下边框失败");
-        result[0]=0;
-        return result;
-    }
-   if(generateLetterXIDCard(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)){
-        if(getlettersxyIDCard(lettersxy,upletterX,heightEdge,blackimage,angle,width,height,upwhitespaces)){
-            dividecharIDCard(blackimage,lettersxy,letterimage,18,407,100);
-            ocrIDCard(letterimage,18,result,NULL);
-            printf("%s",result);
-            if(CheckValue(result)){
-                free(blackimage);
-                free(grayimage);
-                free(letterimage);
-                if(result[0] == 0){
-                    result[1] = 0;
-//                    free2DArray((void**)lettersxy, 18);
-                    free(*lettersxy);
-                    free(lettersxy);
-
-                    return result;
-                }else {
-                    int bbb[72];
-                    for (int i = 0; i < 18; i++) {
-                        for (int j = 0; j < 4; j++) {
-                            bbb[i * 4 + j] = lettersxy[i][j];
+    if(getHeightEdgeIDCard(width,height,blackimage,51,100,&angle,(int*) heightEdge)){
+       if(generateLetterXIDCard(heightEdge[0],heightEdge[1],blackimage,angle,width,height,upletterX,&upwhitespaces)){
+            if(getlettersxyIDCard(lettersxy,upletterX,heightEdge,blackimage,angle,width,height,upwhitespaces)){
+                dividecharIDCard(blackimage,lettersxy,letterimage,18,407,100);
+                ocrIDCard(letterimage,18,result,NULL);
+                printf("%s",result);
+                if(CheckValue(result)){
+                    if(result[0] == 0){
+                        result[1] = 0;
+                    }
+                    else {
+                        int bbb[72];
+                        for (int i = 0; i < 18; i++) {
+                            for (int j = 0; j < 4; j++) {
+                                bbb[i * 4 + j] = lettersxy[i][j];
+                            }
                         }
                     }
-//                    free2DArray((void**)lettersxy, 18);
+                    free(*blackimage);
+                    free(blackimage);
+                    free(*grayimage);
+                    free(grayimage);
+                    free(*letterimage);
+                    free(letterimage);
                     free(*lettersxy);
                     free(lettersxy);
                     return result;
@@ -744,6 +719,17 @@ char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, in
             }
         }
     }
+    else {
+        printf("寻找上下边框失败");
+    }
+    free(*blackimage);
+    free(blackimage);
+    free(*grayimage);
+    free(grayimage);
+    free(*lettersxy);
+    free(lettersxy);
+    free(*letterimage);
+    free(letterimage);
     result[0]=0;
     return result;
 }

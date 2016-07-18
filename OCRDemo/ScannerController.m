@@ -457,38 +457,37 @@ void saveLetterPos(int *pos){
 -(void)IDCardOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{
     @synchronized (self) {
 
-    //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
-    //55/208 = 0.264 (55:height of rect in which the id number possibly exists   208:height of id card)
-    CGSize possibleSize = CGSizeMake(bounds.size.width - bounds.size.width * 0.318, bounds.size.height * 0.264);
-    CGRect croppedRect  = CGRectMake(bounds.origin.x + bounds.size.width - possibleSize.width, bounds.origin.y + bounds.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
-//    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-//    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-//    CGImageRelease(imageRef);
-    
-    static int count = 0;
-    printf("%d",++count);
-    char *result = LibScanIDCard_scanByteIDCard(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height);
-    free(YUVData);
-    
-    NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
-
-    if (scanResult.length >= 15) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
-                                                        message:scanResult
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        if ([_captureSession isRunning]) {
-            [_captureSession stopRunning];
-        }
-
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [alert show];
-            if ([_IDCardDelegate respondsToSelector:@selector(IDCardScannerDidFinish:)]) {
-                [_IDCardDelegate IDCardScannerDidFinish:scanResult];
+        //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
+        //55/208 = 0.264 (55:height of rect in which the id number possibly exists   208:height of id card)
+        CGSize possibleSize = CGSizeMake(bounds.size.width - bounds.size.width * 0.318, bounds.size.height * 0.264);
+        CGRect croppedRect  = CGRectMake(bounds.origin.x + bounds.size.width - possibleSize.width, bounds.origin.y + bounds.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
+    //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+    //    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+    //    CGImageRelease(imageRef);
+        
+        static int count = 0;
+        printf("%d",++count);
+        char *result = LibScanIDCard_scanByteIDCard(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height);
+        free(YUVData);
+        NSString *scanResult = (*result)?[NSString stringWithUTF8String:result]:@"";
+        free(result);
+        if (scanResult.length >= 15) {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
+                                                            message:scanResult
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"OK"
+                                                  otherButtonTitles:nil];
+            if ([_captureSession isRunning]) {
+                [_captureSession stopRunning];
             }
-        });
-    }
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [alert show];
+                if ([_IDCardDelegate respondsToSelector:@selector(IDCardScannerDidFinish:)]) {
+                    [_IDCardDelegate IDCardScannerDidFinish:scanResult];
+                }
+            });
+        }
     }
 }
 
