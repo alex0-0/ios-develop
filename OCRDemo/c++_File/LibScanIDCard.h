@@ -12,8 +12,9 @@
 extern "C" {
 #endif
 
-char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h);
-
+    char* LibScanIDCard_scanByteIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h);
+    char* LibScanPassport_scanByte(int8_t *arr,int hw,int hh,int x,int y,int w,int h);
+    
 #ifdef __cplusplus
 }
 #endif

@@ -494,43 +494,46 @@ void saveLetterPos(int *pos){
 -(void)passportOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
     @synchronized (self) {
 
-    CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
-//    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-////    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-//    CGImageRelease(imageRef);
+        CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
+    //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+    ////    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+    //    CGImageRelease(imageRef);
+            static int count = 0;
+            printf("%d",++count);
 
-    char *result = LibScanPassport_scanByte(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
-    free(YUVData);
-    NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
-    if (scanResult && scanResult.length >= 88) {
-        PassportScanResult *resultModel = [[PassportScanResult alloc] initWithScanResult:scanResult];
-        if (resultModel.gotLegalData) {
-            if ([_captureSession isRunning]) {
-                [_captureSession stopRunning];
-            }
-            //crop image for user to validate the information extracted from the scanning
-            [resultModel cropImage:image inRect:bounds withPositions:letterPosArray];
-            NSString *showResult = [NSString stringWithFormat:@"family name:\t%@\ngiven name:\t%@\npassportID:\t%@\nnation:\t%@gender:\t%@",
-                                    resultModel.familyName,
-                                    resultModel.givenName,
-                                    resultModel.passportID,
-                                    resultModel.nation,
-                                    (resultModel.gender == 0)?@"女":@"男"
-                                    ];
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
-                                                            message:showResult
-                                                           delegate:nil
-                                                  cancelButtonTitle:@"OK"
-                                                  otherButtonTitles:nil];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [alert show];
-                if ([_passportDelegate respondsToSelector:@selector(PassportScannerDidFinish:)]) {
-                    [_passportDelegate PassportScannerDidFinish:resultModel];
+        char *result = LibScanPassport_scanByte(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
+        free(YUVData);
+        NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
+            free(result);
+        if (scanResult && scanResult.length >= 88) {
+            PassportScanResult *resultModel = [[PassportScanResult alloc] initWithScanResult:scanResult];
+            if (resultModel.gotLegalData) {
+                if ([_captureSession isRunning]) {
+                    [_captureSession stopRunning];
                 }
-            });
+                //crop image for user to validate the information extracted from the scanning
+                [resultModel cropImage:image inRect:bounds withPositions:letterPosArray];
+                NSString *showResult = [NSString stringWithFormat:@"family name:\t%@\ngiven name:\t%@\npassportID:\t%@\nnation:\t%@gender:\t%@",
+                                        resultModel.familyName,
+                                        resultModel.givenName,
+                                        resultModel.passportID,
+                                        resultModel.nation,
+                                        (resultModel.gender == 0)?@"女":@"男"
+                                        ];
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
+                                                                message:showResult
+                                                               delegate:nil
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles:nil];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [alert show];
+                    if ([_passportDelegate respondsToSelector:@selector(PassportScannerDidFinish:)]) {
+                        [_passportDelegate PassportScannerDidFinish:resultModel];
+                    }
+                });
+            }
         }
-    }
-    NSLog(@"%@", scanResult);
+        NSLog(@"%@", scanResult);
     }
 }
 

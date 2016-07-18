@@ -56,7 +56,7 @@ static void blackImage(int oldwidth,int oldheight,uc grayimage[135][700],uc blac
             finalthre = inithreshold;
             sub1 = sub1count = sub2 = sub2count = 0;
             for(int j = 0;j<13100;j++){
-                uc pixtmp = grayimage[j/100][i*100+j%100];  //these are useless loops, using 131 is enough!?
+                uc pixtmp = grayimage[j/100][i*100+j%100];
                 if(pixtmp<=inithreshold){
                     sub1+=pixtmp;
                     sub1count++;
