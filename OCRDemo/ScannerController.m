@@ -531,8 +531,8 @@ void saveNumPos(int *pos){
     //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
     ////    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
     //    CGImageRelease(imageRef);
-            static int count = 0;
-            printf("%d",++count);
+//            static int count = 0;
+//            printf("%d",++count);
 
         char *result = libOCRScanPassport(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
         free(YUVData);

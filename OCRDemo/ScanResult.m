@@ -34,6 +34,23 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     return [NSString stringWithString:tmpString];
 }
 
+CGRect getRect(NSArray<LetterPosition*> *array, int start, int length, float widthScale, float heightScale){
+    if ([array count] < start + length) {
+        return CGRectZero;
+    }
+    CGFloat upper = MAXFLOAT;
+    CGFloat bottom = 0;
+    for (int i = 0; i < length; i++) {
+        if (array[start + i].y < upper) {
+            upper = array[start + i].y;
+        }
+        if (array[start + i].toY > bottom) {
+            bottom = array[start + i].toY;
+        }
+    }
+    return CGRectMake(array[start].x * widthScale, upper * heightScale, (array[start + length - 1].toX - array[start].x) * widthScale, (bottom - upper) * heightScale);
+}
+
 @implementation ScanResult
 
 - (instancetype)initWithScanResult:(NSString *)scanResult{
@@ -75,11 +92,12 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
 
     CGFloat widthUnit = croppedRect.size.width / 407;
     CGFloat heightUnit = croppedRect.size.height / 100;
-    CGRect idRect = CGRectMake(pos[0].x * widthUnit,
-                               pos[0].y * heightUnit,
-                               (pos[pos.count-1].toX - pos[0].x) * widthUnit,
-                               (MAX(pos[0].toY, pos[pos.count - 1].toY) - MIN(pos[0].y, pos[pos.count - 1].y)) * heightUnit
-                               );
+    CGRect idRect = getRect(pos, 0, 18, widthUnit, heightUnit);
+//    CGRect idRect = CGRectMake(pos[0].x * widthUnit,
+//                               pos[0].y * heightUnit,
+//                               (pos[pos.count-1].toX - pos[0].x) * widthUnit,
+//                               (MAX(pos[0].toY, pos[pos.count - 1].toY) - MIN(pos[0].y, pos[pos.count - 1].y)) * heightUnit
+//                               );
     imageRef = CGImageCreateWithImageInRect([croppedImage CGImage], idRect);
     _idImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
@@ -170,19 +188,21 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     CGImageRelease(imageRef);
     
     //TODO: the height should be the max among all the family name's letter
-    CGRect familyNameRect = CGRectMake((pos[_familyNameIndex].x - 4) * widthUnit, pos[_familyNameIndex].y * heightUnit,
-                                       (pos[_familyNameIndex + _familyNameLength - 1].toX - pos[_familyNameIndex].x + 4) * widthUnit ,
-                                       (MAX(pos[_familyNameIndex + _familyNameLength - 1].toY, pos[_familyNameIndex].toY) - MIN(pos[_familyNameIndex + _familyNameLength - 1].y, pos[_familyNameIndex].y)) * heightUnit
-                                       );
+//    CGRect familyNameRect = CGRectMake((pos[_familyNameIndex].x - 4) * widthUnit, pos[_familyNameIndex].y * heightUnit,
+//                                       (pos[_familyNameIndex + _familyNameLength - 1].toX - pos[_familyNameIndex].x + 4) * widthUnit ,
+//                                       (MAX(pos[_familyNameIndex + _familyNameLength - 1].toY, pos[_familyNameIndex].toY) - MIN(pos[_familyNameIndex + _familyNameLength - 1].y, pos[_familyNameIndex].y)) * heightUnit
+//                                       );
+    CGRect familyNameRect = getRect(pos, _familyNameIndex, _familyNameLength, widthUnit, heightUnit);
     imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, familyNameRect);
     _familyNameImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
     
     //TODO: the height should be the max among all the given name's letter
-    CGRect givenNameRect = CGRectMake((pos[_givenNameIndex].x - 4) * widthUnit, pos[_givenNameIndex].y * heightUnit,
-                                      (pos[_givenNameIndex + _givenNameLength - 1].toX - pos[_givenNameIndex].x + 4) * widthUnit ,
-                                      (MAX(pos[_givenNameIndex + _givenNameLength - 1].toY, pos[_givenNameIndex].toY) - MIN(pos[_givenNameIndex + _givenNameLength - 1].y, pos[_givenNameIndex].y)) * heightUnit
-                                      );
+//    CGRect givenNameRect = CGRectMake((pos[_givenNameIndex].x - 4) * widthUnit, pos[_givenNameIndex].y * heightUnit,
+//                                      (pos[_givenNameIndex + _givenNameLength - 1].toX - pos[_givenNameIndex].x + 4) * widthUnit ,
+//                                      (MAX(pos[_givenNameIndex + _givenNameLength - 1].toY, pos[_givenNameIndex].toY) - MIN(pos[_givenNameIndex + _givenNameLength - 1].y, pos[_givenNameIndex].y)) * heightUnit
+//                                      );
+    CGRect givenNameRect = getRect(pos, _givenNameIndex, _givenNameLength, widthUnit, heightUnit);
     imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, givenNameRect);
     _givenNameImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
@@ -194,10 +214,11 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
             idImageY = pos[i].y;
         }
     }
-    CGRect idRect = CGRectMake((pos[44].x - 4) * widthUnit, idImageY * heightUnit,
-                               (pos[52].toX - pos[44].x + 4) * widthUnit,
-                               (MAX(pos[44].toY, pos[52].toY) - MIN(pos[44].y, pos[52].y)) * heightUnit
-                               );
+//    CGRect idRect = CGRectMake((pos[44].x - 4) * widthUnit, idImageY * heightUnit,
+//                               (pos[52].toX - pos[44].x + 4) * widthUnit,
+//                               (MAX(pos[44].toY, pos[52].toY) - MIN(pos[44].y, pos[52].y)) * heightUnit
+//                               );
+    CGRect idRect = getRect(pos, 44, 9, widthUnit, heightUnit);
     imageRef = CGImageCreateWithImageInRect(croppedImage.CGImage, idRect);
     _idImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
