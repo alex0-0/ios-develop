@@ -1,5 +1,5 @@
 //
-//  PassportScanResult.h
+//  ScanResult.h
 //  OCRDemo
 //
 //  Created by ltp on 6/22/16.
@@ -9,6 +9,12 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+//the basic class of all scan result
+@interface ScanResult : NSObject
+
+- (instancetype)initWithScanResult:(NSString *)scanResult;
+
+@end
 
 @interface LetterPosition : NSObject
 
@@ -19,7 +25,7 @@
 
 @end
 
-@interface PassportScanResult : NSData
+@interface PassportScanResult : ScanResult
 
 @property (strong, nonatomic) NSString *givenName;  //名
 @property (strong, nonatomic) NSString *familyName; //姓
@@ -32,7 +38,14 @@
 @property (strong, nonatomic) UIImage *givenNameImage;
 @property (strong, nonatomic) UIImage *idImage;
 
-- (instancetype)initWithScanResult:(NSString *)scanResult;
+- (void)cropImage:(UIImage*)image inRect:(CGRect)rect withPositions:(NSArray<LetterPosition*>*)pos;
+
+@end
+
+@interface IDCardScanResult : ScanResult
+
+@property (strong, nonatomic) NSString *cardID;
+@property (strong, nonatomic) UIImage *idImage;
 
 - (void)cropImage:(UIImage*)image inRect:(CGRect)rect withPositions:(NSArray<LetterPosition*>*)pos;
 

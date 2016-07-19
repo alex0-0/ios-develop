@@ -8,6 +8,7 @@
 extern "C" {
 #endif
     extern void saveLetterPos(int *pos);    //save the positions of letters to the program(implemeted in Objective-c file, which can be found in runtime)
+    extern void saveNumPos(int *pos);       //save the positions of id card numbers to the program(implemeted in Objective-c file, which can be found in runtime)
 #ifdef __cplusplus
 }
 #endif
@@ -931,12 +932,16 @@ char* libOCRScanIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
                 printf("%s",result);
                 if(checkValue(result)){
                     if(result[0] != 0){
-                        int bbb[72];
+                        int *numPos;
+                        numPos = (int*)malloc(sizeof(int) * 72);
                         for (int i = 0; i < 18; i++) {
                             for (int j = 0; j < 4; j++) {
-                                bbb[i * 4 + j] = lettersxy[i][j];
+                                numPos[i * 4 + j] = lettersxy[i][j];
                             }
                         }
+                        //save the positions of id card numbers to the program(implemeted in Objective-c file, which can be found in runtime)
+                        saveNumPos(numPos);
+                        free(numPos);
                     }
                     free(*blackImage);
                     free(blackImage);

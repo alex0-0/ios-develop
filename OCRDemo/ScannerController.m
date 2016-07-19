@@ -9,6 +9,7 @@
 #import "ScannerController.h"
 #import <AVFoundation/AVFoundation.h>
 #import "LibOCR.h"
+#import "CameraOverlay.h"
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 #define SCREEN_WIDTH ([[UIScreen mainScreen] bounds].size.width)
@@ -17,7 +18,8 @@
 #define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
 #define IS_IPHONE_4_OR_LESS (IS_IPHONE && SCREEN_MAX_LENGTH < 568.0)
 
-static NSMutableArray<LetterPosition*> *letterPosArray;
+static NSMutableArray<LetterPosition*> *letterPosArray;     //position of passport letters
+static NSMutableArray<LetterPosition*> *numPosArray;        //position of id card numbers
 
 //get position of 88 letters
 void saveLetterPos(int *pos){
@@ -46,6 +48,38 @@ void saveLetterPos(int *pos){
             tmpLetterPos.toX = pos[i * 4 + 2] - 20;
         tmpLetterPos.toY = pos[i * 4 + 3];
         [letterPosArray addObject:tmpLetterPos];
+    }
+    //release memory
+    [arrayLock unlock];
+}
+
+//get position of id card numbers
+void saveNumPos(int *pos){
+    NSLock *arrayLock = [[NSLock alloc] init];
+    [arrayLock lock];
+    
+    if (numPosArray) {
+        [numPosArray removeAllObjects];
+    }
+    else {
+        numPosArray = [NSMutableArray array];
+    }
+    for (int i = 0; i < 18; i++) {
+        LetterPosition *tmpLetterPos = [[LetterPosition alloc] init];
+        if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+            //in iphone4 with ios7, the picture is not cropped correctly
+            tmpLetterPos.x = pos[i * 4] - 50;
+        }
+        else
+            tmpLetterPos.x = pos[i * 4] - 30;
+        tmpLetterPos.y = pos[i * 4 + 1];
+        if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+            tmpLetterPos.toX = pos[i * 4 + 2] - 40;
+        }
+        else
+            tmpLetterPos.toX = pos[i * 4 + 2] - 20;
+        tmpLetterPos.toY = pos[i * 4 + 3];
+        [numPosArray addObject:tmpLetterPos];
     }
     //release memory
     [arrayLock unlock];
@@ -161,7 +195,7 @@ void saveLetterPos(int *pos){
         default:
             break;
     }
-    static BOOL firstTime = TRUE;   //only automaticall show if the app enters for the first time
+    static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
     if (firstTime) {
         [self.view addSubview:_tipView];
         firstTime = NO;
@@ -277,10 +311,10 @@ void saveLetterPos(int *pos){
     tips.font = [UIFont systemFontOfSize:15.0];
     tips.textColor = [UIColor whiteColor];
     tips.text = @"      请确保：\n\n\
-    \u2022 证件为有效证件（暂仅支持中国大陆护照）\n\n\
+    \u2022 证件为有效证件\n\n\
     \u2022 扫描角度正对证件，无倾斜、无抖动\n\n\
     \u2022 证件无反光且清晰。若灯光过暗，请打开闪光灯\n\n\
-    或至明亮的地方扫描\n\n\
+      或至明亮的地方扫描\n\n\
     \u2022 网络顺畅";
     CGSize labelSize = [tips.text sizeWithAttributes:@{NSFontAttributeName:tips.font}];
     tips.frame = CGRectMake(0, 0, labelSize.width, labelSize.height);
@@ -478,11 +512,12 @@ void saveLetterPos(int *pos){
             if ([_captureSession isRunning]) {
                 [_captureSession stopRunning];
             }
-
+            IDCardScanResult *resultModel = [[IDCardScanResult alloc] initWithScanResult:scanResult];
+            [resultModel cropImage:image inRect:bounds withPositions:numPosArray];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [alert show];
                 if ([_IDCardDelegate respondsToSelector:@selector(IDCardScannerDidFinish:)]) {
-                    [_IDCardDelegate IDCardScannerDidFinish:scanResult];
+                    [_IDCardDelegate IDCardScannerDidFinish:resultModel];
                 }
             });
         }

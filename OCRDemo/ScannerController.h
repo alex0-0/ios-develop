@@ -7,12 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "CameraOverlay.h"
-#import "PassportScanResult.h"
-
-void saveSmallBitmap(int* arr);
-void saveBitmap(int* arr);
-void saveLetterPos(int *pos);
+#import "ScanResult.h"
 
 @protocol PassportScannerDelegate <NSObject>
 
@@ -25,8 +20,7 @@ void saveLetterPos(int *pos);
 @protocol IDCardScannerDelegate <NSObject>
 
 @optional
-//id card string as parameter
-- (void)IDCardScannerDidFinish:(NSString*)scanResult;
+- (void)IDCardScannerDidFinish:(IDCardScanResult*)scanResult;
 
 @end
 

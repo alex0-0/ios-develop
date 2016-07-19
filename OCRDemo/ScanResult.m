@@ -1,12 +1,12 @@
 //
-//  PassportScanResult.m
+//  ScanResult.m
 //  OCRDemo
 //
 //  Created by ltp on 6/22/16.
 //  Copyright © 2016 ltp. All rights reserved.
 //
 
-#import "PassportScanResult.h"
+#import "ScanResult.h"
 
 BOOL isPinyin(NSString *string);
 
@@ -34,10 +34,62 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
     return [NSString stringWithString:tmpString];
 }
 
+@implementation ScanResult
+
+- (instancetype)initWithScanResult:(NSString *)scanResult{
+    if (self = [super init]) {
+        
+    }
+    return self;
+}
+
+@end
+
 @implementation LetterPosition
 
 @end
 
+/**
+ **     IDCardScanResult
+ **/
+@implementation IDCardScanResult
+
+- (instancetype)initWithScanResult:(NSString *)scanResult{
+    if (self = [super initWithScanResult:scanResult]) {
+        _cardID = scanResult;
+    }
+    return self;
+}
+
+- (void)cropImage:(UIImage *)image inRect:(CGRect)rect withPositions:(NSArray<LetterPosition *> *)pos{
+    if (!pos || [pos count] == 0) {
+        return;
+    }
+    //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
+    //55/208 = 0.264 (55:height of rect in which the id number possibly exists   208:height of id card)
+    CGSize possibleSize = CGSizeMake(rect.size.width - rect.size.width * 0.318, rect.size.height * 0.264);
+    CGRect croppedRect  = CGRectMake(rect.origin.x + rect.size.width - possibleSize.width, rect.origin.y + rect.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
+    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+    UIImage *croppedImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+
+    CGFloat widthUnit = croppedRect.size.width / 407;
+    CGFloat heightUnit = croppedRect.size.height / 100;
+    CGRect idRect = CGRectMake(pos[0].x * widthUnit,
+                               pos[0].y * heightUnit,
+                               (pos[pos.count-1].toX - pos[0].x) * widthUnit,
+                               (MAX(pos[0].toY, pos[pos.count - 1].toY) - MIN(pos[0].y, pos[pos.count - 1].y)) * heightUnit
+                               );
+    imageRef = CGImageCreateWithImageInRect([croppedImage CGImage], idRect);
+    _idImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+}
+
+@end
+
+/**
+ **     PassportScanResult
+ **/
 @implementation PassportScanResult{
     int _familyNameIndex;
     int _familyNameLength;
@@ -46,7 +98,7 @@ NSString* modifyNumberToAlphabet(NSString* originStr){
 }
 
 - (instancetype)initWithScanResult:(NSString *)scanResult{
-    if (self = [super init]) {
+    if (self = [super initWithScanResult:scanResult]) {
         if (scanResult && scanResult.length == 88) {
             [self processPassportScanResult:scanResult];
         }

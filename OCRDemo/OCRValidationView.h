@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "PassportScanResult.h"
+#import "ScanResult.h"
 
 @interface OCRValidationView : UIView
 
