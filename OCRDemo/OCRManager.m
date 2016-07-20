@@ -88,6 +88,10 @@ static const int kBlue = 3;
     [self cannyEdgeExtractWithTLow:0.3 THigh:0.7];
     
     retImage = [self imageFromBitMap];
+    if (_imageData) {
+        free(_imageData);
+        _imageData = NULL;
+    }
     return retImage;
 }
 
