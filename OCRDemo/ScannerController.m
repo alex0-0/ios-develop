@@ -393,6 +393,7 @@ void saveNumPos(int *pos){
     if ([_captureSession isRunning]) {
         [_captureSession stopRunning];
     }
+    [self dismissTipView];
     if ([self presentingViewController] != nil) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
