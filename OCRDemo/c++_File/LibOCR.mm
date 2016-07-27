@@ -733,15 +733,13 @@ static void divideChar(uc **blackImage,int **lettersXY,uc **letterImage,int lett
     uc **image;//[100][407] = {0};
     image = (uc**)malloc(sizeof(uc*)*imageHeight);
     *image = (uc*)malloc(sizeof(**image) * imageWidth * imageHeight);
+    for (int i = 1; i < imageHeight; i++) {
+        image[i] = *image + imageWidth * i;
+    }
     for(int i = 0;i<letterNum;i++){
         width = lettersXY[i][2]-lettersXY[i][0]+1;
         height = lettersXY[i][3]-lettersXY[i][1]+1;
         memset(*image, 0, imageHeight * imageWidth);
-        for (int i = 1; i < imageHeight; i++) {
-            //            image[i] = (uc*)malloc(sizeof(**image)*imageWidth);
-            //            memset(image[i], 0, imageWidth);
-            image[i] = *image + imageWidth * i;
-        }
         for(int j = 0;j<height;j++){
             for(int k = 0;k<width;k++){
                 char a = getPixelByBlackImage(blackImage, k+lettersXY[i][0], j+lettersXY[i][1]);
