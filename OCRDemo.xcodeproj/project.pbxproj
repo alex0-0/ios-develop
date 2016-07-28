@@ -23,7 +23,6 @@
 		558228C01D3378D70012E18A /* light_off@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 558228BE1D3378D70012E18A /* light_off@3x.png */; };
 		5591E4731D2F9E90001A1349 /* LibOCR.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5591E4711D2F9E90001A1349 /* LibOCR.mm */; };
 		559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 559891181D0D5CDA0079A250 /* CameraOverlay.m */; };
-		55A308011D13D58600DFA964 /* bbb in Resources */ = {isa = PBXBuildFile; fileRef = 55A308001D13D58600DFA964 /* bbb */; };
 		55B9C0571D1926770070CC3E /* barcode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55B9C0551D1926770070CC3E /* barcode@2x.png */; };
 		55B9C0581D1926770070CC3E /* barcode@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55B9C0561D1926770070CC3E /* barcode@3x.png */; };
 		55F1358D1D118D40007E4F2B /* template.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55F135891D118D40007E4F2B /* template.cpp */; };
@@ -57,7 +56,6 @@
 		5591E4711D2F9E90001A1349 /* LibOCR.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LibOCR.mm; sourceTree = "<group>"; };
 		559891171D0D5CDA0079A250 /* CameraOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraOverlay.h; sourceTree = "<group>"; };
 		559891181D0D5CDA0079A250 /* CameraOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlay.m; sourceTree = "<group>"; };
-		55A308001D13D58600DFA964 /* bbb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bbb; sourceTree = "<group>"; };
 		55B9C0551D1926770070CC3E /* barcode@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "barcode@2x.png"; sourceTree = "<group>"; };
 		55B9C0561D1926770070CC3E /* barcode@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "barcode@3x.png"; sourceTree = "<group>"; };
 		55F135891D118D40007E4F2B /* template.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = template.cpp; sourceTree = "<group>"; };
@@ -129,7 +127,6 @@
 				558228BE1D3378D70012E18A /* light_off@3x.png */,
 				55B9C0551D1926770070CC3E /* barcode@2x.png */,
 				55B9C0561D1926770070CC3E /* barcode@3x.png */,
-				55A308001D13D58600DFA964 /* bbb */,
 				55F135841D118D40007E4F2B /* c++_File */,
 				55396B001D0167570039C59E /* passport.jpg */,
 				55396AFC1D0164E40039C59E /* chinese_id_card.jpg */,
@@ -230,7 +227,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				558228C01D3378D70012E18A /* light_off@3x.png in Resources */,
-				55A308011D13D58600DFA964 /* bbb in Resources */,
 				55B9C0581D1926770070CC3E /* barcode@3x.png in Resources */,
 				5538EF351D0013F7004C2BFC /* flowers.jpg in Resources */,
 				55B9C0571D1926770070CC3E /* barcode@2x.png in Resources */,
