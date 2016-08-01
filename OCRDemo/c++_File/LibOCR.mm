@@ -649,6 +649,7 @@ static bool getLettersXYIDCard(int **letters,int upletterX[130],int heightedge[2
         }
         leftX = -1;
     }
+    if(count != 18) return false;
     return true;
 }
 static char getCharByIntIDCard(int maxI){
