@@ -166,6 +166,7 @@ void saveNumPos(int *pos){
     CameraOverlay *_idCardOverlay;
     AVCaptureSession *_captureSession;
     AVCaptureVideoPreviewLayer *_previewLayer;
+    NSLock *_lock;
 }
 
 - (void)viewDidLoad {
@@ -173,6 +174,7 @@ void saveNumPos(int *pos){
     [self initCapture];
     [self initOverlayView];
     [self initTipView];
+    _lock = [[NSLock alloc] init];
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -406,7 +408,7 @@ void saveNumPos(int *pos){
 #pragma mark -------------AVCaptureVideoDataOutputSampleBufferDelegate   -------------------
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection{
-    @autoreleasepool {
+    @synchronized (self) {
         CIImage *ciimage = [CIImage imageWithCVPixelBuffer:CMSampleBufferGetImageBuffer(sampleBuffer)];
         CIImage *croppedRecImage = nil;
         CGRect rectangleRect = CGRectZero;
@@ -488,86 +490,90 @@ void saveNumPos(int *pos){
 }
 
 -(void)IDCardOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{
-    @synchronized (self) {
-
-        //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
-        //55/208 = 0.264 (55:height of rect in which the id number possibly exists   208:height of id card)
-        CGSize possibleSize = CGSizeMake(bounds.size.width - bounds.size.width * 0.318, bounds.size.height * 0.264);
-        CGRect croppedRect  = CGRectMake(bounds.origin.x + bounds.size.width - possibleSize.width, bounds.origin.y + bounds.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
-    //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-    //    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-    //    CGImageRelease(imageRef);
-        
-        static int count = 0;
-        printf("%d",++count);
-        char *result = libOCRScanIDCard(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height);
-        free(YUVData);
-        NSString *scanResult = (*result)?[NSString stringWithUTF8String:result]:@"";
-        free(result);
-        if (scanResult.length >= 15) {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
-                                                            message:scanResult
-                                                           delegate:nil
-                                                  cancelButtonTitle:@"OK"
-                                                  otherButtonTitles:nil];
-            if ([_captureSession isRunning]) {
-                [_captureSession stopRunning];
-            }
-            IDCardScanResult *resultModel = [[IDCardScanResult alloc] initWithScanResult:scanResult];
-            [resultModel cropImage:image inRect:bounds withPositions:numPosArray];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [alert show];
-                if ([_IDCardDelegate respondsToSelector:@selector(IDCardScannerDidFinish:)]) {
-                    [_IDCardDelegate IDCardScannerDidFinish:resultModel];
+    @autoreleasepool {
+        if ([_lock tryLock]) {
+            //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
+            //55/208 = 0.264 (55:height of rect in which the id number possibly exists   208:height of id card)
+            CGSize possibleSize = CGSizeMake(bounds.size.width - bounds.size.width * 0.318, bounds.size.height * 0.264);
+            CGRect croppedRect  = CGRectMake(bounds.origin.x + bounds.size.width - possibleSize.width, bounds.origin.y + bounds.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
+        //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+        //    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+        //    CGImageRelease(imageRef);
+            
+            static int count = 0;
+            printf("%d",++count);
+            char *result = libOCRScanIDCard(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height);
+            NSString *scanResult = (*result)?[NSString stringWithUTF8String:result]:@"";
+            free(result);
+            if (scanResult.length >= 18) {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
+                                                                message:scanResult
+                                                               delegate:nil
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles:nil];
+                if ([_captureSession isRunning]) {
+                    [_captureSession stopRunning];
                 }
-            });
+                IDCardScanResult *resultModel = [[IDCardScanResult alloc] initWithScanResult:scanResult];
+                [resultModel cropImage:image inRect:bounds withPositions:numPosArray];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [alert show];
+                    if ([_IDCardDelegate respondsToSelector:@selector(IDCardScannerDidFinish:)]) {
+                        [_IDCardDelegate IDCardScannerDidFinish:resultModel];
+                    }
+                });
+            }
+            [_lock unlock];
         }
+        free(YUVData);
     }
 }
 
 -(void)passportOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
-    @synchronized (self) {
+    @autoreleasepool {
+        if ([_lock tryLock]) {
+            CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
+        //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+        ////    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+        //    CGImageRelease(imageRef);
+    //            static int count = 0;
+    //            printf("%d",++count);
 
-        CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
-    //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-    ////    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-    //    CGImageRelease(imageRef);
-//            static int count = 0;
-//            printf("%d",++count);
-
-        char *result = libOCRScanPassport(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
-        free(YUVData);
-        NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
-            free(result);
-        if (scanResult && scanResult.length >= 88) {
-            PassportScanResult *resultModel = [[PassportScanResult alloc] initWithScanResult:scanResult];
-            if (resultModel.gotLegalData) {
-                if ([_captureSession isRunning]) {
-                    [_captureSession stopRunning];
-                }
-                //crop image for user to validate the information extracted from the scanning
-                [resultModel cropImage:image inRect:bounds withPositions:letterPosArray];
-                NSString *showResult = [NSString stringWithFormat:@"family name:\t%@\ngiven name:\t%@\npassportID:\t%@\nnation:\t%@gender:\t%@",
-                                        resultModel.familyName,
-                                        resultModel.givenName,
-                                        resultModel.passportID,
-                                        resultModel.nation,
-                                        (resultModel.gender == 0)?@"女":@"男"
-                                        ];
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
-                                                                message:showResult
-                                                               delegate:nil
-                                                      cancelButtonTitle:@"OK"
-                                                      otherButtonTitles:nil];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [alert show];
-                    if ([_passportDelegate respondsToSelector:@selector(PassportScannerDidFinish:)]) {
-                        [_passportDelegate PassportScannerDidFinish:resultModel];
+            char *result = libOCRScanPassport(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
+            NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
+                free(result);
+            if (scanResult && scanResult.length >= 88) {
+                PassportScanResult *resultModel = [[PassportScanResult alloc] initWithScanResult:scanResult];
+                if (resultModel.gotLegalData) {
+                    if ([_captureSession isRunning]) {
+                        [_captureSession stopRunning];
                     }
-                });
+                    //crop image for user to validate the information extracted from the scanning
+                    [resultModel cropImage:image inRect:bounds withPositions:letterPosArray];
+                    NSString *showResult = [NSString stringWithFormat:@"family name:\t%@\ngiven name:\t%@\npassportID:\t%@\nnation:\t%@gender:\t%@",
+                                            resultModel.familyName,
+                                            resultModel.givenName,
+                                            resultModel.passportID,
+                                            resultModel.nation,
+                                            (resultModel.gender == 0)?@"女":@"男"
+                                            ];
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"result"
+                                                                    message:showResult
+                                                                   delegate:nil
+                                                          cancelButtonTitle:@"OK"
+                                                          otherButtonTitles:nil];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [alert show];
+                        if ([_passportDelegate respondsToSelector:@selector(PassportScannerDidFinish:)]) {
+                            [_passportDelegate PassportScannerDidFinish:resultModel];
+                        }
+                    });
+                }
             }
+            NSLog(@"%@", scanResult);
+            [_lock unlock];
         }
-        NSLog(@"%@", scanResult);
+        free(YUVData);
     }
 }
 
