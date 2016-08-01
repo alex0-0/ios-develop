@@ -325,7 +325,7 @@ static bool generateLetterXPassport(int up,int down,uc **blackImage,float angle,
         int startY = (int)(down+angle*i);
         startY = startY>=height?height-1:startY;
         for (int j = 0; j < down - up; j++) {
-            if (i + (j * angle) < 0 || i + (j * angle) >= width) {
+            if (startY - j >= height || i + (j * angle) >= width) {
                 continue;
             }
             uc rgb = getPixelByBlackImage(blackImage, (i + (j * angle)), startY - j);
@@ -443,7 +443,7 @@ static bool generateLetterXIDCard(int up,int down,uc **blackimage,float angle,in
         int startY = (int)(down+angle*i);
         startY = startY>=height?height-1:startY;
         for (int j = 0; j < down - up; j++) {
-            if (i + (j * angle) < 0 || i + (j * angle) >= width) {
+            if (startY - j >= height || i + (j * angle) >= width) {
                 continue;
             }
             uc rgb = getPixelByBlackImage(blackimage, (i + (j * angle)), startY - j);
@@ -649,7 +649,9 @@ static bool getLettersXYIDCard(int **letters,int upletterX[130],int heightedge[2
         }
         leftX = -1;
     }
-    if(count != 18) return false;
+    if (count != 18) {
+        return false;
+    }
     return true;
 }
 static char getCharByIntIDCard(int maxI){
@@ -743,6 +745,9 @@ static void divideChar(uc **blackImage,int **lettersXY,uc **letterImage,int lett
         memset(*image, 0, imageHeight * imageWidth);
         for(int j = 0;j<height;j++){
             for(int k = 0;k<width;k++){
+                if (j + lettersXY[i][1] >= imageHeight || k+lettersXY[i][0] >= imageWidth) {
+                    continue;
+                }
                 char a = getPixelByBlackImage(blackImage, k+lettersXY[i][0], j+lettersXY[i][1]);
                 image[j][k] = a;
             }
