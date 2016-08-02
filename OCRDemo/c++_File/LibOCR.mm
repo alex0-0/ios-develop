@@ -700,10 +700,12 @@ void static ocr(uc **letterImage,int letterNum,char* result,int* iaa,LibScanType
         }
     }
 }
+
+//check the validity of id card scan result
 static bool checkValue(char* result) {
     //region  check null
     for(int i=0;i<18;i++){
-        if(result[i]==' '||!result[i]){
+        if(!result[i] || result[i]==' ' || (result[i] == 'X' && i < 16)){
             return false;
         }
     }
