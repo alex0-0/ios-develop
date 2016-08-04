@@ -705,7 +705,7 @@ void static ocr(uc **letterImage,int letterNum,char* result,int* iaa,LibScanType
 static bool checkValue(char* result) {
     //region  check null
     for(int i=0;i<18;i++){
-        if(!result[i] || result[i]==' ' || (result[i] == 'X' && i < 16)){
+        if(!result[i] || result[i]==' ' || (result[i] == 'X' && i < 17)){
             return false;
         }
     }

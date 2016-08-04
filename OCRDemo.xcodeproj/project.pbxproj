@@ -199,7 +199,6 @@
 				TargetAttributes = {
 					55417A961CE749C600860E4F = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = CS4D2N45B7;
 					};
 				};
 			};
@@ -412,7 +411,7 @@
 				INFOPLIST_FILE = OCRDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.OCRDem;
+				PRODUCT_BUNDLE_IDENTIFIER = ctrip.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
@@ -436,7 +435,7 @@
 				INFOPLIST_FILE = OCRDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.OCRDem;
+				PRODUCT_BUNDLE_IDENTIFIER = ctrip.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
