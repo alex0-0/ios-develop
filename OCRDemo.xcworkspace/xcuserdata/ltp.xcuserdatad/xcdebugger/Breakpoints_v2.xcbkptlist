@@ -16,16 +16,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/c++_File/LibOCR.mm"
-            timestampString = "491903709.834644"
+            timestampString = "492513511.781387"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "914"
-            endingLineNumber = "914"
-            landmarkName = "libOCRScanIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h)"
+            startingLineNumber = "614"
+            endingLineNumber = "614"
+            landmarkName = "getLettersXYPassport(int **letters,int upLetterX[130],int downLetterX[130],int heightedge[4],uc **blackImage,float angle,int width,int height,int upspaces,int downspaces)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -603,12 +603,21 @@ static bool getLettersXYPassport(int **letters,int upLetterX[130],int downLetter
     if(count != 44) return false;
     leftX = -1;
     for (int i = 0; i < downspaces; i++) {
+        if (count >= 88) {
+            return false;
+        }
         if (leftX == -1) {
             leftX = downLetterX[i];
             continue;
         }
         //        FourInt fourInt = new FourInt().setA(leftX + 1).setB(heightEdge.c).setC(downLetterX.get(i) - 1).setD(heightEdge.d);
         diff = angle*(leftX+1);
+//        
+//        //fix crash
+//        if (heightedge[3]+diff >= 134) {
+//            return false;
+//        }
+//        
         int letterEdge[4] = {leftX+1,heightedge[2]+diff,downLetterX[i]-1,heightedge[3]+diff};
         expandFourInt(letterEdge, blackImage,width,height);
         //        if (fourInt.d - fourInt.b + 1 > (heightEdge.d - heightEdge.c + 1) * 0.8 && fourInt.d - fourInt.b + 1 < (heightEdge.d - heightEdge.c + 1) * 1.15) {
