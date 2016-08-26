@@ -476,10 +476,10 @@ void saveNumPos(int *pos){
             
             switch (_scannerType) {
                 case PassportScanner:
-                    [self passportOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)wholeImage];
+                    [self passportOCR:byteMap width:(int)width height:(int)height image:(UIImage*)wholeImage];
                     break;
                 case IDCardScanner:
-                    [self IDCardOCR:byteMap bounds:rectangleRect width:(int)width height:(int)height image:(UIImage*)wholeImage];
+                    [self IDCardOCR:byteMap width:(int)width height:(int)height image:(UIImage*)wholeImage];
                 default:
                     break;
             }
@@ -489,16 +489,20 @@ void saveNumPos(int *pos){
     }
 }
 
--(void)IDCardOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{
+-(void)IDCardOCR:(int8_t *)YUVData width:(int)width height:(int)height image:(UIImage*)image{
     @autoreleasepool {
         if ([_lock tryLock]) {
             //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
             //55/208 = 0.264 (55:height of rect in which the id number possibly exists   208:height of id card)
-            CGSize possibleSize = CGSizeMake(bounds.size.width - bounds.size.width * 0.318, bounds.size.height * 0.264);
-            CGRect croppedRect  = CGRectMake(bounds.origin.x + bounds.size.width - possibleSize.width, bounds.origin.y + bounds.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
-        //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-        //    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-        //    CGImageRelease(imageRef);
+            float scaleRatio = image.size.height / 320;
+            CGSize imageSize = image.size;
+            CGRect cardRect = CGRectMake((imageSize.width - 365 * scaleRatio) / 2, (imageSize.height - 232 * scaleRatio) / 2, 365 * scaleRatio, 232 * scaleRatio);
+
+            CGSize possibleSize = CGSizeMake(cardRect.size.width - cardRect.size.width * 0.318, cardRect.size.height * 0.264);
+            CGRect croppedRect  = CGRectMake(cardRect.origin.x + cardRect.size.width - possibleSize.width, cardRect.origin.y + cardRect.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
+//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+//            CGImageRelease(imageRef);
             
             static int count = 0;
             printf("%d",++count);
@@ -515,7 +519,7 @@ void saveNumPos(int *pos){
                     [_captureSession stopRunning];
                 }
                 IDCardScanResult *resultModel = [[IDCardScanResult alloc] initWithScanResult:scanResult];
-                [resultModel cropImage:image inRect:bounds withPositions:numPosArray];
+                [resultModel cropImage:image inRect:cardRect withPositions:numPosArray];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [alert show];
                     if ([_IDCardDelegate respondsToSelector:@selector(IDCardScannerDidFinish:)]) {
@@ -529,13 +533,17 @@ void saveNumPos(int *pos){
     }
 }
 
--(void)passportOCR:(int8_t *)YUVData bounds:(CGRect)bounds width:(int)width height:(int)height image:(UIImage*)image{//125*88
+-(void)passportOCR:(int8_t *)YUVData width:(int)width height:(int)height image:(UIImage*)image{//125*88
     @autoreleasepool {
         if ([_lock tryLock]) {
-            CGRect croppedRect  = CGRectMake(bounds.origin.x, bounds.origin.y + bounds.size.height - bounds.size.width * 0.158, bounds.size.width, bounds.size.width * 0.158);
-        //    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-        ////    UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-        //    CGImageRelease(imageRef);
+            float scaleRatio = image.size.height / 320;
+            CGSize imageSize = image.size;
+            CGRect passportRect = CGRectMake((imageSize.width - 354 * scaleRatio) / 2, (imageSize.height - 249 * scaleRatio) / 2, 354 * scaleRatio, 249 * scaleRatio);
+
+            CGRect croppedRect  = CGRectMake(passportRect.origin.x, passportRect.origin.y + passportRect.size.height - passportRect.size.width * 0.158, passportRect.size.width, passportRect.size.width * 0.158);
+//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+//            CGImageRelease(imageRef);
     //            static int count = 0;
     //            printf("%d",++count);
 
@@ -549,7 +557,7 @@ void saveNumPos(int *pos){
                         [_captureSession stopRunning];
                     }
                     //crop image for user to validate the information extracted from the scanning
-                    [resultModel cropImage:image inRect:bounds withPositions:letterPosArray];
+                    [resultModel cropImage:image inRect:passportRect withPositions:letterPosArray];
                     NSString *showResult = [NSString stringWithFormat:@"family name:\t%@\ngiven name:\t%@\npassportID:\t%@\nnation:\t%@gender:\t%@",
                                             resultModel.familyName,
                                             resultModel.givenName,
