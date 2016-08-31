@@ -29,15 +29,17 @@ typedef enum {
     IDCardScanner
 } ScannerType;
 
+typedef enum {
+    ImageSourceByCapturing,
+    ImageSourceByChoosing
+} ImageSourceType;
+
 @interface ScannerController : UIViewController
 
 @property (strong, nonatomic) id<PassportScannerDelegate> passportDelegate;
 
 @property (strong, nonatomic) id<IDCardScannerDelegate> IDCardDelegate;
 
-/**
- **  ATTENTION: please set the desired scannerType before present view controller, otherwise the scanner controller will use default type, i.e., idCardScanner, for now.
- **/
-@property ScannerType scannerType;
+- (void)presentScanner:(ScannerType)scannerType imageSource:(ImageSourceType)imageSourceType inViewController:(UIViewController *)vc;
 
 @end

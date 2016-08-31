@@ -56,11 +56,21 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 //    [self configTesseract];
 }
 
--(void) takePhoto{
+- (void)takePhoto{
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
     [actionSheet showInView:self.view];
 }
 
+- (void)pickPhoto{
+//    UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
+//    pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+//    pickerController.delegate = self;
+//    [self presentViewController:pickerController animated:YES completion:nil];
+    
+//    _scannerController.imageSourceType = ImageSourceByChoosing;
+//    [self presentViewController:_scannerController animated:YES completion:nil];
+    [_scannerController presentScanner:PassportScanner imageSource:ImageSourceByChoosing inViewController:self];
+}
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 //    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"ID Number" message:_recognizedText preferredStyle:UIAlertControllerStyleAlert];
@@ -84,13 +94,15 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
-    self.image = [info objectForKey:UIImagePickerControllerLivePhoto];
-    _tesseract.image = [self.image g8_blackAndWhite];
-    [self.picView setImage:_tesseract.image];
-    _tesseract.rect = CGRectMake(0, 0, _tesseract.image.size.width, _tesseract.image.size.height);
-    if ([_tesseract recognize]) {
-        _recognizedText = [_tesseract recognizedText];
-    }
+    self.image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    
+    
+//    _tesseract.image = [self.image g8_blackAndWhite];
+//    [self.picView setImage:_tesseract.image];
+//    _tesseract.rect = CGRectMake(0, 0, _tesseract.image.size.width, _tesseract.image.size.height);
+//    if ([_tesseract recognize]) {
+//        _recognizedText = [_tesseract recognizedText];
+//    }
     [picker dismissViewControllerAnimated:YES completion:nil];
     
 }
@@ -100,9 +112,17 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     [self.view setBackgroundColor:[UIColor purpleColor]];
     UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(kScreenWidth/2 - kButtonRadius, kScreenHeight - kButtonRadius * 2, kButtonRadius * 2, kButtonRadius * 2)];
     btn.backgroundColor = [UIColor blackColor];
+    [btn setTitle:@"camera" forState:UIControlStateNormal];
     [btn addTarget:self action:@selector(takePhoto) forControlEvents:UIControlEventTouchUpInside];
     btn.layer.cornerRadius = kButtonRadius;
     [self.view addSubview:btn];
+    
+    UIButton *albumBtn = [[UIButton alloc] initWithFrame:CGRectMake(kScreenWidth/2 - kButtonRadius, kScreenHeight - kButtonRadius * 4, kButtonRadius * 2, kButtonRadius * 2)];
+    albumBtn.backgroundColor = [UIColor redColor];
+    [albumBtn addTarget:self action:@selector(pickPhoto) forControlEvents:UIControlEventTouchUpInside];
+    albumBtn.layer.cornerRadius = kButtonRadius;
+    [albumBtn setTitle:@"album" forState:UIControlStateNormal];
+    [self.view addSubview:albumBtn];
     
     _image = [UIImage imageNamed:@"passport.jpg"];
     self.picView = demoImageView(_image, 0);
@@ -170,13 +190,15 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
     switch (buttonIndex) {
         case 0:
-            _scannerController.scannerType = IDCardScanner;
-            [self presentViewController:_scannerController animated:YES completion:nil];
+//            _scannerController.scannerType = IDCardScanner;
+//            [self presentViewController:_scannerController animated:YES completion:nil];
+            [_scannerController presentScanner:IDCardScanner imageSource:ImageSourceByCapturing inViewController:self];
             break;
             
         case 1:
-            _scannerController.scannerType = PassportScanner;
-            [self presentViewController:_scannerController animated:YES completion:nil];
+//            _scannerController.scannerType = PassportScanner;
+//            [self presentViewController:_scannerController animated:YES completion:nil];
+            [_scannerController presentScanner:PassportScanner imageSource:ImageSourceByCapturing inViewController:self];
             break;
         default:
             break;

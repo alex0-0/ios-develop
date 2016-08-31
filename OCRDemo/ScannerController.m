@@ -156,8 +156,19 @@ void saveNumPos(int *pos){
 //    CGImageRelease(cgImage);
 //}
 
-@interface ScannerController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface ScannerController ()<AVCaptureVideoDataOutputSampleBufferDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 @property (strong, nonatomic) PassportScanResult *resultModel;
+
+/**
+ **  ATTENTION: please set the desired scannerType before present view controller, otherwise the scanner controller will use default type, i.e., idCardScanner, for now.
+ **/
+@property ScannerType scannerType;
+
+///**
+// **  ATTENTION: please set the desired imageSourceType before present view controller, otherwise the scanner controller will use default type, i.e., ImageSourceByCapturing, for now.
+// **/
+//@property ImageSourceType imageSourceType;
+
 @end
 
 @implementation ScannerController{
@@ -166,11 +177,13 @@ void saveNumPos(int *pos){
     CameraOverlay *_idCardOverlay;
     AVCaptureSession *_captureSession;
     AVCaptureVideoPreviewLayer *_previewLayer;
+    UIImageView *_imageView;
     NSLock *_lock;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self initData];
     [self initCapture];
     [self initOverlayView];
     [self initTipView];
@@ -180,29 +193,6 @@ void saveNumPos(int *pos){
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [[UIApplication sharedApplication] setStatusBarHidden:true];
-    switch (_scannerType) {
-        case PassportScanner:{
-            if ([_idCardOverlay superview]) {
-                [_idCardOverlay removeFromSuperview];
-            }
-            [self.view addSubview:_passportOverlay];
-        }
-            break;
-        case IDCardScanner:{
-            if ([_passportOverlay superview]) {
-                [_passportOverlay removeFromSuperview];
-            }
-            [self.view addSubview:_idCardOverlay];
-        }
-        default:
-            break;
-    }
-    static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
-    if (firstTime) {
-        [self.view addSubview:_tipView];
-        firstTime = NO;
-    }
-    [_captureSession startRunning];
 }
 
 -(void)viewDidDisappear:(BOOL)animated{
@@ -219,6 +209,17 @@ void saveNumPos(int *pos){
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruption:) name:AVCaptureSessionWasInterruptedNotification object:nil];
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleInterruptionEnded:) name:AVCaptureSessionInterruptionEndedNotification object:nil];
 //}
+
+#pragma mark -------------  initialization   -------------------
+
+- (void)initData{
+    if (!_scannerType) {
+        _scannerType = IDCardScanner;
+    }
+//    if (!_imageSourceType) {
+//        _imageSourceType = ImageSourceByCapturing;
+//    }
+}
 
 - (void)initCapture{
     AVCaptureDevice *captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
@@ -285,9 +286,6 @@ void saveNumPos(int *pos){
     [self.view.layer addSublayer:_previewLayer];
     
     [_captureSession commitConfiguration];
-    if (!_scannerType) {
-        _scannerType = IDCardScanner;
-    }
 }
 
 - (void)initTipView{
@@ -371,6 +369,52 @@ void saveNumPos(int *pos){
 
 }
 
+#pragma mark  -------------------  utility  -----------------
+
+- (void)presentScanner:(ScannerType)scannerType imageSource:(ImageSourceType)imageSourceType inViewController:(UIViewController *)vc{
+    [vc presentViewController:self animated:YES completion:nil];
+    _scannerType = scannerType;
+    switch (scannerType) {
+        case PassportScanner:{
+            if ([_idCardOverlay superview]) {
+                [_idCardOverlay removeFromSuperview];
+            }
+            [self.view addSubview:_passportOverlay];
+        }
+            break;
+        case IDCardScanner:{
+            if ([_passportOverlay superview]) {
+                [_passportOverlay removeFromSuperview];
+            }
+            [self.view addSubview:_idCardOverlay];
+        }
+        default:
+            break;
+    }
+    
+    static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
+    switch (imageSourceType) {
+        case ImageSourceByCapturing:
+            [_captureSession startRunning];
+            if (firstTime) {
+                [self.view addSubview:_tipView];
+                firstTime = NO;
+            }
+            break;
+            
+        case ImageSourceByChoosing:
+            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+                UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
+                pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                pickerController.delegate = self;
+                pickerController.allowsEditing = NO;
+                [self presentViewController:pickerController animated:YES completion:nil];
+            }
+        default:
+            break;
+    }
+}
+
 - (void)dismissTipView{
     [_tipView removeFromSuperview];
 }
@@ -395,6 +439,9 @@ void saveNumPos(int *pos){
     if ([_captureSession isRunning]) {
         [_captureSession stopRunning];
     }
+    if (_imageView) {
+        [_imageView removeFromSuperview];
+    }
     [self dismissTipView];
     if ([self presentingViewController] != nil) {
         [self dismissViewControllerAnimated:YES completion:nil];
@@ -403,6 +450,21 @@ void saveNumPos(int *pos){
 
 - (void)showTip{
     [self.view addSubview:_tipView];
+}
+
+#pragma mark -------------  UIImagePickerControllerDelegate   -------------------
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
+    UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    _imageView = [[UIImageView alloc] initWithImage:image];
+    _imageView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+    [self.view addSubview:_imageView];
+    [self.view sendSubviewToBack:_imageView];
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
+    [picker dismissViewControllerAnimated:YES completion:nil];
+    [self back];
 }
 
 #pragma mark -------------AVCaptureVideoDataOutputSampleBufferDelegate   -------------------
