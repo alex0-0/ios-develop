@@ -179,6 +179,10 @@ void saveNumPos(int *pos){
     AVCaptureVideoPreviewLayer *_previewLayer;
     UIImageView *_imageView;
     NSLock *_lock;
+    UIPinchGestureRecognizer *_pinchRecognizer;
+    UIRotationGestureRecognizer *_rotationRecognizer;
+    UIPanGestureRecognizer *_panRecognizer;
+    UIButton *_btn;
 }
 
 - (void)viewDidLoad {
@@ -216,9 +220,15 @@ void saveNumPos(int *pos){
     if (!_scannerType) {
         _scannerType = IDCardScanner;
     }
-//    if (!_imageSourceType) {
-//        _imageSourceType = ImageSourceByCapturing;
-//    }
+    if (!_rotationRecognizer) {
+        _rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
+    }
+    if (!_pinchRecognizer) {
+        _pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
+    }
+    if (!_panRecognizer) {
+        _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+    }
 }
 
 - (void)initCapture{
@@ -366,10 +376,27 @@ void saveNumPos(int *pos){
         __weak typeof(weakSelf) self = weakSelf;
         [self showTip];
     };
-
+    
+    //temp button for OCR of picture which choosed from library
+     _btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
+    [_btn setBackgroundColor:[UIColor whiteColor]];
+    [_btn addTarget:self action:@selector(OCR) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_btn];
 }
 
 #pragma mark  -------------------  utility  -----------------
+
+- (void)OCR{
+//    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+//        UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, NO, [UIScreen mainScreen].scale);
+//    }
+//    else
+//        UIGraphicsBeginImageContext(self.view.bounds.size);
+//    
+//    [self.view.layer renderInContext:UIGraphicsGetCurrentContext()];
+//    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+}
 
 - (void)presentScanner:(ScannerType)scannerType imageSource:(ImageSourceType)imageSourceType inViewController:(UIViewController *)vc{
     [vc presentViewController:self animated:YES completion:nil];
@@ -403,6 +430,10 @@ void saveNumPos(int *pos){
             break;
             
         case ImageSourceByChoosing:
+            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_rotationRecognizer];
+            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_pinchRecognizer];
+            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_panRecognizer];
+
             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
                 UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
                 pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -410,8 +441,30 @@ void saveNumPos(int *pos){
                 pickerController.allowsEditing = NO;
                 [self presentViewController:pickerController animated:YES completion:nil];
             }
+            break;
+            
         default:
             break;
+    }
+    [self.view bringSubviewToFront:_btn];
+}
+
+- (void)handleRotate:(UIRotationGestureRecognizer *)recognizer{
+    _imageView.transform = CGAffineTransformRotate(_imageView.transform, recognizer.rotation);
+    recognizer.rotation = 0;
+}
+
+- (void)handlePinch:(UIPinchGestureRecognizer *)recognizer{
+    _imageView.transform = CGAffineTransformScale(_imageView.transform, recognizer.scale, recognizer.scale);
+    recognizer.scale = 1;
+}
+
+- (void)handlePan:(UIPanGestureRecognizer *)recognizer{
+    if (recognizer.state == UIGestureRecognizerStateBegan || recognizer.state == UIGestureRecognizerStateChanged) {
+        CGPoint translation = [recognizer translationInView:self.view];
+        CGPoint translatedCenter = CGPointMake(_imageView.center.x + translation.x, _imageView.center.y + translation.y);
+        _imageView.center = translatedCenter;
+        [recognizer setTranslation:CGPointZero inView:self.view];
     }
 }
 
@@ -442,6 +495,16 @@ void saveNumPos(int *pos){
     if (_imageView) {
         [_imageView removeFromSuperview];
     }
+    if ([_passportOverlay gestureRecognizers].count > 0) {
+        [_passportOverlay removeGestureRecognizer:_rotationRecognizer];
+        [_passportOverlay removeGestureRecognizer:_pinchRecognizer];
+        [_passportOverlay removeGestureRecognizer:_panRecognizer];
+    }
+    else if ([_idCardOverlay gestureRecognizers].count > 0) {
+        [_idCardOverlay removeGestureRecognizer:_rotationRecognizer];
+        [_idCardOverlay removeGestureRecognizer:_pinchRecognizer];
+        [_idCardOverlay removeGestureRecognizer:_panRecognizer];
+    }
     [self dismissTipView];
     if ([self presentingViewController] != nil) {
         [self dismissViewControllerAnimated:YES completion:nil];
@@ -456,6 +519,7 @@ void saveNumPos(int *pos){
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
     _imageView = [[UIImageView alloc] initWithImage:image];
+    _imageView.transform = CGAffineTransformMakeRotation(M_PI/2);
     _imageView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
     [self.view addSubview:_imageView];
     [self.view sendSubviewToBack:_imageView];
@@ -465,6 +529,12 @@ void saveNumPos(int *pos){
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
     [picker dismissViewControllerAnimated:YES completion:nil];
     [self back];
+}
+
+#pragma mark ------------- UIGestureRecognizerDelegate   -------------------
+
+- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    return true;
 }
 
 #pragma mark -------------AVCaptureVideoDataOutputSampleBufferDelegate   -------------------
