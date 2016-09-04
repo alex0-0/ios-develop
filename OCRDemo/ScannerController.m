@@ -183,15 +183,13 @@ void saveNumPos(int *pos){
     UIRotationGestureRecognizer *_rotationRecognizer;
     UIPanGestureRecognizer *_panRecognizer;
     UIButton *_btn;
+    UIView *_imageContainer;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self initData];
-    [self initCapture];
-    [self initOverlayView];
-    [self initTipView];
-    _lock = [[NSLock alloc] init];
+    [self initView];
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -216,6 +214,24 @@ void saveNumPos(int *pos){
 
 #pragma mark -------------  initialization   -------------------
 
+- (void)initView{
+    if (!_previewLayer) {
+        _previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
+    }
+    CGRect bounds = self.view.layer.bounds;
+    _previewLayer.bounds = bounds;
+    _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    [_previewLayer setPosition:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))];
+    
+    [self initOverlayView];
+    [self initTipView];
+    _imageContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    [self.view addSubview:_imageContainer];
+    [self.view sendSubviewToBack:_imageContainer];
+    _imageView = [[UIImageView alloc] init];
+    [_imageContainer addSubview:_imageView];
+}
+
 - (void)initData{
     if (!_scannerType) {
         _scannerType = IDCardScanner;
@@ -229,6 +245,8 @@ void saveNumPos(int *pos){
     if (!_panRecognizer) {
         _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
     }
+    [self initCapture];
+    _lock = [[NSLock alloc] init];
 }
 
 - (void)initCapture{
@@ -286,15 +304,6 @@ void saveNumPos(int *pos){
     if ([_captureSession canAddOutput:captureOutput]) {
         [_captureSession addOutput:captureOutput];
     }
-    if (!_previewLayer) {
-        _previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
-    }
-    CGRect bounds = self.view.layer.bounds;
-    _previewLayer.bounds = bounds;
-    _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-    [_previewLayer setPosition:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds))];
-    [self.view.layer addSublayer:_previewLayer];
-    
     [_captureSession commitConfiguration];
 }
 
@@ -387,15 +396,20 @@ void saveNumPos(int *pos){
 #pragma mark  -------------------  utility  -----------------
 
 - (void)OCR{
-//    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
-//        UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, NO, [UIScreen mainScreen].scale);
-//    }
-//    else
-//        UIGraphicsBeginImageContext(self.view.bounds.size);
-//    
-//    [self.view.layer renderInContext:UIGraphicsGetCurrentContext()];
-//    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-//    UIGraphicsEndImageContext();
+    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+        UIGraphicsBeginImageContextWithOptions(_imageContainer.bounds.size, NO, [UIScreen mainScreen].scale);
+    }
+    else
+        UIGraphicsBeginImageContext(_imageContainer.bounds.size);
+    
+    [_imageContainer.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    int8_t *byteArray;
+    byteArray = malloc(image.size.height * image.size.width * sizeof(int8_t) - 16);
+    memcpy(byteArray, [UIImageJPEGRepresentation(image, 1.0) bytes], image.size.height * image.size.width);
+    [self passportOCR:byteArray width:image.size.width height:image.size.height image:image];
+    int a = 0;
 }
 
 - (void)presentScanner:(ScannerType)scannerType imageSource:(ImageSourceType)imageSourceType inViewController:(UIViewController *)vc{
@@ -422,6 +436,7 @@ void saveNumPos(int *pos){
     static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
     switch (imageSourceType) {
         case ImageSourceByCapturing:
+            [self.view.layer insertSublayer:_previewLayer atIndex:0];
             [_captureSession startRunning];
             if (firstTime) {
                 [self.view addSubview:_tipView];
@@ -433,7 +448,7 @@ void saveNumPos(int *pos){
             [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_rotationRecognizer];
             [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_pinchRecognizer];
             [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_panRecognizer];
-
+            
             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
                 UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
                 pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -441,12 +456,13 @@ void saveNumPos(int *pos){
                 pickerController.allowsEditing = NO;
                 [self presentViewController:pickerController animated:YES completion:nil];
             }
+            [self.view bringSubviewToFront:_btn];
+            [_imageContainer addSubview:_imageView];
             break;
             
         default:
             break;
     }
-    [self.view bringSubviewToFront:_btn];
 }
 
 - (void)handleRotate:(UIRotationGestureRecognizer *)recognizer{
@@ -506,6 +522,7 @@ void saveNumPos(int *pos){
         [_idCardOverlay removeGestureRecognizer:_panRecognizer];
     }
     [self dismissTipView];
+    [_previewLayer removeFromSuperlayer];
     if ([self presentingViewController] != nil) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
@@ -518,11 +535,10 @@ void saveNumPos(int *pos){
 #pragma mark -------------  UIImagePickerControllerDelegate   -------------------
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
-    _imageView = [[UIImageView alloc] initWithImage:image];
+    [_imageView setImage:image];
     _imageView.transform = CGAffineTransformMakeRotation(M_PI/2);
     _imageView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
-    [self.view addSubview:_imageView];
-    [self.view sendSubviewToBack:_imageView];
+    
     [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
