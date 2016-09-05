@@ -405,10 +405,47 @@ void saveNumPos(int *pos){
     [_imageContainer.layer renderInContext:UIGraphicsGetCurrentContext()];
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+
+//    UIView *rotatedViewBox = [[UIView alloc] initWithFrame:CGRectMake(0,0,image.size.width, image.size.height)];
+//    rotatedViewBox.transform = CGAffineTransformMakeRotation(-M_PI_2);
+//    CGSize rotatedSize = rotatedViewBox.frame.size;
+//    
+//    // Create the bitmap context
+//    UIGraphicsBeginImageContext(rotatedSize);
+//    CGContextRef bitmap = UIGraphicsGetCurrentContext();
+//    
+//    // Move the origin to the middle of the image so we will rotate and scale around the center.
+//    CGContextTranslateCTM(bitmap, rotatedSize.width/2, rotatedSize.height/2);
+//    
+//    //   // Rotate the image context
+//    CGContextRotateCTM(bitmap, -M_PI_2);
+//    
+//    // Now, draw the rotated/scaled image into the context
+//    CGContextScaleCTM(bitmap, 1.0, -1.0);
+//    CGContextDrawImage(bitmap, CGRectMake(-image.size.width / 2, -image.size.height / 2, image.size.width, image.size.height), [image CGImage]);
+//    
+//    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+    
+    UIView *imageBox = [[UIView alloc] initWithFrame:CGRectMake(0, 0, image.size.width, image.size.height)];
+    imageBox.transform = CGAffineTransformMakeRotation(-M_PI_2);
+    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+        UIGraphicsBeginImageContextWithOptions(imageBox.frame.size, NO, [UIScreen mainScreen].scale);
+    }
+    else
+        UIGraphicsBeginImageContext(imageBox.frame.size);
+    CGContextRef bitmap = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(bitmap, imageBox.frame.size.width / 2, imageBox.frame.size.height / 2);
+    CGContextRotateCTM(bitmap, -M_PI_2);
+    CGContextScaleCTM(bitmap, 1.0, -1.0);
+    CGContextDrawImage(bitmap, CGRectMake(-image.size.width / 2, -image.size.height/2, image.size.width, image.size.height), [image CGImage]);
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
     int8_t *byteArray;
-    byteArray = malloc(image.size.height * image.size.width * sizeof(int8_t) - 16);
-    memcpy(byteArray, [UIImageJPEGRepresentation(image, 1.0) bytes], image.size.height * image.size.width);
-    [self passportOCR:byteArray width:image.size.width height:image.size.height image:image];
+    byteArray = malloc(newImage.size.height * newImage.size.width * sizeof(int8_t));
+    memcpy(byteArray, [UIImageJPEGRepresentation(newImage, 1.0) bytes], newImage.size.height * newImage.size.width);
+    [self passportOCR:byteArray width:newImage.size.width height:newImage.size.height image:newImage];
     int a = 0;
 }
 
@@ -686,12 +723,12 @@ void saveNumPos(int *pos){
         if ([_lock tryLock]) {
             float scaleRatio = image.size.height / 320;
             CGSize imageSize = image.size;
-            CGRect passportRect = CGRectMake((imageSize.width - 354 * scaleRatio) / 2, (imageSize.height - 249 * scaleRatio) / 2, 354 * scaleRatio, 249 * scaleRatio);
+            CGRect passportRect = CGRectMake((imageSize.width * image.scale - 354 * scaleRatio) / 2, (imageSize.height * image.scale - 249 * scaleRatio) / 2, 354 * scaleRatio, 249 * scaleRatio);
 
             CGRect croppedRect  = CGRectMake(passportRect.origin.x, passportRect.origin.y + passportRect.size.height - passportRect.size.width * 0.158, passportRect.size.width, passportRect.size.width * 0.158);
-//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-//            CGImageRelease(imageRef);
+            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+            CGImageRelease(imageRef);
     //            static int count = 0;
     //            printf("%d",++count);
 
