@@ -387,7 +387,7 @@ void saveNumPos(int *pos){
     };
     
     //temp button for OCR of picture which choosed from library
-     _btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
+     _btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 60)];
     [_btn setBackgroundColor:[UIColor whiteColor]];
     [_btn addTarget:self action:@selector(OCR) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_btn];
@@ -442,11 +442,23 @@ void saveNumPos(int *pos){
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
-    int8_t *byteArray;
-    byteArray = malloc(newImage.size.height * newImage.size.width * sizeof(int8_t));
-    memcpy(byteArray, [UIImageJPEGRepresentation(newImage, 1.0) bytes], newImage.size.height * newImage.size.width);
-    [self passportOCR:byteArray width:newImage.size.width height:newImage.size.height image:newImage];
-    int a = 0;
+//    int8_t *byteArray;
+//    byteArray = malloc(newImage.size.height * newImage.size.width * sizeof(int8_t));
+//    memcpy(byteArray, [UIImageJPEGRepresentation(newImage, 1.0) bytes], newImage.size.height * newImage.size.width);
+    CGImageRef imageRef = newImage.CGImage;
+    NSUInteger width = CGImageGetWidth(imageRef);
+    NSUInteger height = CGImageGetHeight(imageRef);
+    int8_t *rawData = calloc(height * width * 4, sizeof(int8_t));
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    NSUInteger bytesPerPixel = 4;
+    NSUInteger bytesPerRow = bytesPerPixel * width;
+    NSUInteger bitsPerComponent = 8;
+    CGContextRef context = CGBitmapContextCreate(rawData, width, height, bitsPerComponent, bytesPerRow, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+    CGColorSpaceRelease(colorSpace);
+    CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
+    CGContextRelease(context);
+    
+    [self passportOCR:rawData width:newImage.size.width height:newImage.size.height image:newImage];
 }
 
 - (void)presentScanner:(ScannerType)scannerType imageSource:(ImageSourceType)imageSourceType inViewController:(UIViewController *)vc{
@@ -721,10 +733,9 @@ void saveNumPos(int *pos){
 -(void)passportOCR:(int8_t *)YUVData width:(int)width height:(int)height image:(UIImage*)image{//125*88
     @autoreleasepool {
         if ([_lock tryLock]) {
-            float scaleRatio = image.size.height / 320;
+            float scaleRatio = image.size.height * image.scale / 320;
             CGSize imageSize = image.size;
             CGRect passportRect = CGRectMake((imageSize.width * image.scale - 354 * scaleRatio) / 2, (imageSize.height * image.scale - 249 * scaleRatio) / 2, 354 * scaleRatio, 249 * scaleRatio);
-
             CGRect croppedRect  = CGRectMake(passportRect.origin.x, passportRect.origin.y + passportRect.size.height - passportRect.size.width * 0.158, passportRect.size.width, passportRect.size.width * 0.158);
             CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
             UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
@@ -732,7 +743,7 @@ void saveNumPos(int *pos){
     //            static int count = 0;
     //            printf("%d",++count);
 
-            char *result = libOCRScanPassport(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height); //0.158 = 1/6.33
+            char *result = libOCRScanPassport(YUVData, width*4*image.scale, height, croppedRect.origin.x*4*image.scale, croppedRect.origin.y, croppedRect.size.width*4*image.scale, croppedRect.size.height); //0.158 = 1/6.33
             NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
                 free(result);
             if (scanResult && scanResult.length >= 88) {

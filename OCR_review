@@ -1,7 +1,7 @@
 Character Recognition
 
 **********************************************
-//About ios PUV format
+//About ios YUV format
 //save for future in case that i have time to write a review on that
 http://stackoverflow.com/questions/6189409/how-to-get-bytes-from-cmsamplebufferref-to-send-over-network
 http://stackoverflow.com/questions/4205191/how-to-grab-yuv-formatted-video-from-the-camera-display-it-and-process-it
