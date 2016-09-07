@@ -693,7 +693,7 @@ void saveNumPos(int *pos){
     }
 }
 
--(void)IDCardOCR:(int8_t *)YUVData width:(int)width height:(int)height image:(UIImage*)image{
+-(void)IDCardOCR:(int8_t *)imageData width:(int)width height:(int)height image:(UIImage*)image{
     @autoreleasepool {
         if ([_lock tryLock]) {
             //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
@@ -709,7 +709,7 @@ void saveNumPos(int *pos){
             CGImageRelease(imageRef);
             
             int bytesPerPixel = (_imageSource == ImageSourceByChoosing)?4:1;
-            char *result = libOCRScanIDCard(YUVData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height);
+            char *result = libOCRScanIDCard(imageData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height);
             NSString *scanResult = (*result)?[NSString stringWithUTF8String:result]:@"";
             free(result);
             if (scanResult.length >= 18) {
@@ -732,11 +732,11 @@ void saveNumPos(int *pos){
             }
             [_lock unlock];
         }
-        free(YUVData);
+        free(imageData);
     }
 }
 
--(void)passportOCR:(int8_t *)YUVData width:(int)width height:(int)height image:(UIImage*)image{//125*88
+-(void)passportOCR:(int8_t *)imageData width:(int)width height:(int)height image:(UIImage*)image{//125*88
     @autoreleasepool {
         if ([_lock tryLock]) {
             float scaleRatio = image.size.height * image.scale / 320;
@@ -748,7 +748,7 @@ void saveNumPos(int *pos){
 //            CGImageRelease(imageRef);
             
             int bytesPerPixel = (_imageSource == ImageSourceByChoosing)?4:1;
-            char *result = libOCRScanPassport(YUVData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height); //0.158 = 1/6.33
+            char *result = libOCRScanPassport(imageData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height); //0.158 = 1/6.33
             NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
                 free(result);
             if (scanResult && scanResult.length >= 88) {
@@ -782,7 +782,7 @@ void saveNumPos(int *pos){
             NSLog(@"%@", scanResult);
             [_lock unlock];
         }
-        free(YUVData);
+        free(imageData);
     }
 }
 
