@@ -42,6 +42,7 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     G8Tesseract *_tesseract;
     NSString *_recognizedText;
     ScannerController *_scannerController;
+    ImageSourceType _imageSource;
 }
 
 - (void)viewDidLoad {
@@ -57,19 +58,16 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 - (void)takePhoto{
+    _imageSource = ImageSourceByCapturing;
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
     [actionSheet showInView:self.view];
 }
 
 - (void)pickPhoto{
-//    UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
-//    pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-//    pickerController.delegate = self;
-//    [self presentViewController:pickerController animated:YES completion:nil];
-    
-//    _scannerController.imageSourceType = ImageSourceByChoosing;
-//    [self presentViewController:_scannerController animated:YES completion:nil];
-    [_scannerController presentScanner:PassportScanner imageSource:ImageSourceByChoosing inViewController:self];
+    _imageSource = ImageSourceByChoosing;
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
+    [actionSheet showInView:self.view];
+//    [_scannerController presentScanner:PassportScanner imageSource:ImageSourceByChoosing inViewController:self];
 }
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
@@ -192,13 +190,13 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
         case 0:
 //            _scannerController.scannerType = IDCardScanner;
 //            [self presentViewController:_scannerController animated:YES completion:nil];
-            [_scannerController presentScanner:IDCardScanner imageSource:ImageSourceByCapturing inViewController:self];
+            [_scannerController presentScanner:IDCardScanner imageSource:_imageSource inViewController:self];
             break;
             
         case 1:
 //            _scannerController.scannerType = PassportScanner;
 //            [self presentViewController:_scannerController animated:YES completion:nil];
-            [_scannerController presentScanner:PassportScanner imageSource:ImageSourceByCapturing inViewController:self];
+            [_scannerController presentScanner:PassportScanner imageSource:_imageSource inViewController:self];
             break;
         default:
             break;

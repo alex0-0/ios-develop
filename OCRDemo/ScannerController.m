@@ -184,6 +184,7 @@ void saveNumPos(int *pos){
     UIPanGestureRecognizer *_panRecognizer;
     UIButton *_btn;
     UIView *_imageContainer;
+    ImageSourceType _imageSource;
 }
 
 - (void)viewDidLoad {
@@ -458,12 +459,18 @@ void saveNumPos(int *pos){
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
     CGContextRelease(context);
     
-    [self passportOCR:rawData width:newImage.size.width height:newImage.size.height image:newImage];
+    if (_scannerType == PassportScanner) {
+        [self passportOCR:rawData width:newImage.size.width height:newImage.size.height image:newImage];
+    }
+    else if (_scannerType == IDCardScanner) {
+        [self IDCardOCR:rawData width:newImage.size.width height:newImage.size.height image:newImage];
+    }
 }
 
 - (void)presentScanner:(ScannerType)scannerType imageSource:(ImageSourceType)imageSourceType inViewController:(UIViewController *)vc{
     [vc presentViewController:self animated:YES completion:nil];
     _scannerType = scannerType;
+    _imageSource = imageSourceType;
     switch (scannerType) {
         case PassportScanner:{
             if ([_idCardOverlay superview]) {
@@ -691,19 +698,18 @@ void saveNumPos(int *pos){
         if ([_lock tryLock]) {
             //105/330 = 0.318 (105:length of "公民身份号码"   330:length of id card)
             //55/208 = 0.264 (55:height of rect in which the id number possibly exists   208:height of id card)
-            float scaleRatio = image.size.height / 320;
+            float scaleRatio = image.size.height * image.scale / 320;
             CGSize imageSize = image.size;
-            CGRect cardRect = CGRectMake((imageSize.width - 365 * scaleRatio) / 2, (imageSize.height - 232 * scaleRatio) / 2, 365 * scaleRatio, 232 * scaleRatio);
+            CGRect cardRect = CGRectMake((imageSize.width * image.scale - 365 * scaleRatio) / 2, (imageSize.height * image.scale - 232 * scaleRatio) / 2, 365 * scaleRatio, 232 * scaleRatio);
 
             CGSize possibleSize = CGSizeMake(cardRect.size.width - cardRect.size.width * 0.318, cardRect.size.height * 0.264);
             CGRect croppedRect  = CGRectMake(cardRect.origin.x + cardRect.size.width - possibleSize.width, cardRect.origin.y + cardRect.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
-//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-//            CGImageRelease(imageRef);
+            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+            CGImageRelease(imageRef);
             
-            static int count = 0;
-            printf("%d",++count);
-            char *result = libOCRScanIDCard(YUVData, width, height, croppedRect.origin.x, croppedRect.origin.y, croppedRect.size.width, croppedRect.size.height);
+            int bytesPerPixel = (_imageSource == ImageSourceByChoosing)?4:1;
+            char *result = libOCRScanIDCard(YUVData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height);
             NSString *scanResult = (*result)?[NSString stringWithUTF8String:result]:@"";
             free(result);
             if (scanResult.length >= 18) {
@@ -737,13 +743,12 @@ void saveNumPos(int *pos){
             CGSize imageSize = image.size;
             CGRect passportRect = CGRectMake((imageSize.width * image.scale - 354 * scaleRatio) / 2, (imageSize.height * image.scale - 249 * scaleRatio) / 2, 354 * scaleRatio, 249 * scaleRatio);
             CGRect croppedRect  = CGRectMake(passportRect.origin.x, passportRect.origin.y + passportRect.size.height - passportRect.size.width * 0.158, passportRect.size.width, passportRect.size.width * 0.158);
-            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-            CGImageRelease(imageRef);
-    //            static int count = 0;
-    //            printf("%d",++count);
-
-            char *result = libOCRScanPassport(YUVData, width*4*image.scale, height, croppedRect.origin.x*4*image.scale, croppedRect.origin.y, croppedRect.size.width*4*image.scale, croppedRect.size.height); //0.158 = 1/6.33
+//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+//            CGImageRelease(imageRef);
+            
+            int bytesPerPixel = (_imageSource == ImageSourceByChoosing)?4:1;
+            char *result = libOCRScanPassport(YUVData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height); //0.158 = 1/6.33
             NSString *scanResult = (result)?[NSString stringWithUTF8String:result]:@"";
                 free(result);
             if (scanResult && scanResult.length >= 88) {
