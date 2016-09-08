@@ -10,13 +10,45 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/ScannerController.m"
-            timestampString = "494932263.755455"
+            timestampString = "494995812.317509"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "716"
-            endingLineNumber = "716"
+            startingLineNumber = "729"
+            endingLineNumber = "729"
             landmarkName = "-IDCardOCR:width:height:image:"
             landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "-[ScannerController IDCardOCR:width:height:image:]"
+                  moduleName = "OCRDemo"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ltp/Desktop/test/OCRDemo/OCRDemo/ScannerController.m"
+                  timestampString = "494996130.298683"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "729"
+                  endingLineNumber = "729"
+                  offsetFromSymbolStart = "1356">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "__50-[ScannerController IDCardOCR:width:height:image:]_block_invoke"
+                  moduleName = "OCRDemo"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ltp/Desktop/test/OCRDemo/OCRDemo/ScannerController.m"
+                  timestampString = "494996130.298854"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "729"
+                  endingLineNumber = "729"
+                  offsetFromSymbolStart = "24">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -26,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "OCRDemo/ScannerController.m"
-            timestampString = "494932323.633233"
+            timestampString = "494995812.317509"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "713"
-            endingLineNumber = "713"
+            startingLineNumber = "716"
+            endingLineNumber = "716"
             landmarkName = "-IDCardOCR:width:height:image:"
             landmarkType = "5">
          </BreakpointContent>
@@ -49,6 +81,22 @@
             endingLineNumber = "931"
             landmarkName = "libOCRScanIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "OCRDemo/ScannerController.m"
+            timestampString = "494995943.987632"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "772"
+            endingLineNumber = "772"
+            landmarkName = "-passportOCR:width:height:image:"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

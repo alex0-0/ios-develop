@@ -20,6 +20,7 @@
 
 static NSMutableArray<LetterPosition*> *letterPosArray;     //position of passport letters
 static NSMutableArray<LetterPosition*> *numPosArray;        //position of id card numbers
+static bool needAdjust;     //whether the position of letters should be adjusted
 
 //get position of 88 letters
 void saveLetterPos(int *pos){
@@ -36,16 +37,16 @@ void saveLetterPos(int *pos){
         LetterPosition *tmpLetterPos = [[LetterPosition alloc] init];
         if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
             //in iphone4 with ios7, the picture is not cropped correctly
-            tmpLetterPos.x = pos[i * 4] - 50;
+            tmpLetterPos.x = ((needAdjust)?-50:0) + pos[i * 4];
         }
         else
-            tmpLetterPos.x = pos[i * 4] - 30;
+            tmpLetterPos.x = ((needAdjust)?-30:0) + pos[i * 4];
         tmpLetterPos.y = pos[i * 4 + 1];
         if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-            tmpLetterPos.toX = pos[i * 4 + 2] - 40;
+            tmpLetterPos.toX = ((needAdjust)?-40:0) + pos[i * 4 + 2];
         }
         else
-            tmpLetterPos.toX = pos[i * 4 + 2] - 20;
+            tmpLetterPos.toX = ((needAdjust)?-20:0) + pos[i * 4 + 2];
         tmpLetterPos.toY = pos[i * 4 + 3];
         [letterPosArray addObject:tmpLetterPos];
     }
@@ -68,16 +69,16 @@ void saveNumPos(int *pos){
         LetterPosition *tmpLetterPos = [[LetterPosition alloc] init];
         if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
             //in iphone4 with ios7, the picture is not cropped correctly
-            tmpLetterPos.x = pos[i * 4] - 50;
+            tmpLetterPos.x = ((needAdjust)?-50:0) + pos[i * 4];
         }
         else
-            tmpLetterPos.x = pos[i * 4] - 30;
+            tmpLetterPos.x = ((needAdjust)?-30:0) + pos[i * 4];
         tmpLetterPos.y = pos[i * 4 + 1];
         if (IS_IPHONE_4_OR_LESS && !SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-            tmpLetterPos.toX = pos[i * 4 + 2] - 40;
+            tmpLetterPos.toX = ((needAdjust)?-40:0) + pos[i * 4 + 2];
         }
         else
-            tmpLetterPos.toX = pos[i * 4 + 2] - 20;
+            tmpLetterPos.toX = ((needAdjust)?-20:0) + pos[i * 4 + 2];
         tmpLetterPos.toY = pos[i * 4 + 3];
         [numPosArray addObject:tmpLetterPos];
     }
@@ -492,6 +493,7 @@ void saveNumPos(int *pos){
     static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
     switch (imageSourceType) {
         case ImageSourceByCapturing:
+            needAdjust = true;
             [self.view.layer insertSublayer:_previewLayer atIndex:0];
             [_captureSession startRunning];
             if (firstTime) {
@@ -501,6 +503,7 @@ void saveNumPos(int *pos){
             break;
             
         case ImageSourceByChoosing:
+            needAdjust = false;
             [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_rotationRecognizer];
             [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_pinchRecognizer];
             [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_panRecognizer];
