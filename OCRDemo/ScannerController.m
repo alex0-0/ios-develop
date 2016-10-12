@@ -707,9 +707,9 @@ void saveNumPos(int *pos){
 
             CGSize possibleSize = CGSizeMake(cardRect.size.width - cardRect.size.width * 0.318, cardRect.size.height * 0.264);
             CGRect croppedRect  = CGRectMake(cardRect.origin.x + cardRect.size.width - possibleSize.width, cardRect.origin.y + cardRect.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
-            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-            CGImageRelease(imageRef);
+//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+//            CGImageRelease(imageRef);
             
             int bytesPerPixel = (_imageSource == ImageSourceByChoosing)?4:1;
             char *result = libOCRScanIDCard(imageData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height);
