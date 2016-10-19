@@ -163,27 +163,22 @@ void saveNumPos(int *pos){
 /**
  **  ATTENTION: please set the desired scannerType before present view controller, otherwise the scanner controller will use default type, i.e., idCardScanner, for now.
  **/
-@property ScannerType scannerType;
+@property (nonatomic, assign) ScannerType scannerType;
 
-///**
-// **  ATTENTION: please set the desired imageSourceType before present view controller, otherwise the scanner controller will use default type, i.e., ImageSourceByCapturing, for now.
-// **/
-//@property ImageSourceType imageSourceType;
+@property (strong, nonatomic) AVCaptureSession *captureSession;
+@property (strong, nonatomic) UIImageView *imageView;
 
 @end
 
 @implementation ScannerController{
     UIView *_tipView;
-    CameraOverlay *_passportOverlay;
-    CameraOverlay *_idCardOverlay;
-    AVCaptureSession *_captureSession;
+    CameraOverlay *_overlay;
+//    CameraOverlay *_idCardOverlay;
     AVCaptureVideoPreviewLayer *_previewLayer;
-    UIImageView *_imageView;
     NSLock *_lock;
     UIPinchGestureRecognizer *_pinchRecognizer;
     UIRotationGestureRecognizer *_rotationRecognizer;
     UIPanGestureRecognizer *_panRecognizer;
-    UIButton *_btn;
     UIView *_imageContainer;
     ImageSourceType _imageSource;
 }
@@ -197,6 +192,18 @@ void saveNumPos(int *pos){
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [[UIApplication sharedApplication] setStatusBarHidden:true];
+    
+    static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
+    if (firstTime) {
+        [self.view addSubview:_tipView];
+        firstTime = NO;
+    }
+    if (_imageSource == ImageSourceByCapturing ) {
+        if ([self checkCameraAccess]) {
+            [_captureSession startRunning];
+            [self.view.layer insertSublayer:_previewLayer atIndex:0];
+        }
+    }
 }
 
 -(void)viewDidDisappear:(BOOL)animated{
@@ -232,11 +239,13 @@ void saveNumPos(int *pos){
     [self.view sendSubviewToBack:_imageContainer];
     _imageView = [[UIImageView alloc] init];
     [_imageContainer addSubview:_imageView];
+    [self.view addSubview:_overlay];
+    
 }
 
 - (void)initData{
     if (!_scannerType) {
-        _scannerType = IDCardScanner;
+        _scannerType = PassportScanner;
     }
     if (!_rotationRecognizer) {
         _rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
@@ -249,6 +258,8 @@ void saveNumPos(int *pos){
     }
     [self initCapture];
     _lock = [[NSLock alloc] init];
+    needAdjust = true;
+    _imageSource = ImageSourceByCapturing;
 }
 
 - (void)initCapture{
@@ -358,41 +369,49 @@ void saveNumPos(int *pos){
 }
 
 - (void)initOverlayView{
-    _passportOverlay = [[CameraOverlay alloc] init:CameraOverlayTypePassport];
-    _passportOverlay.frame = [UIScreen mainScreen].bounds;
+    _overlay = [[CameraOverlay alloc] init];
+    _overlay.frame = [UIScreen mainScreen].bounds;
     __weak typeof(self) weakSelf = self;
-    _passportOverlay.tapFlashLight = ^{
+    _overlay.tapFlashLight = ^(UIButton *btn){
         __weak typeof(weakSelf) self = weakSelf;
         [self flashLight];
     };
-    _passportOverlay.dismissImagePicker = ^{
+    _overlay.dismissImagePicker = ^{
         __weak typeof(weakSelf) self = weakSelf;
         [self back];
     };
-    _passportOverlay.tapTip = ^{
+    _overlay.tapTip = ^{
         __weak typeof(weakSelf) self = weakSelf;
         [self showTip];
     };
-    _idCardOverlay = [[CameraOverlay alloc] init:CameraOverlayTypeIDCard];
-    _idCardOverlay.frame = [UIScreen mainScreen].bounds;
-    _idCardOverlay.tapFlashLight = ^{
+    _overlay.doOCR = ^{
         __weak typeof(weakSelf) self = weakSelf;
-        [self flashLight];
+        [self OCR];
     };
-    _idCardOverlay.dismissImagePicker = ^{
+    _overlay.tapIDCardBtn = ^{
         __weak typeof(weakSelf) self = weakSelf;
-        [self back];
+        self.scannerType = IDCardScanner;
     };
-    _idCardOverlay.tapTip = ^{
+    _overlay.tapPassportBtn = ^{
         __weak typeof(weakSelf) self = weakSelf;
-        [self showTip];
+        self.scannerType = PassportScanner;
+    };
+    _overlay.doTakingPicture = ^{
+        __weak typeof(weakSelf) self = weakSelf;
+        [self takePicture];
+    };
+    _overlay.doChoosePicture = ^{
+        __weak typeof(weakSelf) self = weakSelf;
+        [self choosePicture];
+        [self addOverlayRecognizers];
+        needAdjust = false;
     };
     
-    //temp button for OCR of picture which choosed from library
-     _btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 60)];
-    [_btn setBackgroundColor:[UIColor whiteColor]];
-    [_btn addTarget:self action:@selector(OCR) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_btn];
+//    //temp button for OCR of picture which choosed from library
+//     _btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 60)];
+//    [_btn setBackgroundColor:[UIColor whiteColor]];
+//    [_btn addTarget:self action:@selector(OCR) forControlEvents:UIControlEventTouchUpInside];
+//    [self.view addSubview:_btn];
 }
 
 #pragma mark  -------------------  utility  -----------------
@@ -470,58 +489,58 @@ void saveNumPos(int *pos){
 
 - (void)presentScanner:(ScannerType)scannerType imageSource:(ImageSourceType)imageSourceType inViewController:(UIViewController *)vc{
     [vc presentViewController:self animated:YES completion:nil];
-    _scannerType = scannerType;
-    _imageSource = imageSourceType;
-    switch (scannerType) {
-        case PassportScanner:{
-            if ([_idCardOverlay superview]) {
-                [_idCardOverlay removeFromSuperview];
-            }
-            [self.view addSubview:_passportOverlay];
-        }
-            break;
-        case IDCardScanner:{
-            if ([_passportOverlay superview]) {
-                [_passportOverlay removeFromSuperview];
-            }
-            [self.view addSubview:_idCardOverlay];
-        }
-        default:
-            break;
-    }
+//    _scannerType = scannerType;
+//    _imageSource = imageSourceType;
+//    switch (scannerType) {
+//        case PassportScanner:{
+//            if ([_idCardOverlay superview]) {
+//                [_idCardOverlay removeFromSuperview];
+//            }
+//            [self.view addSubview:_passportOverlay];
+//        }
+//            break;
+//        case IDCardScanner:{
+//            if ([_passportOverlay superview]) {
+//                [_passportOverlay removeFromSuperview];
+//            }
+//            [self.view addSubview:_idCardOverlay];
+//        }
+//        default:
+//            break;
+//    }
     
-    static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
-    switch (imageSourceType) {
-        case ImageSourceByCapturing:
-            needAdjust = true;
-            [self.view.layer insertSublayer:_previewLayer atIndex:0];
-            [_captureSession startRunning];
-            if (firstTime) {
-                [self.view addSubview:_tipView];
-                firstTime = NO;
-            }
-            break;
-            
-        case ImageSourceByChoosing:
-            needAdjust = false;
-            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_rotationRecognizer];
-            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_pinchRecognizer];
-            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_panRecognizer];
-            
-            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
-                UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
-                pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-                pickerController.delegate = self;
-                pickerController.allowsEditing = NO;
-                [self presentViewController:pickerController animated:YES completion:nil];
-            }
-            [self.view bringSubviewToFront:_btn];
-            [_imageContainer addSubview:_imageView];
-            break;
-            
-        default:
-            break;
-    }
+//    static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
+//    switch (imageSourceType) {
+//        case ImageSourceByCapturing:
+//            needAdjust = true;
+//            [self.view.layer insertSublayer:_previewLayer atIndex:0];
+//            [_captureSession startRunning];
+//            if (firstTime) {
+//                [self.view addSubview:_tipView];
+//                firstTime = NO;
+//            }
+//            break;
+//            
+//        case ImageSourceByChoosing:
+//            needAdjust = false;
+//            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_rotationRecognizer];
+//            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_pinchRecognizer];
+//            [(scannerType == PassportScanner)?_passportOverlay:_idCardOverlay addGestureRecognizer:_panRecognizer];
+//            
+//            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+//                UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
+//                pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+//                pickerController.delegate = self;
+//                pickerController.allowsEditing = NO;
+//                [self presentViewController:pickerController animated:YES completion:nil];
+//            }
+//            [self.view bringSubviewToFront:_btn];
+//            [_imageContainer addSubview:_imageView];
+//            break;
+//            
+//        default:
+//            break;
+//    }
 }
 
 - (void)handleRotate:(UIRotationGestureRecognizer *)recognizer{
@@ -541,6 +560,51 @@ void saveNumPos(int *pos){
         _imageView.center = translatedCenter;
         [recognizer setTranslation:CGPointZero inView:self.view];
     }
+}
+
+- (void)takePicture{
+    if (self.imageView) {
+        [self.imageView removeFromSuperview];
+    }
+    [self removeOverlayRecognizers];
+    needAdjust = true;
+    _imageSource = ImageSourceByCapturing;
+    [self.view.layer insertSublayer:_previewLayer atIndex:0];
+    
+    if (![self.captureSession isRunning]) {
+        [self.captureSession startRunning];
+    }
+}
+
+- (void)choosePicture{
+    if ([self.captureSession isRunning]) {
+        [self.captureSession stopRunning];
+    }
+    _imageSource = ImageSourceByChoosing;
+    [_previewLayer removeFromSuperlayer];
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+        UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
+        pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        pickerController.delegate = self;
+        pickerController.allowsEditing = NO;
+        [self presentViewController:pickerController animated:YES completion:nil];
+    }
+    [_imageContainer addSubview:_imageView];
+}
+
+- (void)removeOverlayRecognizers{
+    if ([_overlay gestureRecognizers].count > 0) {
+        [_overlay removeGestureRecognizer:_rotationRecognizer];
+        [_overlay removeGestureRecognizer:_pinchRecognizer];
+        [_overlay removeGestureRecognizer:_panRecognizer];
+    }
+}
+
+- (void)addOverlayRecognizers{
+    [self removeOverlayRecognizers];
+    [_overlay addGestureRecognizer:_rotationRecognizer];
+    [_overlay addGestureRecognizer:_pinchRecognizer];
+    [_overlay addGestureRecognizer:_panRecognizer];
 }
 
 - (void)dismissTipView{
@@ -570,16 +634,7 @@ void saveNumPos(int *pos){
     if (_imageView) {
         [_imageView removeFromSuperview];
     }
-    if ([_passportOverlay gestureRecognizers].count > 0) {
-        [_passportOverlay removeGestureRecognizer:_rotationRecognizer];
-        [_passportOverlay removeGestureRecognizer:_pinchRecognizer];
-        [_passportOverlay removeGestureRecognizer:_panRecognizer];
-    }
-    else if ([_idCardOverlay gestureRecognizers].count > 0) {
-        [_idCardOverlay removeGestureRecognizer:_rotationRecognizer];
-        [_idCardOverlay removeGestureRecognizer:_pinchRecognizer];
-        [_idCardOverlay removeGestureRecognizer:_panRecognizer];
-    }
+    [self removeOverlayRecognizers];
     [self dismissTipView];
     [_previewLayer removeFromSuperlayer];
     if ([self presentingViewController] != nil) {
@@ -591,19 +646,40 @@ void saveNumPos(int *pos){
     [self.view addSubview:_tipView];
 }
 
+- (BOOL)checkCameraAccess{
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0f) {
+            AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+            //    获取对摄像头的访问权限。
+            if (authStatus == AVAuthorizationStatusRestricted || authStatus == AVAuthorizationStatusDenied)
+            {
+                UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:@"提示" message:@"请进入系统“设置>隐私>相机”开启此权限" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
+                [alertView show];
+                return false;
+            }
+        }//IOS7（包括）之后才有 隐私里面增加 相机。之前版本 只要isSourceTypeAvailable 就可以
+    } else {
+        return false;
+    }
+    return true;
+}
+
+
 #pragma mark -------------  UIImagePickerControllerDelegate   -------------------
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
     [_imageView setImage:image];
     _imageView.transform = CGAffineTransformMakeRotation(M_PI/2);
-    _imageView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+    float scaleRatio = image.size.width / [UIScreen mainScreen].bounds.size.height;
+    _imageView.frame = CGRectMake(0, 0, image.size.height / scaleRatio, image.size.width / scaleRatio);
     
     [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
     [picker dismissViewControllerAnimated:YES completion:nil];
-    [self back];
+    _imageSource = ImageSourceByCapturing;
+    [_overlay doTakingPicture];
 }
 
 #pragma mark ------------- UIGestureRecognizerDelegate   -------------------

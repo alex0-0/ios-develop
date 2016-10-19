@@ -146,25 +146,25 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 
 -(void)setupImagePicker {
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-        self.imagePicker = [[UIImagePickerController alloc] init];
-        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-//        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
-        self.imagePicker.allowsEditing = NO;
-        self.imagePicker.delegate = self;
-        _imagePicker.showsCameraControls = NO;
-        _imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
-        _imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
-        
+//        self.imagePicker = [[UIImagePickerController alloc] init];
+//        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+////        self.imagePicker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+//        self.imagePicker.allowsEditing = NO;
+//        self.imagePicker.delegate = self;
+//        _imagePicker.showsCameraControls = NO;
+//        _imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
+//        _imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
+//        
         _scannerController = [[ScannerController alloc] init];
-        _imagePicker.cameraOverlayView = _scannerController.view;
+//        _imagePicker.cameraOverlayView = _scannerController.view;
 
         //make iamge picker full screen
-        CGSize screenSize = [UIScreen mainScreen].bounds.size;
-        float cameraAspectRatio = 4.0 / 3.0;
-        float imageHeight = floorf(screenSize.width * cameraAspectRatio);
-        float scale = ceilf((screenSize.height / imageHeight) * 10.0) / 10.0;
-        _imagePicker.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenSize.height - imageHeight) / 2);
-        _imagePicker.cameraViewTransform = CGAffineTransformScale(_imagePicker.cameraViewTransform,scale, scale);
+//        CGSize screenSize = [UIScreen mainScreen].bounds.size;
+//        float cameraAspectRatio = 4.0 / 3.0;
+//        float imageHeight = floorf(screenSize.width * cameraAspectRatio);
+//        float scale = ceilf((screenSize.height / imageHeight) * 10.0) / 10.0;
+//        _imagePicker.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenSize.height - imageHeight) / 2);
+//        _imagePicker.cameraViewTransform = CGAffineTransformScale(_imagePicker.cameraViewTransform,scale, scale);
     }
 }
 
@@ -189,14 +189,14 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
     switch (buttonIndex) {
         case 0:
 //            _scannerController.scannerType = IDCardScanner;
-//            [self presentViewController:_scannerController animated:YES completion:nil];
-            [_scannerController presentScanner:IDCardScanner imageSource:_imageSource inViewController:self];
+            [self presentViewController:_scannerController animated:YES completion:nil];
+//            [_scannerController presentScanner:IDCardScanner imageSource:_imageSource inViewController:self];
             break;
             
         case 1:
 //            _scannerController.scannerType = PassportScanner;
-//            [self presentViewController:_scannerController animated:YES completion:nil];
-            [_scannerController presentScanner:PassportScanner imageSource:_imageSource inViewController:self];
+            [self presentViewController:_scannerController animated:YES completion:nil];
+//            [_scannerController presentScanner:PassportScanner imageSource:_imageSource inViewController:self];
             break;
         default:
             break;

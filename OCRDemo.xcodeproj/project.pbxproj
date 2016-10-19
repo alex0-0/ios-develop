@@ -25,6 +25,10 @@
 		559891191D0D5CDA0079A250 /* CameraOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 559891181D0D5CDA0079A250 /* CameraOverlay.m */; };
 		55B9C0571D1926770070CC3E /* barcode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55B9C0551D1926770070CC3E /* barcode@2x.png */; };
 		55B9C0581D1926770070CC3E /* barcode@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55B9C0561D1926770070CC3E /* barcode@3x.png */; };
+		55BC06B61DB6076D00AC6CA6 /* triangle.png in Resources */ = {isa = PBXBuildFile; fileRef = 55BC06B51DB6076D00AC6CA6 /* triangle.png */; };
+		55BC06B91DB60FE500AC6CA6 /* ico_photo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55BC06B71DB60FE500AC6CA6 /* ico_photo@2x.png */; };
+		55BC06BA1DB60FE500AC6CA6 /* ico_photo@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55BC06B81DB60FE500AC6CA6 /* ico_photo@3x.png */; };
+		55BC06BC1DB617F900AC6CA6 /* ico_question@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 55BC06BB1DB617F900AC6CA6 /* ico_question@2x.png */; };
 		55F1358D1D118D40007E4F2B /* template.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55F135891D118D40007E4F2B /* template.cpp */; };
 		55F2D6DA1D2FA81C00F3057E /* ScannerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55F2D6D91D2FA81C00F3057E /* ScannerController.m */; };
 		C28B029B83B6F40CB22D5739 /* libPods-OCRDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA564261AD1C46BF46DA7CFE /* libPods-OCRDemo.a */; };
@@ -58,6 +62,10 @@
 		559891181D0D5CDA0079A250 /* CameraOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlay.m; sourceTree = "<group>"; };
 		55B9C0551D1926770070CC3E /* barcode@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "barcode@2x.png"; sourceTree = "<group>"; };
 		55B9C0561D1926770070CC3E /* barcode@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "barcode@3x.png"; sourceTree = "<group>"; };
+		55BC06B51DB6076D00AC6CA6 /* triangle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = triangle.png; sourceTree = "<group>"; };
+		55BC06B71DB60FE500AC6CA6 /* ico_photo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ico_photo@2x.png"; path = "../../../../Documents/常用信息-1/切图/ico_photo@2x.png"; sourceTree = "<group>"; };
+		55BC06B81DB60FE500AC6CA6 /* ico_photo@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ico_photo@3x.png"; path = "../../../../Documents/常用信息-1/切图/ico_photo@3x.png"; sourceTree = "<group>"; };
+		55BC06BB1DB617F900AC6CA6 /* ico_question@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ico_question@2x.png"; sourceTree = "<group>"; };
 		55F135891D118D40007E4F2B /* template.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = template.cpp; sourceTree = "<group>"; };
 		55F2D6D91D2FA81C00F3057E /* ScannerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerController.m; sourceTree = "<group>"; };
 		55F54E421D34E590002D19DB /* LibOCR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LibOCR.h; sourceTree = "<group>"; };
@@ -123,6 +131,10 @@
 		55417A9A1CE749C600860E4F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				55BC06BB1DB617F900AC6CA6 /* ico_question@2x.png */,
+				55BC06B71DB60FE500AC6CA6 /* ico_photo@2x.png */,
+				55BC06B81DB60FE500AC6CA6 /* ico_photo@3x.png */,
+				55BC06B51DB6076D00AC6CA6 /* triangle.png */,
 				558228BD1D3378D70012E18A /* back_arrow@3x.png */,
 				558228BE1D3378D70012E18A /* light_off@3x.png */,
 				55B9C0551D1926770070CC3E /* barcode@2x.png */,
@@ -228,14 +240,18 @@
 			files = (
 				558228C01D3378D70012E18A /* light_off@3x.png in Resources */,
 				55B9C0581D1926770070CC3E /* barcode@3x.png in Resources */,
+				55BC06BA1DB60FE500AC6CA6 /* ico_photo@3x.png in Resources */,
 				5538EF351D0013F7004C2BFC /* flowers.jpg in Resources */,
 				55B9C0571D1926770070CC3E /* barcode@2x.png in Resources */,
 				55396B011D0167570039C59E /* passport.jpg in Resources */,
+				55BC06B91DB60FE500AC6CA6 /* ico_photo@2x.png in Resources */,
 				55396AFF1D0164E40039C59E /* idCard.png in Resources */,
 				5538EF331D0012BA004C2BFC /* tessdata in Resources */,
 				55396AFE1D0164E40039C59E /* chinese_id_card.jpg in Resources */,
+				55BC06BC1DB617F900AC6CA6 /* ico_question@2x.png in Resources */,
 				558228BF1D3378D70012E18A /* back_arrow@3x.png in Resources */,
 				55417AA71CE749C600860E4F /* Assets.xcassets in Resources */,
+				55BC06B61DB6076D00AC6CA6 /* triangle.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
