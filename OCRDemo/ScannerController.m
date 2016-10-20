@@ -17,6 +17,7 @@
 #define SCREEN_MAX_LENGTH (MAX(SCREEN_WIDTH, SCREEN_HEIGHT))
 #define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
 #define IS_IPHONE_4_OR_LESS (IS_IPHONE && SCREEN_MAX_LENGTH < 568.0)
+#define ColorHex(c) [UIColor colorWithRed:((c>>16)&0xFF)/255.0 green:((c>>8)&0xFF)/255.0 blue:((c)&0xFF)/255.0 alpha:1.0]
 
 static NSMutableArray<LetterPosition*> *letterPosArray;     //position of passport letters
 static NSMutableArray<LetterPosition*> *numPosArray;        //position of id card numbers
@@ -172,6 +173,7 @@ void saveNumPos(int *pos){
 
 @implementation ScannerController{
     UIView *_tipView;
+    UIView *_OCRFailureAlert;
     CameraOverlay *_overlay;
 //    CameraOverlay *_idCardOverlay;
     AVCaptureVideoPreviewLayer *_previewLayer;
@@ -240,6 +242,7 @@ void saveNumPos(int *pos){
     _imageView = [[UIImageView alloc] init];
     [_imageContainer addSubview:_imageView];
     [self.view addSubview:_overlay];
+    [self initOCRFailureAlert];
     
 }
 
@@ -318,6 +321,52 @@ void saveNumPos(int *pos){
         [_captureSession addOutput:captureOutput];
     }
     [_captureSession commitConfiguration];
+}
+
+- (void)initOCRFailureAlert{
+    float scaleRatio = [UIScreen mainScreen].bounds.size.width / 375;
+    _OCRFailureAlert = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    [_OCRFailureAlert setBackgroundColor:[[UIColor blackColor] colorWithAlphaComponent:0.7]];
+    UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300 * scaleRatio, 144 * scaleRatio)];
+    CGSize size = container.frame.size;
+    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(15 * scaleRatio, 27 * scaleRatio, size.width - 30 * scaleRatio, 24)];
+    title.textAlignment = NSTextAlignmentCenter;
+    [title setText:@"识别失败"];
+    title.textColor = [UIColor blackColor];
+    title.font = [UIFont boldSystemFontOfSize:17.0f];
+    [container addSubview:title];
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(15 * scaleRatio, title.frame.origin.y + title.frame.size.height + 6 * scaleRatio, size.width - 30 * scaleRatio, 16 * scaleRatio)];
+    [label setText:@"请确保证件有效，且图片清晰无变形"];
+    label.font = [UIFont systemFontOfSize:13.0f];
+    label.textAlignment = NSTextAlignmentCenter;
+    [container addSubview:label];
+    
+    UIButton *cancelBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, size.height - 44 * scaleRatio, size.width / 2, 44 *scaleRatio)];
+    [cancelBtn setTitle:@"取消" forState:UIControlStateNormal];
+    [cancelBtn setTitleColor:ColorHex(0x099FDE) forState:UIControlStateNormal];
+    [cancelBtn addTarget:_OCRFailureAlert action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchUpInside];
+    cancelBtn.layer.borderColor = ColorHex(0xCDCED2).CGColor;
+    cancelBtn.layer.borderWidth = 1.0f;
+    cancelBtn.titleLabel.font = [UIFont systemFontOfSize:17.0f];
+    [container addSubview:cancelBtn];
+    
+    UIButton *repickBtn = [[UIButton alloc] initWithFrame:CGRectMake(size.width / 2, size.height - 44 * scaleRatio, size.width / 2, 44 *scaleRatio)];
+    [repickBtn setTitle:@"重选图片" forState:UIControlStateNormal];
+    [repickBtn setTitleColor:ColorHex(0x099FDE) forState:UIControlStateNormal];
+    [repickBtn addTarget:self action:@selector(choosePicture) forControlEvents:UIControlEventTouchUpInside];
+    repickBtn.layer.borderColor = ColorHex(0xCDCED2).CGColor;
+    repickBtn.layer.borderWidth = 1.0f;
+    repickBtn.titleLabel.font = [UIFont boldSystemFontOfSize:17.0f];
+    [container addSubview:repickBtn];
+    
+    container.backgroundColor = [UIColor whiteColor];
+    container.clipsToBounds = YES;
+    container.layer.cornerRadius = 13.0f;
+    container.transform = CGAffineTransformMakeRotation(M_PI/2);
+    CGSize screenSize = [UIScreen mainScreen].bounds.size;
+    container.frame = CGRectMake((screenSize.width - size.height) / 2, (screenSize.height - size.width) / 2, size.height, size.width);
+    [_OCRFailureAlert addSubview:container];
 }
 
 - (void)initTipView{
@@ -577,6 +626,9 @@ void saveNumPos(int *pos){
 }
 
 - (void)choosePicture{
+    if ([_OCRFailureAlert superview]) {
+        [_OCRFailureAlert removeFromSuperview];
+    }
     if ([self.captureSession isRunning]) {
         [self.captureSession stopRunning];
     }
@@ -679,7 +731,7 @@ void saveNumPos(int *pos){
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
     [picker dismissViewControllerAnimated:YES completion:nil];
     _imageSource = ImageSourceByCapturing;
-    [_overlay doTakingPicture];
+    [_overlay cancelPhotoScanningMode];
 }
 
 #pragma mark ------------- UIGestureRecognizerDelegate   -------------------
@@ -809,6 +861,9 @@ void saveNumPos(int *pos){
                     }
                 });
             }
+            else if (_imageSource == ImageSourceByChoosing){
+                [self.view addSubview:_OCRFailureAlert];
+            }
             [_lock unlock];
         }
         free(imageData);
@@ -857,6 +912,12 @@ void saveNumPos(int *pos){
                         }
                     });
                 }
+                else if (_imageSource == ImageSourceByChoosing){
+                    [self.view addSubview:_OCRFailureAlert];
+                }
+            }
+            else if (_imageSource == ImageSourceByChoosing){
+                [self.view addSubview:_OCRFailureAlert];
             }
             NSLog(@"%@", scanResult);
             [_lock unlock];

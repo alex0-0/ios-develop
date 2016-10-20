@@ -28,7 +28,5 @@ typedef void(^doSenderBlock) (id sender);
 @property (assign, nonatomic) CGRect idStringRect;
 @property (assign, nonatomic) CGRect passportRect;
 
-////overlay for passport scanner or id card scanner
-//- (instancetype)init:(CameraOverlayType)type;
-
+- (void)cancelPhotoScanningMode;
 @end
