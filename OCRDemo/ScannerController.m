@@ -193,7 +193,6 @@ void saveNumPos(int *pos){
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [[UIApplication sharedApplication] setStatusBarHidden:true];
     
     static BOOL firstTime = TRUE;   //only automatically show if the app enters for the first time
     if (firstTime) {
@@ -206,6 +205,11 @@ void saveNumPos(int *pos){
             [self.view.layer insertSublayer:_previewLayer atIndex:0];
         }
     }
+}
+
+- (void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    [[UIApplication sharedApplication] setStatusBarHidden:true];
 }
 
 -(void)viewDidDisappear:(BOOL)animated{
@@ -455,12 +459,6 @@ void saveNumPos(int *pos){
         [self addOverlayRecognizers];
         needAdjust = false;
     };
-    
-//    //temp button for OCR of picture which choosed from library
-//     _btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 60)];
-//    [_btn setBackgroundColor:[UIColor whiteColor]];
-//    [_btn addTarget:self action:@selector(OCR) forControlEvents:UIControlEventTouchUpInside];
-//    [self.view addSubview:_btn];
 }
 
 #pragma mark  -------------------  utility  -----------------

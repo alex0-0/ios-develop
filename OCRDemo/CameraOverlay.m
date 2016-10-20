@@ -265,7 +265,7 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     _triggerBtn.layer.borderWidth = 1.0f;
     _triggerBtn.layer.borderColor = [ColorHex(0xFF9A14) CGColor];
     [_triggerBtn setTitleColor:ColorHex(0xFF9A14) forState:UIControlStateNormal];
-    _triggerBtn.frame = CGRectMake(_photoBtn.frame.origin.x, _photoBtn.frame.origin.y, 30 * scaleRatio, 80 * scaleRatio);
+    _triggerBtn.frame = CGRectMake(_photoBtn.frame.origin.x, _photoBtn.frame.origin.y - 10 * scaleRatio, 30 * scaleRatio, 80 * scaleRatio);
     _triggerBtn.titleLabel.font = [UIFont systemFontOfSize:15.0f];
     _triggerBtn.hidden = true;
     [_triggerBtn addTarget:self action:@selector(OCR) forControlEvents:UIControlEventTouchUpInside];
