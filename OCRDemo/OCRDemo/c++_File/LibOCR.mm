@@ -3,6 +3,7 @@
 #include <math.h>
 #import "LibOCR.h"
 #import "string.h"
+#import <UIKit/UIKit.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -98,7 +99,7 @@ static int getVariance(int oldwidth,int oldheight,uc **blackimage,float ang,int 
         int h = (int)round(i*ang)+height;
         if(h<0||h>=oldheight) break;
         int wid = i/8;
-        uc tmp = ((blackimage[h][wid]>>1)^(blackimage[h][wid])&0x7f);
+        uc tmp = ((blackimage[h][wid]>>1)^(blackimage[h][wid]))&0x7f;
         result += byteOneCount[tmp];
         if((blackimage[h][wid]&1) != ((blackimage[h][wid+1]&0x80)>>7)){
             result++;
@@ -168,7 +169,7 @@ static bool getHeightEdge(int oldwidth,int oldheight,uc **blackimage,int bWidth,
         return false;
     if(oldheight<=0)
         return false;
-    Varivance varivances[5][bHeight];
+    Varivance varivances[5][bHeight];//passport variance original size is 135, not 131
     struct VarivanceNode {
         struct VarivanceNode *next;
         struct VarivanceNode *before;
@@ -189,8 +190,7 @@ static bool getHeightEdge(int oldwidth,int oldheight,uc **blackimage,int bWidth,
                 Varivance v = {0, 0, 0, varivance};
                 varivances[i + 2][j] = v;
             } else {
-                Varivance v = {abs(varivance - varivances[i + 2][j - 6].oldva), j - 3, ii,
-                    varivance};
+                Varivance v = {abs(varivance - varivances[i + 2][j - 6].oldva), j - 3, ii, varivance};
                 varivances[i + 2][j] = v;
                 if (v.va > minva || count < 10) {
                     struct VarivanceNode *node = &(nodes[nodescount++]);
@@ -325,7 +325,7 @@ static bool generateLetterXPassport(int up,int down,uc **blackImage,float angle,
         int startY = (int)(down+angle*i);
         startY = startY>=height?height-1:startY;
         for (int j = 0; j < down - up; j++) {
-            if (startY - j >= height || i + (j * angle) >= width) {
+            if (startY - j >= height || i + (j * angle) >= width || i + (j * angle) < 0 ) { //                if (i + (j * angle) < 0 || i + (j * angle) >= width) {//different judgement
                 continue;
             }
             uc rgb = getPixelByBlackImage(blackImage, (i + (j * angle)), startY - j);
@@ -840,7 +840,7 @@ static void divideChar(uc **blackImage,int **lettersXY,uc **letterImage,int lett
     free(*image);
     free(image);
 }
-static void generateGrayImage(int8_t* arr,uc **grayImage,int imageWidth,int imageHeight,int hw,int hh,int x,int y,int w,int h){
+static void generateGrayImage(int8_t* arr,uc **grayImage,int imageWidth,int imageHeight,int hw,int hh,int x,int y,int w,int h, LibScanType type){
     float pixelwidth =(float)w/imageWidth;
     float pixelheight =(float)h/imageHeight;
     for(int j = 0;j<imageHeight;j++){
@@ -891,11 +891,16 @@ static void generateGrayImage(int8_t* arr,uc **grayImage,int imageWidth,int imag
                     }
                     color += d * dd * ((int) (*(arr + m * hw + n)) & 0xff);
                 }
-            }
-            if (color / ((endy - starty) * (endx - startx)) >= 0.5) {
-                if (endy != starty && endx != startx) {
-                    grayImage[j][k] = roundf(color / ((endy - starty) * (endx - startx)));
+            }//original passport scanning is different from that
+            if (type == LibScanIDCard) {
+                if (color / ((endy - starty) * (endx - startx)) >= 0.5) {
+                    if (endy != starty && endx != startx) {
+                        grayImage[j][k] = roundf(color / ((endy - starty) * (endx - startx)));
+                    }
                 }
+            }
+            else {
+                grayImage[j][k] = roundf(color / ((endy - starty) * (endx - startx)));
             }
         }
     }
@@ -928,7 +933,7 @@ char* libOCRScanIDCard(int8_t *arr, int hw, int hh, int x, int y, int w, int h){
     int height = 100;
     float angle = 0;
     int heightEdge[2]={0};
-    generateGrayImage(arr,grayImage,407,100,hw,hh,x,y,w,h);
+    generateGrayImage(arr,grayImage,407,100,hw,hh,x,y,w,h, LibScanIDCard);
     generateBlackImage(width,height,grayImage,blackImage);
     char *result = new char[19];
     memset(result, 0, 19 * sizeof(char));
@@ -1017,7 +1022,7 @@ char* libOCRScanPassport(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
     int height = 131;
     float angle = 0;
     int heightEdge[4]={0};
-    generateGrayImage(arr,grayImage,700,131,hw,hh,x,y,w,h);
+    generateGrayImage(arr,grayImage,700,131,hw,hh,x,y,w,h, LibScanPassport);
     generateBlackImage(width,height,grayImage,blackImage);
     char *result = new char[89];
     memset(result, 0, 89 * sizeof(char));
@@ -1033,7 +1038,7 @@ char* libOCRScanPassport(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
     
     int upwhitespaces = 0;
     int downwhitespaces = 0;
-    if(getHeightEdge(width,height,blackImage,88,131,&angle,(int*) heightEdge,LibScanPassport)){
+    if(getHeightEdge(width,height,blackImage,88,135,&angle,(int*) heightEdge,LibScanPassport)){
         if(generateLetterXPassport(heightEdge[0],heightEdge[1],blackImage,angle,width,height,upletterX,&upwhitespaces)&&generateLetterXPassport(heightEdge[2],heightEdge[3],blackImage,angle,width,height,downletterX,&downwhitespaces)){
             if(getLettersXYPassport(lettersxy,upletterX,downletterX,heightEdge,blackImage,angle,width,height,upwhitespaces,downwhitespaces)){
                 divideChar(blackImage,lettersxy,letterImage,88,700,131);
@@ -1077,4 +1082,32 @@ char* libOCRScanPassport(int8_t *arr,int hw,int hh,int x,int y,int w,int h){
     free(letterImage);
     result[0] = 0;
     return result;
+}
+
+static const int kRed = 1;
+static const int kGreen = 2;
+static const int kBlue = 3;
+
+
+UIImage *imageFromBitMap(int width, int height, uint8_t *imageData){
+    UIImage *retImage;
+    uint8_t *retImageData = (uint8_t*)calloc(sizeof(uint32_t) * width * height, 1);
+    for (int i = 0; i < height * width; i++) {
+        uint8_t *rgbPixel = (uint8_t *)&retImageData[4*i];
+        int pixel = imageData[i];
+        rgbPixel[kRed] = pixel;
+        rgbPixel[kGreen] = pixel;
+        rgbPixel[kBlue] = pixel;
+    }
+    
+    CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+    CGContextRef context=CGBitmapContextCreate(retImageData, width, height, 8, width*sizeof(uint32_t), colorSpace, kCGBitmapByteOrder32Little|kCGImageAlphaNoneSkipLast);
+    CGImageRef image=CGBitmapContextCreateImage(context);
+    CGContextRelease(context);
+    CGColorSpaceRelease(colorSpace);
+    retImage=[UIImage imageWithCGImage:image];
+    CGImageRelease(image);
+    // make sure the data will be released by giving it to an autoreleased NSData
+    [NSData dataWithBytesNoCopy:retImageData length:width*height];
+    return retImage;
 }

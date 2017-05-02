@@ -153,15 +153,15 @@ void addMask(UIView *containerView, CGRect transparentRect, UIColor *maskColor){
     idTipButton.frame = CGRectMake(idTipLabel.frame.origin.x + idTipLabelSize.height / 2 - 33 / 2, idTipLabel.frame.origin.y + idTipLabelSize.width + 5 * scaleRatio, 33, 33);
     [_IDCardContainer addSubview:idTipButton];
     
-    UILabel *IDCardPhoto = [[UILabel alloc] init];
-    IDCardPhoto.text = @"照片";
-    IDCardPhoto.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.1f];
-    IDCardPhoto.textColor = [[UIColor blackColor] colorWithAlphaComponent:0.3f];
-    IDCardPhoto.font = [UIFont systemFontOfSize:18.0f];
-    IDCardPhoto.transform = CGAffineTransformMakeRotation(M_PI/2);
-    IDCardPhoto.frame = CGRectMake(cardRect.origin.x + cardRect.size.width - (150 + 29) * scaleRatio, cardRect.origin.y + cardRect.size.height - (111 + 27) * scaleRatio, 150 * scaleRatio, 111 * scaleRatio);
-    IDCardPhoto.textAlignment = NSTextAlignmentCenter;
-    [_IDCardContainer addSubview:IDCardPhoto];
+//    UILabel *IDCardPhoto = [[UILabel alloc] init];
+//    IDCardPhoto.text = @"照片";
+//    IDCardPhoto.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.1f];
+//    IDCardPhoto.textColor = [[UIColor blackColor] colorWithAlphaComponent:0.3f];
+//    IDCardPhoto.font = [UIFont systemFontOfSize:18.0f];
+//    IDCardPhoto.transform = CGAffineTransformMakeRotation(M_PI/2);
+//    IDCardPhoto.frame = CGRectMake(cardRect.origin.x + cardRect.size.width - (150 + 29) * scaleRatio, cardRect.origin.y + cardRect.size.height - (111 + 27) * scaleRatio, 150 * scaleRatio, 111 * scaleRatio);
+//    IDCardPhoto.textAlignment = NSTextAlignmentCenter;
+//    [_IDCardContainer addSubview:IDCardPhoto];
     
     UIBezierPath *linePathB = [UIBezierPath bezierPath];
     //up left

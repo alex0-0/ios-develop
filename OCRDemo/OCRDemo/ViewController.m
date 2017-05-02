@@ -58,15 +58,18 @@ static inline UIImageView *demoImageView (UIImage *pic, NSInteger index) {
 }
 
 - (void)takePhoto{
-    _imageSource = ImageSourceByCapturing;
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
-    [actionSheet showInView:self.view];
+    [self presentViewController:_scannerController animated:YES completion:nil];
+
+ //   _imageSource = ImageSourceByCapturing;
+//    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
+//    [actionSheet showInView:self.view];
 }
 
 - (void)pickPhoto{
-    _imageSource = ImageSourceByChoosing;
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
-    [actionSheet showInView:self.view];
+        [self presentViewController:_scannerController animated:YES completion:nil];
+    //_imageSource = ImageSourceByChoosing;
+    //UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:@"身份证", @"护照", nil];
+    //[actionSheet showInView:self.view];
 //    [_scannerController presentScanner:PassportScanner imageSource:ImageSourceByChoosing inViewController:self];
 }
 -(void)viewDidAppear:(BOOL)animated {

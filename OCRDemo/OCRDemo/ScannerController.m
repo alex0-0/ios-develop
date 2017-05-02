@@ -525,7 +525,7 @@ void saveNumPos(int *pos){
     CGColorSpaceRelease(colorSpace);
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
     CGContextRelease(context);
-    
+    NSData *data = UIImageJPEGRepresentation(newImage, 1.0);
     if (_scannerType == PassportScanner) {
         [self passportOCR:rawData width:newImage.size.width height:newImage.size.height image:newImage];
     }
@@ -666,7 +666,7 @@ void saveNumPos(int *pos){
     if ([flashLight isTorchAvailable] && [flashLight isTorchModeSupported:AVCaptureTorchModeOn]) {
         BOOL success = [flashLight lockForConfiguration:nil];
         if (success) {
-            if ([flashLight isTorchActive]) {
+            if ([flashLight isTorchActive] || flashLight.torchMode == AVCaptureTorchModeOn) {
                 [flashLight setTorchMode:AVCaptureTorchModeOff];
             }
             else {
@@ -678,6 +678,11 @@ void saveNumPos(int *pos){
 }
 
 - (void)back{
+    if (_imageSource == ImageSourceByChoosing) {
+        [_overlay cancelPhotoScanningMode];
+        _imageContainer.backgroundColor = [UIColor clearColor];
+    }
+
     if ([_captureSession isRunning]) {
         [_captureSession stopRunning];
     }
@@ -781,18 +786,18 @@ void saveNumPos(int *pos){
             }
         }
         if (croppedRecImage) {
-            BOOL faceDetected = FALSE;
-            CIDetector *faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:[CIContext contextWithOptions:nil] options:nil];
-            NSArray *faceFeatures = [faceDetector featuresInImage:croppedRecImage options:nil];
-            for (CIFeature *feature in faceFeatures) {
-                if ( [feature isKindOfClass:[CIFaceFeature class]]) {
-                    faceDetected = YES;
-                    break;
-                }
-            }
-            if (!faceDetected) {
-                return;
-            }
+//            BOOL faceDetected = FALSE;
+//            CIDetector *faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace context:[CIContext contextWithOptions:nil] options:nil];
+//            NSArray *faceFeatures = [faceDetector featuresInImage:croppedRecImage options:nil];
+  //          for (CIFeature *feature in faceFeatures) {
+    //            if ( [feature isKindOfClass:[CIFaceFeature class]]) {
+      //              faceDetected = YES;
+        //            break;
+          //      }
+            //}
+            //if (!faceDetected) {
+              //  return;
+            //}
             CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
             CVPixelBufferLockBaseAddress(imageBuffer, 0);
             void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
@@ -831,11 +836,11 @@ void saveNumPos(int *pos){
             CGSize imageSize = image.size;
             CGRect cardRect = CGRectMake((imageSize.width * image.scale - 365 * scaleRatio) / 2, (imageSize.height * image.scale - 232 * scaleRatio) / 2, 365 * scaleRatio, 232 * scaleRatio);
 
-            CGSize possibleSize = CGSizeMake(cardRect.size.width - cardRect.size.width * 0.318, cardRect.size.height * 0.264);
+            CGSize possibleSize = CGSizeMake(cardRect.size.width - cardRect.size.width * 0.318, cardRect.size.height * 0.244);  //minimze 0.264 to 0.244 to raise accuracy
             CGRect croppedRect  = CGRectMake(cardRect.origin.x + cardRect.size.width - possibleSize.width, cardRect.origin.y + cardRect.size.height - possibleSize.height, possibleSize.width, possibleSize.height);
-//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-//            CGImageRelease(imageRef);
+            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+            CGImageRelease(imageRef);
             
             int bytesPerPixel = (_imageSource == ImageSourceByChoosing)?4:1;
             char *result = libOCRScanIDCard(imageData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height);
@@ -875,9 +880,9 @@ void saveNumPos(int *pos){
             CGSize imageSize = image.size;
             CGRect passportRect = CGRectMake((imageSize.width * image.scale - 354 * scaleRatio) / 2, (imageSize.height * image.scale - 249 * scaleRatio) / 2, 354 * scaleRatio, 249 * scaleRatio);
             CGRect croppedRect  = CGRectMake(passportRect.origin.x, passportRect.origin.y + passportRect.size.height - passportRect.size.width * 0.158, passportRect.size.width, passportRect.size.width * 0.158);
-//            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
-//            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
-//            CGImageRelease(imageRef);
+            CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], croppedRect);
+            UIImage *newImage = [UIImage imageWithCGImage:imageRef];//[UIImage imageWithData:tmpData];//
+            CGImageRelease(imageRef);
             
             int bytesPerPixel = (_imageSource == ImageSourceByChoosing)?4:1;
             char *result = libOCRScanPassport(imageData, width*image.scale*bytesPerPixel, height*image.scale, croppedRect.origin.x*bytesPerPixel, croppedRect.origin.y, croppedRect.size.width*bytesPerPixel, croppedRect.size.height); //0.158 = 1/6.33
